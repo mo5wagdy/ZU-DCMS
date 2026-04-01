@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="ZU-DCMS.API/ZU-DCMS.API.csproj" />
+  <Project Path="ZU-DCMS.APPLICATION/ZU-DCMS.APPLICATION.csproj" />
+  <Project Path="ZU-DCMS.Domain/ZU-DCMS.Domain.csproj" />
+  <Project Path="ZU-DCMS.INFRASTRUCTURE/ZU-DCMS.INFRASTRUCTURE.csproj" />
+</Solution>

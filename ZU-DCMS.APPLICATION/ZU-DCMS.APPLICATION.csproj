@@ -16,4 +16,17 @@
     <ProjectReference Include="..\ZU-DCMS.Domain\ZU-DCMS.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="DTOs\Booking\" />
+    <Folder Include="DTOs\Case\" />
+    <Folder Include="DTOs\Diagnosis\" />
+    <Folder Include="DTOs\Admin\" />
+    <Folder Include="DTOs\Dashboard\" />
+    <Folder Include="DTOs\Student\" />
+    <Folder Include="DTOs\Patient\" />
+    <Folder Include="Validators\Booking\" />
+    <Folder Include="Validators\Case\" />
+    <Folder Include="Validators\Patient\" />
+  </ItemGroup>
+
 </Project>

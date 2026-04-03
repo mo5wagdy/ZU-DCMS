@@ -4,6 +4,7 @@ using System.Text;
 
 namespace ZU_DCMS.Domain.Enums
 {
+    // This enum represents the gender of a person.
     public enum Gender
     {
         Male = 1,

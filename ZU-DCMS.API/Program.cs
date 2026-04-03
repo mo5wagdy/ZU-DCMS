@@ -1,3 +1,4 @@
+using ZU_DCMS.INFRASTRUCTURE.Extentions;
 
 namespace ZU_DCMS.API
 {
@@ -9,7 +10,11 @@ namespace ZU_DCMS.API
 
             // Add services to the container.
 
+            // Add infrastructure services
+            builder.Services.AddInfrastructureServices(builder.Configuration);
+
             builder.Services.AddControllers();
+
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 

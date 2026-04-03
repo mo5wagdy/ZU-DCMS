@@ -8,6 +8,7 @@ namespace ZU_DCMS.Domain.Entities
 {
     public class CaseAssignment : BaseEntity
     {
+        // Properties
         public int DiagnosisRecordId { get; set; }
         public int StudentId { get; set; }
         public int ClinicId { get; set; }

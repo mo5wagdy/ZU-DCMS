@@ -9,6 +9,7 @@ namespace ZU_DCMS.Domain.Entities
 {
     public class Booking : BaseEntity
     {
+        // Properties
         public string BookingCode { get; set; } = string.Empty;
         public int PatientId { get; set; }
         public int SessionId { get; set; }

@@ -4,6 +4,8 @@ using System.Text;
 
 namespace ZU_DCMS.Domain.UserRoles
 {
+    // This class defines constant string values for different user roles in the application.
+    // Used in role-based authorization to control access to various parts of the application based on the user's role.
     public static class UserRoles
     {
         public const string Admin = "Admin";

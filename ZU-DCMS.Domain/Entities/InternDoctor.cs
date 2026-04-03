@@ -7,6 +7,7 @@ namespace ZU_DCMS.Domain.Entities
 {
     public class InternDoctor : BaseEntity
     {
+        // Properties
         public string ApplicationUserId { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
         public string DoctorCode { get; set; } = string.Empty;

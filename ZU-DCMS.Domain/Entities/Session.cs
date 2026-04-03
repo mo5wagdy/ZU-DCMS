@@ -7,6 +7,7 @@ namespace ZU_DCMS.Domain.Entities
 {
     public class Session : BaseEntity
     {
+        // Properties
         public DateTime Date { get; set; }
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
@@ -16,7 +17,9 @@ namespace ZU_DCMS.Domain.Entities
         public int CurrentFollowUpCount { get; set; }
         public bool IsActive { get; set; } = true;
 
-        // Calculated
+        // Calculated properties
+        // These properties are not mapped to the database but calculated at runtime
+        // They can be used to easily check if the session is full for new or follow-up patients
         public bool IsNewFull => CurrentNewCount >= MaxNewPatients;
         public bool IsFollowUpFull => CurrentFollowUpCount >= MaxFollowUpPatients;
         public bool IsFull => IsNewFull && IsFollowUpFull;

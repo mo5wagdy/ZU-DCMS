@@ -8,6 +8,7 @@ namespace ZU_DCMS.Domain.Entities
 {
     public class Patient : BaseEntity
     {
+        // Properties
         public string ApplicationUserId { get; set; } = string.Empty;
         public string PatientCode { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
@@ -15,11 +16,11 @@ namespace ZU_DCMS.Domain.Entities
         public IdentityType IdentityType { get; set; }
         public string PhoneNumber { get; set; } = string.Empty;
         public string? Email { get; set; }
-        public string Nationality { get; set; } = string.Empty;
+        public string NationalityCode { get; set; } = string.Empty;
         public DateTime DateOfBirth { get; set; }
         public Gender Gender { get; set; }
-        public bool HasChronicDisease { get; set; }
-        public string? ChronicDiseaseDetails { get; set; }
+        public ChronicCondition ChronicConditions { get; set; } = ChronicCondition.None;
+        public string? OtherConditions { get; set; }
 
         // Navigation
         public ICollection<Booking> Bookings { get; set; } = new List<Booking>();

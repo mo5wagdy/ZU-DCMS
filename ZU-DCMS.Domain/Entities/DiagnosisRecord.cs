@@ -7,6 +7,7 @@ namespace ZU_DCMS.Domain.Entities
 {
     public class DiagnosisRecord : BaseEntity
     {
+        // Properties
         public int BookingId { get; set; }
         public int InternDoctorId { get; set; }
         public int ClinicId { get; set; }

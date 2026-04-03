@@ -4,6 +4,7 @@ using System.Text;
 
 namespace ZU_DCMS.Domain.Enums
 {
+    // This enum represents the type of identity document, such as National ID, Passport, or Residence Permit.
     public enum IdentityType
     {
         NationalId = 1,

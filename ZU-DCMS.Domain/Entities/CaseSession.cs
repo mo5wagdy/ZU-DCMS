@@ -7,6 +7,7 @@ namespace ZU_DCMS.Domain.Entities
 {
     public class CaseSession : BaseEntity
     {
+        // Properties
         public int CaseAssignmentId { get; set; }
         public int StudentId { get; set; }
         public DateTime SessionDate { get; set; } = DateTime.UtcNow;

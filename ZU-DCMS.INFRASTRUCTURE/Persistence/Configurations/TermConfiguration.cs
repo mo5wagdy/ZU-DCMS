@@ -1,10 +1,24 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System;
 using System.Collections.Generic;
 using System.Text;
+using ZU_DCMS.Domain.Entities;
 
 namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
 {
-    internal class TermConfiguration
+    public class TermConfiguration : IEntityTypeConfiguration<Term>
     {
+        public void Configure(EntityTypeBuilder<Term> builder)
+        {
+            builder.HasKey(t => t.Id);
+
+            builder.Property(t => t.Name)
+                   .IsRequired()
+                   .HasMaxLength(100);
+
+            // Global Query Filter to exclude soft-deleted records
+            builder.HasQueryFilter(t => !t.IsDeleted);
+        }
     }
 }

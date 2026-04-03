@@ -8,13 +8,15 @@ namespace ZU_DCMS.Domain.Entities
 {
     public class Payment : BaseEntity
     {
+        // Properties
         public int PatientId { get; set; }
         public int BookingId { get; set; }
         public decimal Amount { get; set; }
         public PaymentType Type { get; set; }
         public PaymentStatus Status { get; set; } = PaymentStatus.Pending;
-        public string? FawryCode { get; set; }
-        public string? FawryReference { get; set; }
+        public string? PaymentCode { get; set; }
+        public string? GatewayReference { get; set; }
+        public string? GatewayName { get; set; }
         public DateTime? PaidAt { get; set; }
         public DateTime? RefundedAt { get; set; }
 

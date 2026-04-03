@@ -38,7 +38,8 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                     Key = "MAX_DAILY_PATIENTS",
                     Value = "200",
                     Description = "أقصى عدد مرضى في اليوم",
-                    UpdatedByAdminId = "system"
+                    UpdatedByAdminId = "system",
+                    CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new SystemConfig
                 {
@@ -46,7 +47,8 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                     Key = "MAX_NEW_PER_SESSION",
                     Value = "25",
                     Description = "أقصى عدد مرضى جدد في السكشن",
-                    UpdatedByAdminId = "system"
+                    UpdatedByAdminId = "system",
+                    CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new SystemConfig
                 {
@@ -54,7 +56,8 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                     Key = "MAX_FOLLOWUP_PER_SESSION",
                     Value = "25",
                     Description = "أقصى عدد مرضى متابعة في السكشن",
-                    UpdatedByAdminId = "system"
+                    UpdatedByAdminId = "system",
+                    CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new SystemConfig
                 {
@@ -62,7 +65,8 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                     Key = "DIAGNOSIS_FEE",
                     Value = "300",
                     Description = "سعر كشف التشخيص",
-                    UpdatedByAdminId = "system"
+                    UpdatedByAdminId = "system",
+                    CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new SystemConfig
                 {
@@ -70,7 +74,8 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                     Key = "SESSION_TIMES",
                     Value = "09:00,11:00,13:00,15:00",
                     Description = "مواعيد بداية السكاشن",
-                    UpdatedByAdminId = "system"
+                    UpdatedByAdminId = "system",
+                    CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
                 new SystemConfig
                 {
@@ -78,7 +83,8 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                     Key = "WORKING_DAYS",
                     Value = "0,1,2,3,4,6",
                     Description = "أيام العمل (0=الأحد ... 6=السبت)",
-                    UpdatedByAdminId = "system"
+                    UpdatedByAdminId = "system",
+                    CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 }
             );
         }

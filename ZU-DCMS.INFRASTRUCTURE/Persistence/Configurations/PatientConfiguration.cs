@@ -28,8 +28,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                    .IsRequired()
                    .HasMaxLength(20);
 
-            // Store IdentityType as string in the database
-            builder.Property(p => p.IdentityType)
+            builder.Property(p => p.IdentityType)  // Enum Conversions to string for better readability in the database
                    .HasConversion<string>();
 
             builder.Property(p => p.PhoneNumber)
@@ -43,8 +42,10 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                    .IsRequired()
                    .HasMaxLength(50);
 
-            // Enum Conversions to string for better readability in the database
-            builder.Property(p => p.Gender)
+            builder.Property(p => p.Gender)  // Enum Conversions to string for better readability in the database
+                   .HasConversion<string>();
+
+            builder.Property(p => p.ChronicConditions)  // Enum Conversions to string for better readability in the database
                    .HasConversion<string>();
 
             builder.Property(p => p.OtherConditions)

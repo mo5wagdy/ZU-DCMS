@@ -393,7 +393,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                         {
                             Id = 1,
                             Code = "DIAG",
-                            CreatedAt = new DateTime(2026, 4, 3, 0, 41, 1, 642, DateTimeKind.Utc).AddTicks(4083),
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsActive = true,
                             IsDeleted = false,
                             MaxDailyPatients = 200,
@@ -403,7 +403,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                         {
                             Id = 2,
                             Code = "ENDO",
-                            CreatedAt = new DateTime(2026, 4, 3, 0, 41, 1, 642, DateTimeKind.Utc).AddTicks(7467),
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsActive = true,
                             IsDeleted = false,
                             MaxDailyPatients = 50,
@@ -413,7 +413,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                         {
                             Id = 3,
                             Code = "SURG",
-                            CreatedAt = new DateTime(2026, 4, 3, 0, 41, 1, 642, DateTimeKind.Utc).AddTicks(7472),
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsActive = true,
                             IsDeleted = false,
                             MaxDailyPatients = 50,
@@ -423,7 +423,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                         {
                             Id = 4,
                             Code = "PERIO",
-                            CreatedAt = new DateTime(2026, 4, 3, 0, 41, 1, 642, DateTimeKind.Utc).AddTicks(7475),
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsActive = true,
                             IsDeleted = false,
                             MaxDailyPatients = 50,
@@ -433,7 +433,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                         {
                             Id = 5,
                             Code = "REST",
-                            CreatedAt = new DateTime(2026, 4, 3, 0, 41, 1, 642, DateTimeKind.Utc).AddTicks(7478),
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsActive = true,
                             IsDeleted = false,
                             MaxDailyPatients = 50,
@@ -443,7 +443,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                         {
                             Id = 6,
                             Code = "PED",
-                            CreatedAt = new DateTime(2026, 4, 3, 0, 41, 1, 642, DateTimeKind.Utc).AddTicks(7481),
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsActive = true,
                             IsDeleted = false,
                             MaxDailyPatients = 50,
@@ -453,7 +453,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                         {
                             Id = 7,
                             Code = "FIX",
-                            CreatedAt = new DateTime(2026, 4, 3, 0, 41, 1, 642, DateTimeKind.Utc).AddTicks(7484),
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsActive = true,
                             IsDeleted = false,
                             MaxDailyPatients = 50,
@@ -463,7 +463,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                         {
                             Id = 8,
                             Code = "REM",
-                            CreatedAt = new DateTime(2026, 4, 3, 0, 41, 1, 642, DateTimeKind.Utc).AddTicks(7487),
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsActive = true,
                             IsDeleted = false,
                             MaxDailyPatients = 50,
@@ -664,8 +664,9 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ChronicConditions")
-                        .HasColumnType("int");
+                    b.Property<string>("ChronicConditions")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -756,7 +757,8 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("GatewayName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("GatewayReference")
                         .HasMaxLength(100)
@@ -772,8 +774,8 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("PaymentCode")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime?>("RefundedAt")
                         .HasColumnType("datetime2");
@@ -967,7 +969,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2026, 4, 3, 0, 41, 1, 672, DateTimeKind.Utc).AddTicks(2116),
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "أقصى عدد مرضى في اليوم",
                             IsDeleted = false,
                             Key = "MAX_DAILY_PATIENTS",
@@ -977,7 +979,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2026, 4, 3, 0, 41, 1, 672, DateTimeKind.Utc).AddTicks(5714),
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "أقصى عدد مرضى جدد في السكشن",
                             IsDeleted = false,
                             Key = "MAX_NEW_PER_SESSION",
@@ -987,7 +989,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(2026, 4, 3, 0, 41, 1, 672, DateTimeKind.Utc).AddTicks(5719),
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "أقصى عدد مرضى متابعة في السكشن",
                             IsDeleted = false,
                             Key = "MAX_FOLLOWUP_PER_SESSION",
@@ -997,7 +999,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                         new
                         {
                             Id = 4,
-                            CreatedAt = new DateTime(2026, 4, 3, 0, 41, 1, 672, DateTimeKind.Utc).AddTicks(5721),
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "سعر كشف التشخيص",
                             IsDeleted = false,
                             Key = "DIAGNOSIS_FEE",
@@ -1007,7 +1009,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                         new
                         {
                             Id = 5,
-                            CreatedAt = new DateTime(2026, 4, 3, 0, 41, 1, 672, DateTimeKind.Utc).AddTicks(5723),
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "مواعيد بداية السكاشن",
                             IsDeleted = false,
                             Key = "SESSION_TIMES",
@@ -1017,7 +1019,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                         new
                         {
                             Id = 6,
-                            CreatedAt = new DateTime(2026, 4, 3, 0, 41, 1, 672, DateTimeKind.Utc).AddTicks(5725),
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "أيام العمل (0=الأحد ... 6=السبت)",
                             IsDeleted = false,
                             Key = "WORKING_DAYS",

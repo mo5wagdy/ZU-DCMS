@@ -139,7 +139,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                     NationalityCode = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     DateOfBirth = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Gender = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ChronicConditions = table.Column<int>(type: "int", nullable: false),
+                    ChronicConditions = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     OtherConditions = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -448,9 +448,9 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                     Amount = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
                     Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PaymentCode = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    PaymentCode = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     GatewayReference = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    GatewayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    GatewayName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     PaidAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     RefundedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -607,14 +607,14 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                 columns: new[] { "Id", "Code", "CreatedAt", "CreatedByUserId", "IsActive", "IsDeleted", "MaxDailyPatients", "Name", "UpdatedAt", "UpdatedByUserId" },
                 values: new object[,]
                 {
-                    { 1, "DIAG", new DateTime(2026, 4, 3, 0, 41, 1, 642, DateTimeKind.Utc).AddTicks(4083), null, true, false, 200, "عيادات التشخيص", null, null },
-                    { 2, "ENDO", new DateTime(2026, 4, 3, 0, 41, 1, 642, DateTimeKind.Utc).AddTicks(7467), null, true, false, 50, "عيادات حشو العصب", null, null },
-                    { 3, "SURG", new DateTime(2026, 4, 3, 0, 41, 1, 642, DateTimeKind.Utc).AddTicks(7472), null, true, false, 50, "عيادات الجراحة", null, null },
-                    { 4, "PERIO", new DateTime(2026, 4, 3, 0, 41, 1, 642, DateTimeKind.Utc).AddTicks(7475), null, true, false, 50, "عيادات طب الفم واللثة", null, null },
-                    { 5, "REST", new DateTime(2026, 4, 3, 0, 41, 1, 642, DateTimeKind.Utc).AddTicks(7478), null, true, false, 50, "عيادات الحشو العادي", null, null },
-                    { 6, "PED", new DateTime(2026, 4, 3, 0, 41, 1, 642, DateTimeKind.Utc).AddTicks(7481), null, true, false, 50, "عيادات الأطفال", null, null },
-                    { 7, "FIX", new DateTime(2026, 4, 3, 0, 41, 1, 642, DateTimeKind.Utc).AddTicks(7484), null, true, false, 50, "التركيبات الثابتة", null, null },
-                    { 8, "REM", new DateTime(2026, 4, 3, 0, 41, 1, 642, DateTimeKind.Utc).AddTicks(7487), null, true, false, 50, "التركيبات المتحركة", null, null }
+                    { 1, "DIAG", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, true, false, 200, "عيادات التشخيص", null, null },
+                    { 2, "ENDO", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, true, false, 50, "عيادات حشو العصب", null, null },
+                    { 3, "SURG", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, true, false, 50, "عيادات الجراحة", null, null },
+                    { 4, "PERIO", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, true, false, 50, "عيادات طب الفم واللثة", null, null },
+                    { 5, "REST", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, true, false, 50, "عيادات الحشو العادي", null, null },
+                    { 6, "PED", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, true, false, 50, "عيادات الأطفال", null, null },
+                    { 7, "FIX", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, true, false, 50, "التركيبات الثابتة", null, null },
+                    { 8, "REM", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, true, false, 50, "التركيبات المتحركة", null, null }
                 });
 
             migrationBuilder.InsertData(
@@ -622,12 +622,12 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                 columns: new[] { "Id", "CreatedAt", "CreatedByUserId", "Description", "IsDeleted", "Key", "UpdatedAt", "UpdatedByAdminId", "UpdatedByUserId", "Value" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2026, 4, 3, 0, 41, 1, 672, DateTimeKind.Utc).AddTicks(2116), null, "أقصى عدد مرضى في اليوم", false, "MAX_DAILY_PATIENTS", null, "system", null, "200" },
-                    { 2, new DateTime(2026, 4, 3, 0, 41, 1, 672, DateTimeKind.Utc).AddTicks(5714), null, "أقصى عدد مرضى جدد في السكشن", false, "MAX_NEW_PER_SESSION", null, "system", null, "25" },
-                    { 3, new DateTime(2026, 4, 3, 0, 41, 1, 672, DateTimeKind.Utc).AddTicks(5719), null, "أقصى عدد مرضى متابعة في السكشن", false, "MAX_FOLLOWUP_PER_SESSION", null, "system", null, "25" },
-                    { 4, new DateTime(2026, 4, 3, 0, 41, 1, 672, DateTimeKind.Utc).AddTicks(5721), null, "سعر كشف التشخيص", false, "DIAGNOSIS_FEE", null, "system", null, "300" },
-                    { 5, new DateTime(2026, 4, 3, 0, 41, 1, 672, DateTimeKind.Utc).AddTicks(5723), null, "مواعيد بداية السكاشن", false, "SESSION_TIMES", null, "system", null, "09:00,11:00,13:00,15:00" },
-                    { 6, new DateTime(2026, 4, 3, 0, 41, 1, 672, DateTimeKind.Utc).AddTicks(5725), null, "أيام العمل (0=الأحد ... 6=السبت)", false, "WORKING_DAYS", null, "system", null, "0,1,2,3,4,6" }
+                    { 1, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "أقصى عدد مرضى في اليوم", false, "MAX_DAILY_PATIENTS", null, "system", null, "200" },
+                    { 2, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "أقصى عدد مرضى جدد في السكشن", false, "MAX_NEW_PER_SESSION", null, "system", null, "25" },
+                    { 3, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "أقصى عدد مرضى متابعة في السكشن", false, "MAX_FOLLOWUP_PER_SESSION", null, "system", null, "25" },
+                    { 4, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "سعر كشف التشخيص", false, "DIAGNOSIS_FEE", null, "system", null, "300" },
+                    { 5, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "مواعيد بداية السكاشن", false, "SESSION_TIMES", null, "system", null, "09:00,11:00,13:00,15:00" },
+                    { 6, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, "أيام العمل (0=الأحد ... 6=السبت)", false, "WORKING_DAYS", null, "system", null, "0,1,2,3,4,6" }
                 });
 
             migrationBuilder.CreateIndex(

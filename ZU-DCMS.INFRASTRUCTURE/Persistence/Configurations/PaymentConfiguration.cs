@@ -17,18 +17,20 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
             builder.Property(p => p.Amount)
                    .HasPrecision(10, 2);
 
-            // Store enums as strings for better readability in the database
-            builder.Property(p => p.Type)
+            builder.Property(p => p.Type)  // Store enums as strings for better readability in the database
                    .HasConversion<string>();
 
-            builder.Property(p => p.Status)
+            builder.Property(p => p.Status)  // Store enums as strings for better readability in the database
                    .HasConversion<string>();
 
             builder.Property(p => p.PaymentCode)
-                   .HasMaxLength(50);
+                   .HasMaxLength(100);
 
             builder.Property(p => p.GatewayReference)
                    .HasMaxLength(100);
+
+            builder.Property(p => p.GatewayName)
+                   .HasMaxLength(50);
 
             // Global Query Filter to exclude soft-deleted records
             builder.HasQueryFilter(p => !p.IsDeleted);

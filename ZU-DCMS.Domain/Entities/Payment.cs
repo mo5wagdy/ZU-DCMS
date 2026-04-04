@@ -18,7 +18,6 @@ namespace ZU_DCMS.Domain.Entities
         public string? GatewayReference { get; set; }
         public string? GatewayName { get; set; }
         public DateTime? PaidAt { get; set; }
-        public DateTime? RefundedAt { get; set; }
 
         // Navigation
         public Patient Patient { get; set; } = null!;

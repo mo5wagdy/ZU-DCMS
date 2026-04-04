@@ -1,11 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using ZU_DCMS.APPLICATION.Contracts;
 using ZU_DCMS.Domain.Interfaces;
+using ZU_DCMS.INFRASTRUCTURE.Cache;
 using ZU_DCMS.INFRASTRUCTURE.Identity;
 using ZU_DCMS.INFRASTRUCTURE.Persistence;
 using ZU_DCMS.INFRASTRUCTURE.Persistence.Repositories;
@@ -52,6 +54,10 @@ namespace ZU_DCMS.INFRASTRUCTURE.Extentions
             // Add repositories and unit of work to the DI container
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            // Add caching services
+            services.AddMemoryCache();
+            services.AddScoped<ICacheService, MemoryCacheService>();
 
             return services;
         }

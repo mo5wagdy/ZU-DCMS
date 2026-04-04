@@ -1,0 +1,18 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace ZU_DCMS.APPLICATION.DTOs.Admin
+{
+    // DTO for Admin User information
+    public class CreateUserDto
+    {
+        public string Username { get; set; } = string.Empty;
+        public string FullName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
+        public string? StudentCode { get; set; }
+        public string? DoctorCode { get; set; }
+        public int? AcademicYear { get; set; }
+    }
+}

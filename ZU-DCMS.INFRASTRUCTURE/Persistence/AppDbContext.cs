@@ -13,6 +13,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         // DbSets for each entity in the domain model
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
         public DbSet<Patient> Patients => Set<Patient>();
         public DbSet<InternDoctor> InternDoctors => Set<InternDoctor>();
         public DbSet<Student> Students => Set<Student>();

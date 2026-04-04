@@ -11,7 +11,7 @@ namespace ZU_DCMS.Domain.Entities
         public string Name { get; set; } = string.Empty;
         public string Code { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
-        public int MaxDailyPatients { get; set; } = 50;
+        public int MaxDailyPatients { get; set; }
 
         // Navigation
         public ICollection<DiagnosisRecord> DiagnosisRecords { get; set; } = new List<DiagnosisRecord>();

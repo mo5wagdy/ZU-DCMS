@@ -11,8 +11,8 @@ namespace ZU_DCMS.Domain.Entities
         public DateTime Date { get; set; }
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
-        public int MaxNewPatients { get; set; } = 25;
-        public int MaxFollowUpPatients { get; set; } = 25;
+        public int MaxNewPatients { get; set; }
+        public int MaxFollowUpPatients { get; set; }
         public int CurrentNewCount { get; set; }
         public int CurrentFollowUpCount { get; set; }
         public bool IsActive { get; set; } = true;

@@ -5,7 +5,7 @@ using ZU_DCMS.Domain.Enums;
 
 namespace ZU_DCMS.APPLICATION.DTOs.Auth
 {
-    // DTO for registering a patient
+    // __ DTO for registering a patient __ //
     public class RegisterPatientDto
     {
         public string Username { get; set; } = string.Empty;

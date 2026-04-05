@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ZU_DCMS.APPLICATION.DTOs.Auth
 {
-    // DTO for user login
+    // __ DTO for user login __ //
     public class LoginDto
     {
         public string Username { get; set; } = string.Empty;

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ZU_DCMS.APPLICATION.DTOs.Admin
 {
-    // DTO for creating a new Term
+    // __ DTO for creating a new Term __ //
     public class CreateTermDto
     {
         public string Name { get; set; } = string.Empty;

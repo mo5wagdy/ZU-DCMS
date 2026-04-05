@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ZU_DCMS.APPLICATION.DTOs.Diagnosis
 {
-    // Dto for assigning a student to a diagnosis record
+    // __ Dto for assigning a student to a diagnosis record __ //
     public class AssignStudentDto
     {
         public int DiagnosisRecordId { get; set; }

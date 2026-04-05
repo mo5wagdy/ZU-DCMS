@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ZU_DCMS.APPLICATION.DTOs.Dashboard
 {
-    // DTO for Session status on the Dashboard
+    // __ DTO for Session status on the Dashboard __ //
     public class SessionStatusDto
     {
         public int SessionId { get; set; }

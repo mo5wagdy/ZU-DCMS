@@ -4,6 +4,7 @@ using System.Text;
 
 namespace ZU_DCMS.APPLICATION.DTOs.Session
 {
+    // __ DTO for transferring session data __ //
     public class SessionDto
     {
         public int Id { get; set; }
@@ -15,5 +16,7 @@ namespace ZU_DCMS.APPLICATION.DTOs.Session
         public int CurrentNewCount { get; set; }
         public int CurrentFollowUpCount { get; set; }
         public bool IsFull { get; set; }
+        public bool IsNewFull { get; set; }
+        public bool IsFollowUpFull { get; set; }
     }
 }

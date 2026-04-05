@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ZU_DCMS.APPLICATION.DTOs.Admin
 {
-    // DTO for System Configuration settings
+    // __ DTO for System Configuration settings __ //
     public class SystemConfigDto
     {
         public string Key { get; set; } = string.Empty;

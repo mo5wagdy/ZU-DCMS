@@ -5,6 +5,7 @@ using ZU_DCMS.Domain.Enums;
 
 namespace ZU_DCMS.APPLICATION.DTOs.Booking
 {
+    // __ DTO for transferring booking data __ //
     public class BookingDto
     {
         public int Id { get; set; }

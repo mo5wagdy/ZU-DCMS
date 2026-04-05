@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ZU_DCMS.APPLICATION.DTOs.Dashboard
 {
-    // DTO for Dashboard information
+    // __ DTO for Dashboard information __ //
     public class DashboardDto
     {
         public int TotalBookingsToday { get; set; }

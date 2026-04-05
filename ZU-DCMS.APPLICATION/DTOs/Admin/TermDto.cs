@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ZU_DCMS.APPLICATION.DTOs.Admin
 {
-    // DTO for Term information
+    // __ DTO for Term information __ //
     public class TermDto
     {
         public int Id { get; set; }

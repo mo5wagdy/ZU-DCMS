@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ZU_DCMS.APPLICATION.DTOs.Admin
 {
-    /// DTO for Admin User information
+    // __ DTO for Admin User information __ //
     public class AdminUserDto
     {
         public string Id { get; set; } = string.Empty;

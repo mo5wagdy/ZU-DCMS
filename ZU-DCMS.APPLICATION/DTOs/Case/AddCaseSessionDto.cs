@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ZU_DCMS.APPLICATION.DTOs.Case
 {
-    // DTO for adding a new Case Session
+    // __ DTO for adding a new Case Session __ //
     public class AddCaseSessionDto
     {
         public int CaseAssignmentId { get; set; }

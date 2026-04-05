@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ZU_DCMS.APPLICATION.DTOs.Admin
 {
-    // DTO for updating an existing Term
+    // __ DTO for updating an existing Term __ //
     public class UpdateTermDto
     {
         public string? Name { get; set; }

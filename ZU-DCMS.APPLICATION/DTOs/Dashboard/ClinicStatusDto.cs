@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ZU_DCMS.APPLICATION.DTOs.Dashboard
 {
-    // DTO for Clinic status on the Dashboard
+    // __ DTO for Clinic status on the Dashboard __ //
     public class ClinicStatusDto
     {
         public int ClinicId { get; set; }

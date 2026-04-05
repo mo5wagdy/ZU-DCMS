@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ZU_DCMS.APPLICATION.DTOs.Diagnosis
 {
-    // Dto for returning diagnosis record details.
+    // __ Dto for returning diagnosis record details. __ //
     public class DiagnosisRecordDto
     {
         public int Id { get; set; }

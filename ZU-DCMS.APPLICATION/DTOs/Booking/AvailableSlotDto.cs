@@ -4,6 +4,7 @@ using System.Text;
 
 namespace ZU_DCMS.APPLICATION.DTOs.Booking
 {
+    // __ DTO for transferring available slot data __ //
     public class AvailableSlotDto
     {
         public int SessionId { get; set; }

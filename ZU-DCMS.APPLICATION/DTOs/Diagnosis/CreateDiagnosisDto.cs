@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ZU_DCMS.APPLICATION.DTOs.Diagnosis
 {
-    // Dto for creating a new diagnosis
+    // __ Dto for creating a new diagnosis __ //
     public class CreateDiagnosisDto
     {
         public int BookingId { get; set; }

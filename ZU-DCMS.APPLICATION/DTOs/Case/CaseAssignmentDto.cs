@@ -5,7 +5,7 @@ using ZU_DCMS.Domain.Enums;
 
 namespace ZU_DCMS.APPLICATION.DTOs.Case
 {
-    // DTO for Case Assignment information
+    // __ DTO for Case Assignment information __ //
     public class CaseAssignmentDto
     {
         public int Id { get; set; }

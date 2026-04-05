@@ -5,7 +5,7 @@ using ZU_DCMS.Domain.Enums;
 
 namespace ZU_DCMS.APPLICATION.DTOs.Payment
 {
-    // DTO for Payment information
+    // __ DTO for Payment information __ //
     public class PaymentDto
     {
         public int Id { get; set; }

@@ -18,6 +18,7 @@ namespace ZU_DCMS.Domain.Entities
         public string? Email { get; set; }
         public string NationalityCode { get; set; } = string.Empty;
         public DateTime DateOfBirth { get; set; }
+        public int Age { get; set; }
         public Gender Gender { get; set; }
         public ChronicCondition ChronicConditions { get; set; } = ChronicCondition.None;
         public string? OtherConditions { get; set; }

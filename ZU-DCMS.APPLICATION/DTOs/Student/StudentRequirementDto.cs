@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ZU_DCMS.APPLICATION.DTOs.Student
 {
-    // DTO for Student Requirement information
+    // __ DTO for Student Requirement information __ //
     public class StudentRequirementDto
     {
         public int Id { get; set; }
@@ -15,7 +15,7 @@ namespace ZU_DCMS.APPLICATION.DTOs.Student
         public bool IsSatisfied { get; set; }
         public int Priority { get; set; }
 
-        // Computed property to calculate completion percentage
+        // __ Computed property to calculate completion percentage __ //
         public double CompletionPercentage => RequiredCount == 0 ? 0 : Math.Round((double)(CompletedCount + TransferredCount) / RequiredCount * 100, 1);
     }
 }

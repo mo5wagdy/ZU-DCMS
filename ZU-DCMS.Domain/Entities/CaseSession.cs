@@ -7,9 +7,7 @@ namespace ZU_DCMS.Domain.Entities
 {
     public class CaseSession : BaseEntity
     {
-        // Properties
-        public int CaseAssignmentId { get; set; }
-        public int StudentId { get; set; }
+        // _____________ Main Properties _____________ //
         public DateTime SessionDate { get; set; } = DateTime.UtcNow;
         public string ProceduresDone { get; set; } = string.Empty;
         public bool IsCompleted { get; set; } = false;
@@ -17,7 +15,11 @@ namespace ZU_DCMS.Domain.Entities
         public string? InternApprovalId { get; set; }
         public DateTime? ApprovedAt { get; set; }
 
-        // Navigation
+        // _____________ Foreign Keys _____________ //
+        public int CaseAssignmentId { get; set; }
+        public int StudentId { get; set; }
+
+        // _____________ Navigation _____________ //
         public CaseAssignment CaseAssignment { get; set; } = null!;
         public Student Student { get; set; } = null!;
     }

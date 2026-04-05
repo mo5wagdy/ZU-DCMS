@@ -15,7 +15,5 @@ namespace ZU_DCMS.APPLICATION.Contracts
         // Method to remove a specific key from the cache
         Task RemoveAsync(string key);
 
-        // Method to remove all cache entries that start with a specific prefix
-        Task RemoveByPrefixAsync(string prefix);
     }
 }

@@ -20,12 +20,13 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                    .IsRequired()
                    .HasMaxLength(20);
 
-            // Enum Conversions to string for better readability in the database
+            // __ Enum Conversions to string for better readability in the database __ //
             builder.Property(b => b.BookingType)
                    .HasConversion<string>();
 
             builder.Property(b => b.Status)
                    .HasConversion<string>();
+            //_______________________________________________________________________//
 
             builder.Property(b => b.PreliminaryComplaint)
                    .HasMaxLength(500);
@@ -33,10 +34,10 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
             builder.Property(b => b.PostponeReason)
                    .HasMaxLength(500);
 
-            // Global Query Filter to exclude soft-deleted records
+            // __ Global Query Filter to exclude soft-deleted records __ //
             builder.HasQueryFilter(b => !b.IsDeleted);
 
-            // Relationships
+            // ____________ Relationships ____________ //
             builder.HasOne(b => b.Patient)
                    .WithMany(p => p.Bookings)
                    .HasForeignKey(b => b.PatientId)

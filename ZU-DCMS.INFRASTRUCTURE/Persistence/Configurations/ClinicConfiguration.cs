@@ -24,10 +24,10 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                    .IsRequired()
                    .HasMaxLength(100);
 
-            // Global Query Filter to exclude soft-deleted records
+            // __ Global Query Filter to exclude soft-deleted records __ //
             builder.HasQueryFilter(c => !c.IsDeleted);
 
-            // Seed Data for Clinics with MaxDailyPatients
+            // __ Seed Data for Clinics with MaxDailyPatients __ //
             builder.HasData
             (
                 new Clinic { Id = 1, Name = "عيادات التشخيص", Code = "DIAG", MaxDailyPatients = 200, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },

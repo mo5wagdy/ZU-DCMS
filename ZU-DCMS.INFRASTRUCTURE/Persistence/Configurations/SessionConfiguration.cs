@@ -13,10 +13,10 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
         {
             builder.HasKey(s => s.Id);
 
-            // Index on Date for faster queries
+            // __ Index on Date for faster queries __ //
             builder.HasIndex(s => s.Date);
 
-            // Global Query Filter to exclude soft-deleted 
+            // __ Global Query Filter to exclude soft-deleted __ //
             builder.HasQueryFilter(s => !s.IsDeleted);
         }
     }

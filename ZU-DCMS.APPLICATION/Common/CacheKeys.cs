@@ -4,14 +4,14 @@ using System.Text;
 
 namespace ZU_DCMS.APPLICATION.Common
 {
-    // This class defines standardized cache keys for various types of data in the application.
+    // __ This class defines standardized cache keys for various types of data in the application. __ //
     public static class CacheKeys
     {
-        // Static Keys
+        // ____________ Static Keys ____________ //
         public const string Clinics = "clinics";
         public const string SystemConfigs = "system_configs";
 
-        // Dynamic Keys
+        // ____________ Dynamic Keys ____________ //
         public static string AvailableStudents(int clinicId)
             => $"available_students_{clinicId}";
     }

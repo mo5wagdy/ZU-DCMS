@@ -8,18 +8,21 @@ using ZU_DCMS.Domain.Interfaces;
 
 namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Repositories
 {
-    // Generic repository implementation for basic CRUD operations
+    // __ Generic repository implementation for basic CRUD operations __ //
     public class Repository<T> : IRepository<T> where T : BaseEntity
     {
+        // __ Protected fields for the database context and DbSet __ //
         protected readonly AppDbContext _context;
         protected readonly DbSet<T> _dbSet;
 
+        // __ Constructor that initializes the database context and DbSet __ //
         public Repository(AppDbContext context)
         {
             _context = context;
             _dbSet = context.Set<T>();
         }
 
+        // __________ Implementation of IRepository<T> methods __________ //
         public async Task<T?> GetByIdAsync(int id) => await _dbSet.FindAsync(id);
 
         public async Task<T?> GetFirstOrDefaultAsync(Expression<Func<T, bool>> predicate) => await _dbSet.FirstOrDefaultAsync(predicate);

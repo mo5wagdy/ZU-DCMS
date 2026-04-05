@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ZU_DCMS.Domain.Enums;
 
 namespace ZU_DCMS.APPLICATION.DTOs.Case
 {
@@ -13,7 +14,7 @@ namespace ZU_DCMS.APPLICATION.DTOs.Case
         public string AssignedByInternName { get; set; } = string.Empty;
         public string Diagnosis { get; set; } = string.Empty;
         public string? Notes { get; set; }
-        public string Status { get; set; } = string.Empty;
+        public CaseStatus Status { get; set; }
         public DateTime AssignedAt { get; set; }
         public List<CaseSessionDto> Sessions { get; set; } = new();
     }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ZU_DCMS.Domain.Enums
 {
-    // This enum represents the various statuses that a booking can have in the system.
+    // __ This enum represents the various statuses that a booking can have in the system. __ //
     public enum BookingStatus
     {
         Pending = 1,

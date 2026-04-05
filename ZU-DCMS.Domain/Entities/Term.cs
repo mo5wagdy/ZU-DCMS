@@ -7,7 +7,7 @@ namespace ZU_DCMS.Domain.Entities
 {
     public class Term : BaseEntity
     {
-        // Properties
+        // _____________ Main Properties _____________ //
         public string Name { get; set; } = string.Empty;
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
@@ -15,7 +15,7 @@ namespace ZU_DCMS.Domain.Entities
         public int RequiredCasesCount { get; set; }
         public string CreatedByAdminId { get; set; } = string.Empty;
 
-        // Navigation
+        // _____________ Navigation _____________ //
         public ICollection<TermRequirement> TermRequirements { get; set; } = new List<TermRequirement>();
     }
 }

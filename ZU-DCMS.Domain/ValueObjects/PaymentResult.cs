@@ -4,8 +4,10 @@ using System.Text;
 
 namespace ZU_DCMS.Domain.ValueObjects
 {
-    // This class represents the result of a payment operation, encapsulating information about whether the payment was successful,
-    // any relevant codes or references, and error messages if applicable.
+    /*
+     * This class represents the result of a payment operation, encapsulating information about whether the payment was successful,
+     * any relevant codes or references, and error messages if applicable.
+     */
     public class PaymentResult
     {
         public bool IsSuccess { get; set; }

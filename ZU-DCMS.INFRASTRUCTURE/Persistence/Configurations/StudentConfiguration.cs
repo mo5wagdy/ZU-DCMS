@@ -24,14 +24,14 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                    .IsRequired()
                    .HasMaxLength(100);
 
-            // Ensure ApplicationUserId is unique to maintain one-to-one relationship with ApplicationUser with index for performance
+            // __ Ensure ApplicationUserId is unique to maintain one-to-one relationship with ApplicationUser with index for performance __ //
             builder.HasIndex(s => s.ApplicationUserId)
                    .IsUnique();
 
-            // Global Query Filter to exclude soft-deleted records
+            // __ Global Query Filter to exclude soft-deleted records __ //
             builder.HasQueryFilter(s => !s.IsDeleted);
 
-            // Relationships
+            // ____________ Relationships ____________ //
             builder.HasOne(s => s.ActiveTerm)
                    .WithMany()
                    .HasForeignKey(s => s.ActiveTermId)

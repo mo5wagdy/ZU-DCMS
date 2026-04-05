@@ -24,10 +24,10 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
             builder.Property(d => d.Notes)
                    .HasMaxLength(1000);
 
-            // Global Query Filter to exclude soft-deleted records
+            // __ Global Query Filter to exclude soft-deleted records __ //
             builder.HasQueryFilter(d => !d.IsDeleted);
 
-            // Relationships
+            // ____________ Relationships ____________ //
             builder.HasOne(d => d.Clinic)
                    .WithMany(c => c.DiagnosisRecords)
                    .HasForeignKey(d => d.ClinicId)

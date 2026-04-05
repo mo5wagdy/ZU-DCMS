@@ -9,18 +9,20 @@ namespace ZU_DCMS.Domain.Entities
 {
     public class Booking : BaseEntity
     {
-        // Properties
+        // _____________ Main Properties _____________ //
         public string BookingCode { get; set; } = string.Empty;
-        public int PatientId { get; set; }
-        public int SessionId { get; set; }
         public BookingType BookingType { get; set; }
         public BookingStatus Status { get; set; } = BookingStatus.Pending;
         public string? PreliminaryComplaint { get; set; }
-        public int? PaymentId { get; set; }
         public string? PostponeReason { get; set; }
         public DateTime? PostponedAt { get; set; }
 
-        // Navigation
+        // _____________ Foreign Keys _____________ //
+        public int PatientId { get; set; }
+        public int SessionId { get; set; }
+        public int? PaymentId { get; set; }
+
+        // _____________ Navigation _____________ //
         public Patient Patient { get; set; } = null!;
         public Session Session { get; set; } = null!;
         public Payment? Payment { get; set; }

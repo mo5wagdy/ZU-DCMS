@@ -17,37 +17,31 @@ namespace ZU_DCMS.INFRASTRUCTURE.Cache
             _cache = cache;
         }
 
-        // Retrieves a value from the cache based on the provided key
+        // __ Retrieves a value from the cache based on the provided key __ //
         public Task<T?> GetAsync<T>(string key)
         {
             _cache.TryGetValue(key, out T? value);
             return Task.FromResult(value);
         }
 
-        // Stores a value in the cache with an optional expiration duration
+        // __ Stores a value in the cache with an optional expiration duration __ //
         public Task SetAsync<T>(string key, T value, TimeSpan? duration = null)
         {
             var options = new MemoryCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow =
-                    duration ?? CacheDuration.Medium
+                AbsoluteExpirationRelativeToNow = duration ?? CacheDuration.Medium
             };
+
             _cache.Set(key, value, options);
+            
             return Task.CompletedTask;
         }
 
-        // Removes a value from the cache based on the provided key
+        // __ Removes a value from the cache based on the provided key __ //
         public Task RemoveAsync(string key)
         {
             _cache.Remove(key);
             return Task.CompletedTask;
-        }
-
-        // Removes all cache entries that start with the specified prefix
-        // Note: This implementation does not support prefix-based removal due to limitations of IMemoryCache.
-        public Task RemoveByPrefixAsync(string prefix)
-        {
-            return Task.CompletedTask;
-        }
+        }        
     }
 }

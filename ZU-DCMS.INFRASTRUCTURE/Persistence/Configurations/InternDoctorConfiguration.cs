@@ -24,11 +24,11 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                    .IsRequired()
                    .HasMaxLength(100);
 
-            // Assuming ApplicationUserId is a foreign key to the AspNetUsers table with indexing for performance
+            // __ Assuming ApplicationUserId is a foreign key to the AspNetUsers table with indexing for performance __ //
             builder.HasIndex(d => d.ApplicationUserId)
                    .IsUnique();
 
-            // Global Query Filter to exclude soft-deleted records
+            // __ Global Query Filter to exclude soft-deleted records __ //
             builder.HasQueryFilter(d => !d.IsDeleted);
         }
     }

@@ -4,8 +4,11 @@ using System.Text;
 
 namespace ZU_DCMS.APPLICATION.Common
 {
-    // Constants for configuration keys used in the application
-    // This class provides a centralized place to manage all configuration keys, ensuring consistency and reducing the risk of typos.
+    /* 
+     * Constants for configuration keys used in the application.
+     * This class provides a centralized place to manage all configuration keys,
+     * ensuring consistency and reducing the risk of typos. 
+     */
     public static class ConfigKeys
     {
         public const string MaxDailyPatients = "MAX_DAILY_PATIENTS";

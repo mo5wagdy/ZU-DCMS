@@ -8,9 +8,7 @@ namespace ZU_DCMS.Domain.Entities
 {
     public class Payment : BaseEntity
     {
-        // Properties
-        public int PatientId { get; set; }
-        public int BookingId { get; set; }
+        // _____________ Main Properties _____________ //
         public decimal Amount { get; set; }
         public PaymentType Type { get; set; }
         public PaymentStatus Status { get; set; } = PaymentStatus.Pending;
@@ -19,7 +17,11 @@ namespace ZU_DCMS.Domain.Entities
         public string? GatewayName { get; set; }
         public DateTime? PaidAt { get; set; }
 
-        // Navigation
+        // _____________ Foreign Keys _____________ //
+        public int PatientId { get; set; }
+        public int BookingId { get; set; }
+
+        // _____________ Navigation _____________ //
         public Patient Patient { get; set; } = null!;
         public Booking Booking { get; set; } = null!;
     }

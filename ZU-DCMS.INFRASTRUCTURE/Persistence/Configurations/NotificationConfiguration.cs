@@ -21,7 +21,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                    .IsRequired()
                    .HasMaxLength(1000);
 
-            // Enum Conversions to string for better readability in the database
+            // __ Enum Conversions to string for better readability in the database __ //
             builder.Property(n => n.Type)
                    .HasConversion<string>();   
 
@@ -37,10 +37,10 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
             builder.Property(n => n.ReferenceId)
                    .HasMaxLength(50);
 
-            // Index on UserId for faster lookups
+            // __ Index on UserId for faster lookups __ //
             builder.HasIndex(n => n.UserId);
 
-            // Global Query Filter to exclude soft-deleted records
+            // __ Global Query Filter to exclude soft-deleted records __ //
             builder.HasQueryFilter(n => !n.IsDeleted);
         }
     }

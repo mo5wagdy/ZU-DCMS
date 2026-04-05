@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ZU_DCMS.Domain.Enums
 {
-    // This enum represents the status of a case, indicating whether it is active, completed, or transferred.
+    // __ This enum represents the status of a case, indicating whether it is active, completed, or transferred. __ //
     public enum CaseStatus
     {
         Active = 1,

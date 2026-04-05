@@ -7,22 +7,20 @@ namespace ZU_DCMS.Domain.Entities
 {
     public class TermRequirement : BaseEntity
     {
-        // Properties
-        public int StudentId { get; set; }
-        public int TermId { get; set; }
-        public int ClinicId { get; set; }
+        // _____________ Main Properties _____________ //
         public int RequiredCount { get; set; }
         public int CompletedCount { get; set; }
         public int TransferredCount { get; set; }
 
-        // Calculated properties
-        // These properties are not mapped to the database but calculated at runtime
-        // They can be used to easily check if the requirement is satisfied and to determine the priority of completing it
+        // _____________ Calculated properties _____________ //
+
+        /* __ These properties are not mapped to the database but calculated at runtime,
+        They can be used to easily check if the requirement is satisfied and to determine the priority of completing it __ */
         public bool IsSatisfied =>
             CompletedCount + TransferredCount >= RequiredCount;
 
-        // Priority is determined by how many cases are completed or transferred
-        // 0 completed/transferred = priority 1 (highest)
+        /* __ Priority is determined by how many cases are completed or transferred
+        0 completed/transferred = priority 1 (highest) __ */
         public int Priority =>
             CompletedCount + TransferredCount switch
             {
@@ -32,7 +30,12 @@ namespace ZU_DCMS.Domain.Entities
                 _ => 4
             };
 
-        // Navigation
+        // _____________ Foreign Keys _____________ //
+        public int StudentId { get; set; }
+        public int TermId { get; set; }
+        public int ClinicId { get; set; }
+
+        // _____________ Navigation _____________ //
         public Student Student { get; set; } = null!;
         public Term Term { get; set; } = null!;
         public Clinic Clinic { get; set; } = null!;

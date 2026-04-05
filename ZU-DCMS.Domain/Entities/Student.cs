@@ -7,7 +7,7 @@ namespace ZU_DCMS.Domain.Entities
 {
     public class Student : BaseEntity
     {
-        // Properties
+        // _____________ Main Properties _____________ //
         public string ApplicationUserId { get; set; } = string.Empty;
         public string StudentCode { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
@@ -15,7 +15,7 @@ namespace ZU_DCMS.Domain.Entities
         public int? ActiveTermId { get; set; }
         public bool IsActive { get; set; } = true;
 
-        // Navigation
+        // _____________ Navigation _____________ //
         public Term? ActiveTerm { get; set; }
         public ICollection<TermRequirement> TermRequirements { get; set; } = new List<TermRequirement>();
         public ICollection<CaseAssignment> CaseAssignments { get; set; } = new List<CaseAssignment>();

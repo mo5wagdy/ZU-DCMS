@@ -5,7 +5,7 @@ using ZU_DCMS.Domain.Enums;
 
 namespace ZU_DCMS.Domain.ValueObjects
 {
-    // This class represents the result of a notification operation, encapsulating information about whether the notification was successful.
+    // __ This class represents the result of a notification operation, encapsulating information about whether the notification was successful. __ //
     public class NotificationResult
     {
         public bool IsSuccess { get; set; }

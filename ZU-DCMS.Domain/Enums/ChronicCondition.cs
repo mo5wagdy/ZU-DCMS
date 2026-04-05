@@ -4,8 +4,10 @@ using System.Text;
 
 namespace ZU_DCMS.Domain.Enums
 {
-    // Enum representing various chronic conditions that a patient may have
-    // Using the [Flags] attribute to allow combination of multiple chronic conditions
+    /* 
+     * Enum representing various chronic conditions that a patient may have.
+     * Using the [Flags] attribute to allow combination of multiple chronic conditions. 
+     */
     [Flags]
     public enum ChronicCondition
     {

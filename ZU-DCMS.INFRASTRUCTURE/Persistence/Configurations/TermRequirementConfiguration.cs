@@ -13,14 +13,14 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
         {
             builder.HasKey(r => r.Id);
 
-            //StudentId + TermId + ClinicId should be unique to prevent duplicate requirements for the same student, term, and clinic
+            // __ StudentId + TermId + ClinicId should be unique to prevent duplicate requirements for the same student, term, and clinic __ //
             builder.HasIndex(r => new { r.StudentId, r.TermId, r.ClinicId })
                    .IsUnique();
 
-            // Global Query Filter to exclude soft-deleted records
+            // __ Global Query Filter to exclude soft-deleted records __ //
             builder.HasQueryFilter(r => !r.IsDeleted);
 
-            // Relationships
+            // ____________ Relationships ____________ //
             builder.HasOne(r => r.Student)
                    .WithMany(s => s.TermRequirements)
                    .HasForeignKey(r => r.StudentId)

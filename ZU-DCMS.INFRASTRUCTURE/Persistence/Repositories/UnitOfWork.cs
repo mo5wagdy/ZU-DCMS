@@ -11,6 +11,8 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Repositories
     {
         private readonly AppDbContext _context;
         private IDbContextTransaction? _transaction;
+
+        // __ Dictionary to hold repositories for different entity types __ //
         private readonly Dictionary<Type, object> _repositories = new();
 
         public UnitOfWork(AppDbContext context)
@@ -18,9 +20,11 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Repositories
             _context = context;
         }
 
-        // Get the repository for the specified entity type
-        // If the repository doesn't exist in the dictionary, create a new instance and add it to the dictionary
-        // This allows us to reuse the same repository instance for the same entity type throughout the unit of work
+        /* 
+         * Get the repository for the specified entity type.
+         * If the repository doesn't exist in the dictionary, create a new instance and add it to the dictionary.
+         * This allows us to reuse the same repository instance for the same entity type throughout the unit of work.
+         */
         public IRepository<T> Repository<T>() where T : BaseEntity
         {
             var type = typeof(T);
@@ -31,10 +35,10 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Repositories
             return (IRepository<T>)_repositories[type];
         }
 
-        // Save changes to the database
+        // ________ Save changes to the database ________ //
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) => await _context.SaveChangesAsync(cancellationToken);
 
-        // Transaction management methods
+        // ________ Transaction management methods ________ //
         public async Task BeginTransactionAsync() => _transaction = await _context.Database.BeginTransactionAsync();
 
         public async Task CommitTransactionAsync()
@@ -64,6 +68,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Repositories
             }
         }
 
+        // ________ Dispose the context when done ________ //
         public void Dispose() => _context.Dispose();
     }
 }

@@ -5,7 +5,7 @@ using ZU_DCMS.Domain.Common;
 
 namespace ZU_DCMS.Domain.Entities
 {
-    // The RefreshToken entity represents a refresh token used for authentication and session management.
+    // __ The RefreshToken entity represents a refresh token used for authentication and session management. __ //
     public class RefreshToken : BaseEntity
     {
         public string Token { get; set; } = string.Empty;
@@ -15,7 +15,7 @@ namespace ZU_DCMS.Domain.Entities
         public DateTime? RevokedAt { get; set; }
         public string? ReplacedByToken { get; set; }
 
-        // Calculated
+        // __ Calculated properties to determine the status of the token __ //
         public bool IsExpired => DateTime.UtcNow >= ExpiresAt;
         public bool IsActive => !IsRevoked && !IsExpired;
     }

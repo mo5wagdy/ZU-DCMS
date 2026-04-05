@@ -9,6 +9,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
 {
     public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
     {
+        // __ Configures the entity properties and relationships for the RefreshToken entity. __ //
         public void Configure(EntityTypeBuilder<RefreshToken> builder)
         {
             builder.HasKey(r => r.Id);

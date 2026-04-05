@@ -13,15 +13,17 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
         {
             builder.HasKey(p => p.Id);
 
-            // Precision for Amount to ensure it can handle typical currency values
+            // __ Precision for Amount to ensure it can handle typical currency values __ //
             builder.Property(p => p.Amount)
                    .HasPrecision(10, 2);
 
-            builder.Property(p => p.Type)  // Store enums as strings for better readability in the database
+            // __ Enum Conversions to string for better readability in the database __ //
+            builder.Property(p => p.Type)
                    .HasConversion<string>();
 
-            builder.Property(p => p.Status)  // Store enums as strings for better readability in the database
+            builder.Property(p => p.Status)
                    .HasConversion<string>();
+            //_________________________________________________________________________//
 
             builder.Property(p => p.PaymentCode)
                    .HasMaxLength(100);
@@ -32,10 +34,10 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
             builder.Property(p => p.GatewayName)
                    .HasMaxLength(50);
 
-            // Global Query Filter to exclude soft-deleted records
+            // __ Global Query Filter to exclude soft-deleted records __ //
             builder.HasQueryFilter(p => !p.IsDeleted);
 
-            // Relationships
+            // ____________ Relationships ____________ //
             builder.HasOne(p => p.Patient)
                    .WithMany(pt => pt.Payments)
                    .HasForeignKey(p => p.PatientId)

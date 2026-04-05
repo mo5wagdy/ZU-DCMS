@@ -6,11 +6,11 @@ namespace ZU_DCMS.APPLICATION.Common
 {
     public class PagedRequest
     {
-        // Default values for pagination parameters
+        // __ Default values for pagination parameters __ //
         private int _page = 1;
         private int _pageSize = 10;
 
-        // Properties with validation in setters to ensure valid pagination parameters
+        // __ Properties with validation in setters to ensure valid pagination parameters __ //
         public int Page
         {
             get => _page;
@@ -23,7 +23,7 @@ namespace ZU_DCMS.APPLICATION.Common
             set => _pageSize = value > 50 ? 50 : value < 1 ? 10 : value;
         }
 
-        // Optional sorting and searching parameters
+        // __ Optional sorting and searching parameters __ //
         public string? SortBy { get; set; }
         public bool SortDescending { get; set; }
         public string? SearchTerm { get; set; }

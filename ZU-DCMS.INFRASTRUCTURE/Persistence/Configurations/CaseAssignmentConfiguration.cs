@@ -16,14 +16,14 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
             builder.Property(c => c.Notes)
                    .HasMaxLength(500);
 
-            // Enum Conversions to string for better readability in the database
+            // __ Enum Conversions to string for better readability in the database __ //
             builder.Property(c => c.Status)
                    .HasConversion<string>();
 
-            // Global Query Filter to exclude soft-deleted records
+            // __ Global Query Filter to exclude soft-deleted records __ //
             builder.HasQueryFilter(c => !c.IsDeleted);
 
-            // Relationships
+            // ____________ Relationships ____________ //
             builder.HasOne(c => c.Student)
                    .WithMany(s => s.CaseAssignments)
                    .HasForeignKey(c => c.StudentId)

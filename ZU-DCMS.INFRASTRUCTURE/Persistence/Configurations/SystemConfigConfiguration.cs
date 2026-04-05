@@ -27,10 +27,10 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
             builder.Property(s => s.Description)
                    .HasMaxLength(500);
 
-            // Global Query Filter to exclude soft-deleted records
+            // __ Global Query Filter to exclude soft-deleted records __ //
             builder.HasQueryFilter(s => !s.IsDeleted);
 
-            // Seed Default Config
+            // ____________ Seed Default Config ____________ //
             builder.HasData(
                 new SystemConfig
                 {

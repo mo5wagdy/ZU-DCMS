@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ZU_DCMS.APPLICATION.Common
 {
-    // This class defines standard durations for caching data in the application.
+    // __ This class defines standard durations for caching data in the application. __ //
     public static class CacheDuration
     {
         public static readonly TimeSpan Short = TimeSpan.FromMinutes(5);

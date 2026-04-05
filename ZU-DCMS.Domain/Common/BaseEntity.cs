@@ -4,9 +4,9 @@ using System.Text;
 
 namespace ZU_DCMS.Domain.Common
 {
-    // BaseEntity class to be inherited by all entities in the application
-    // It includes common properties like Id, CreatedAt, UpdatedAt, IsDeleted, CreatedByUserId, and UpdatedByUserId
-    // This class can be extended in the future to include additional common properties or methods as needed
+    /* __ BaseEntity class to be inherited by all entities in the application, 
+     * providing common properties for tracking creation, updates, and soft deletion.
+     * This class can be extended in the future to include additional common properties or methods as needed __ */
     public abstract class BaseEntity
     {
         public int Id { get; set; }

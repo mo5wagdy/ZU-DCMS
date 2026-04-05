@@ -4,8 +4,10 @@ using System.Text;
 
 namespace ZU_DCMS.Domain.Enums
 {
-    // This enum represents the different types of notifications that can be sent to users,
-    // such as booking confirmations, student assignments, case completions, case transfers, and appointment postponements.
+    /* 
+     * This enum represents the different types of notifications that can be sent to users,
+     * such as booking confirmations, student assignments, case completions, case transfers, and appointment postponements.
+     * */
     public enum NotificationType
     {
         BookingConfirmed = 1,

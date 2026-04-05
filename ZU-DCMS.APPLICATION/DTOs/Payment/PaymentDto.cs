@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ZU_DCMS.Domain.Enums;
 
 namespace ZU_DCMS.APPLICATION.DTOs.Payment
 {
@@ -9,8 +10,8 @@ namespace ZU_DCMS.APPLICATION.DTOs.Payment
     {
         public int Id { get; set; }
         public decimal Amount { get; set; }
-        public string Type { get; set; } = string.Empty;
-        public string Status { get; set; } = string.Empty;
+        public PaymentType Type { get; set; }
+        public PaymentStatus Status { get; set; }
         public string? PaymentCode { get; set; }
         public DateTime? PaidAt { get; set; }
     }

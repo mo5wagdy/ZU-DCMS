@@ -28,8 +28,16 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                    .IsRequired()
                    .HasMaxLength(20);
 
-            builder.Property(p => p.IdentityType)  // Enum Conversions to string for better readability in the database
+            // __ Enum Conversions to string for better readability in the database __ //
+            builder.Property(p => p.IdentityType)  
                    .HasConversion<string>();
+
+            builder.Property(p => p.Gender)
+                   .HasConversion<string>();
+
+            builder.Property(p => p.ChronicConditions)
+                   .HasConversion<string>();
+            //________________________________________________________________//
 
             builder.Property(p => p.PhoneNumber)
                    .IsRequired()
@@ -42,16 +50,11 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                    .IsRequired()
                    .HasMaxLength(50);
 
-            builder.Property(p => p.Gender)  // Enum Conversions to string for better readability in the database
-                   .HasConversion<string>();
-
-            builder.Property(p => p.ChronicConditions)  // Enum Conversions to string for better readability in the database
-                   .HasConversion<string>();
 
             builder.Property(p => p.OtherConditions)
                    .HasMaxLength(500);
 
-            // Global Query Filter to exclude soft-deleted records
+            // __ Global Query Filter to exclude soft-deleted records __ //
             builder.HasQueryFilter(p => !p.IsDeleted);
         }
     }

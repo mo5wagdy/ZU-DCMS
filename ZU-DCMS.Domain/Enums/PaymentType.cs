@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ZU_DCMS.Domain.Enums
 {
-    // This enum represents the different types of payments that can be made in the system, such as payments for diagnoses or clinic services.
+    // __ This enum represents the different types of payments that can be made in the system, such as payments for diagnoses or clinic services. __ //
     public enum PaymentType
     {
         Diagnosis = 1,

@@ -6,41 +6,23 @@ using ZU_DCMS.Domain.Common;
 
 namespace ZU_DCMS.Domain.Interfaces
 {
-    // Generic repository interface for basic CRUD operations
-    // T is constrained to be a type that inherits from BaseEntity, ensuring that all entities have a common base structure
+    /*
+     * Generic repository interface for basic CRUD operations
+     * T is constrained to be a type that inherits from BaseEntity,
+     * ensuring that all entities have a common base structure
+     */
     public interface IRepository<T> where T : BaseEntity
     {
-        // Asynchronous method to retrieve an entity by its unique identifier
-        Task<T?> GetByIdAsync(int id);
-
-        // Asynchronous method to retrieve the first entity that matches a given predicate, or null if no such entity exists
-        Task<T?> GetFirstOrDefaultAsync(Expression<Func<T, bool>> predicate);
-
-        // Asynchronous method to retrieve all entities of type T
-        Task<IEnumerable<T>> GetAllAsync();
-
-        // Method to retrieve an IQueryable of type T, allowing for further querying and deferred execution
-        IQueryable<T> GetQueryable();
-
-        // Asynchronous method to check if any entities match a given predicate, returning true if at least one entity matches
-        Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate);
-
-        // Asynchronous method to count the number of entities that match a given predicate, or count all entities if no predicate is provided
-        Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null);
-
-        // Asynchronous method to add a new entity to the repository
-        Task AddAsync(T entity);
-
-        // Asynchronous method to add a range of entities to the repository
-        Task AddRangeAsync(IEnumerable<T> entities);
-
-        // Method to update an existing entity in the repository
-        void Update(T entity);
-
-        // Method to delete an entity from the repository
-        void Delete(T entity);
-
-        // Method to perform a soft delete on an entity, marking it as deleted without removing it from the database
-        void SoftDelete(T entity);
+        Task<T?> GetByIdAsync(int id); // => Asynchronous method to retrieve an entity by its unique identifier
+        Task<T?> GetFirstOrDefaultAsync(Expression<Func<T, bool>> predicate); // => Asynchronous method to retrieve the first entity that matches a given predicate, or null if no such entity exists
+        Task<IEnumerable<T>> GetAllAsync(); // => Asynchronous method to retrieve all entities of type T
+        IQueryable<T> GetQueryable(); // => Method to retrieve an IQueryable of type T, allowing for further querying and deferred execution
+        Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate); // => Asynchronous method to check if any entities match a given predicate, returning true if at least one entity matches
+        Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null); // => Asynchronous method to count the number of entities that match a given predicate, or count all entities if no predicate is provided
+        Task AddAsync(T entity); // => Asynchronous method to add a new entity to the repository
+        Task AddRangeAsync(IEnumerable<T> entities); // => Asynchronous method to add a range of entities to the 
+        void Update(T entity); // => Method to update an existing entity in the repository
+        void Delete(T entity); // => Method to delete an entity from the repository
+        void SoftDelete(T entity); // => Method to perform a soft delete on an entity, marking it as deleted without removing it from the database
     }
 }

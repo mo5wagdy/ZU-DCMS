@@ -17,8 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Validators\Booking\" />
-    <Folder Include="Validators\Case\" />
     <Folder Include="Validators\Patient\" />
   </ItemGroup>
 

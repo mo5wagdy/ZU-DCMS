@@ -4,10 +4,9 @@ using System.Text;
 
 namespace ZU_DCMS.APPLICATION.Contracts
 {
-    // This interface defines the contract for an AI agent service.
+    // __ This interface defines the contract for an AI agent service. __ //
     public interface IAiAgentService
     {
-        // This method retrieves a list of student IDs based on their priority for a specific clinic and term.
-        Task<List<int>> GetStudentPriorityListAsync(int clinicId, int termId);
+        Task<List<int>> GetStudentPriorityListAsync(int clinicId, int termId); // => This method retrieves a list of student IDs based on their priority for a specific clinic and term.
     }
 }

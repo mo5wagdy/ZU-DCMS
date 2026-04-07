@@ -42,6 +42,13 @@ namespace ZU_DCMS.INFRASTRUCTURE.Cache
         {
             _cache.Remove(key);
             return Task.CompletedTask;
-        }        
+        }
+
+        // __ Removes all cache entries that start with a specific prefix __ //
+        public Task RemoveByPrefixAsync(string prefix)
+        {
+            _cache.Remove(prefix);
+            return Task.CompletedTask;
+        }
     }
 }

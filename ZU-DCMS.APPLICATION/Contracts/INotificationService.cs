@@ -4,32 +4,29 @@ using System.Text;
 
 namespace ZU_DCMS.APPLICATION.Contracts
 {
-    // This interface defines the contract for a notification service that can send various types of notifications
-    // (SMS, WhatsApp, Email) and specific booking-related notifications.
+    /* 
+     * This interface defines the contract for a notification service that can send various types of notifications
+     * (SMS, WhatsApp, Email) and specific booking-related notifications.
+    */
     public interface INotificationService
     {
-        // This method sends an SMS message to a specified phone number with the given message content.
-        Task<bool> SendSmsAsync(string phoneNumber, string message);
+        /* 
+         * These methods are responsible for sending different types of notifications to users.
+         * Each method returns a Task<bool> indicating the success or failure of the notification sending operation.
+         */
+        Task<bool> SendSmsAsync(string phoneNumber, string message); // => This method sends an SMS message to a specified phone number with the given message content.
+        Task<bool> SendWhatsAppAsync(string phoneNumber, string message); // => This method sends a WhatsApp message to a specified phone number with the given message content.
+        Task<bool> SendEmailAsync(string email, string subject, string message); // => This method sends an email to a specified email address with the given subject and message content.
 
-        // This method sends a WhatsApp message to a specified phone number with the given message content.
-        Task<bool> SendWhatsAppAsync(string phoneNumber, string message);
-
-        // This method sends an email to a specified email address with the given subject and message content.
-        Task<bool> SendEmailAsync(string email, string subject, string message);
-
-        // This method sends a notification to the student when a booking is confirmed, using the booking ID to retrieve necessary details.
-        Task SendBookingConfirmedAsync(int bookingId);
-
-        // This method sends a notification to the student when they are assigned to a case, using the case assignment ID to retrieve necessary details.
-        Task SendStudentAssignedAsync(int caseAssignmentId);
-
-        // This method sends a notification to the student when a case they are assigned to is completed, using the case assignment ID to retrieve necessary details.
-        Task SendCaseCompletedAsync(int caseAssignmentId);
-
-        // This method sends a notification to the student when a booking is cancelled, using the booking ID to retrieve necessary details.
-        Task SendBookingCancelledAsync(int bookingId);
-
-        // This method sends a notification to the student when a booking is postponed, using the booking ID and reason for postponement to retrieve necessary details.
-        Task SendBookingPostponedAsync(int bookingId, string reason);
+        /*
+         * These methods are responsible for sending specific notifications related to bookings and case assignments.
+         * Each method takes relevant identifiers (like booking ID or case assignment ID) to retrieve necessary details for the notification.  
+         */
+        Task SendBookingConfirmedAsync(int bookingId); // => This method sends a notification to the Intern Doctor and patient when a booking is confirmed, using the booking ID to retrieve necessary details
+        Task SendBookingCancelledAsync(int bookingId); // => This method sends a notification to the Intern Doctor and patient when a booking is cancelled, using the booking ID to retrieve necessary details.
+        Task SendBookingPostponedAsync(int bookingId, string reason); // => This method sends a notification to the all when a booking is postponed, using the booking ID and reason for postponement to retrieve necessary details.
+        Task SendStudentAssignedAsync(int caseAssignmentId); // => This method sends a notification to the student and patient when they are assigned to a case, using the case assignment ID to retrieve necessary details.
+        Task SendCasePartiallyCompletedAsync(int caseAssignmentId);
+        Task SendCaseCompletedAsync(int caseAssignmentId); // => This method sends a notification to the Intern Doctor when a case they are assigned to is completed, using the case assignment ID to retrieve necessary details.
     }
 }

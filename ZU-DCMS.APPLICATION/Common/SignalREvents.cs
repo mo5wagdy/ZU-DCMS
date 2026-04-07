@@ -8,17 +8,23 @@ namespace ZU_DCMS.APPLICATION.Common
     public static class SignalREvents
     {
         // ________ Dashboard Events ________ //
-        public const string DashboardUpdated = "dashboard_updated";
+        public const string StatsUpdated = "stats_updated";
 
         // ________ Session Events ________ //
         public const string SessionUpdated = "session_updated";
+        public const string SessionFull = "session_full";
 
         // ________ Booking Events ________ //
         public const string BookingCreated = "booking_created";
         public const string BookingCancelled = "booking_cancelled";
+        public const string BookingPostponed = "booking_postponed";
 
         // ________ Case Events ________ //
         public const string CaseAssigned = "case_assigned";
         public const string CaseCompleted = "case_completed";
+        public const string CaseHasFollowUp = "case_has_followup";
+
+        // ________ Alerts ________ //
+        public const string LowStudentsAlert = "low_students_alert";
     }
 }

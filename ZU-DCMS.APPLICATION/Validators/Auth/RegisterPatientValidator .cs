@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using ZU_DCMS.APPLICATION.DTOs.Auth;
+using ZU_DCMS.APPLICATION.Validators.Shared;
 using ZU_DCMS.Domain.Enums;
 
 namespace ZU_DCMS.APPLICATION.Validators.Auth
@@ -62,8 +63,7 @@ namespace ZU_DCMS.APPLICATION.Validators.Auth
             
             RuleFor(x => x.Address)
                    .NotEmpty().WithMessage("العنوان مطلوب")
-                   .Must(BeValidAddress)
-                   .WithMessage("العنوان لازم يكون: الدولة,المحافظة")
+                   .ValidAddress()
                    .When(x => !string.IsNullOrEmpty(x.Address));
         }
 
@@ -135,14 +135,6 @@ namespace ZU_DCMS.APPLICATION.Validators.Auth
             var age = today.Year - dateOfBirth.Year;
             if (dateOfBirth.Date > today.AddYears(-age)) age--;
             return age >= 1 && age <= 120;
-        }
-
-        // __ Validates that the address is in the format "Country,City" __ //
-        private bool BeValidAddress(string address)
-        {
-            if (!string.IsNullOrWhiteSpace(address)) return true;
-            var parts = address.Split(',');
-            return parts.Length == 2 && parts.All(p => !string.IsNullOrWhiteSpace(p.Trim()));
         }
     }
 

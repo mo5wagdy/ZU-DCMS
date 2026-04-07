@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using ZU_DCMS.APPLICATION.DTOs.Patient;
+using ZU_DCMS.APPLICATION.Validators.Shared;
 
 namespace ZU_DCMS.APPLICATION.Validators.Patient
 {
@@ -11,6 +12,13 @@ namespace ZU_DCMS.APPLICATION.Validators.Patient
         // __ Validator for updating patient data __ //
         public UpdatePatientValidator()
         {
+            RuleFor(x => x.Username)
+                   .MinimumLength(3).WithMessage("لازم 3 حروف على الأقل")
+                   .MaximumLength(50).WithMessage("لازم أقل من 50 حرف")
+                   .Matches(@"^[a-zA-Z0-9._-]+$")
+                   .WithMessage("يقبل حروف وأرقام و . _ - فقط")
+                   .When(x => !string.IsNullOrEmpty(x.Username));
+
             RuleFor(x => x.PhoneNumber)
                    .Matches(@"^\+?[0-9]{10,15}$")
                    .WithMessage("رقم التليفون غير صحيح")
@@ -30,17 +38,8 @@ namespace ZU_DCMS.APPLICATION.Validators.Patient
                    .When(x => !string.IsNullOrEmpty(x.OtherConditions));
 
             RuleFor(x => x.Address)
-                   .Must(BeValidAddress)
-                   .WithMessage("العنوان لازم يكون: الدولة,المحافظة")
+                   .ValidAddress()
                    .When(x => !string.IsNullOrEmpty(x.Address));
-        }
-
-        // __ Custom validation method for address format __ //
-        private bool BeValidAddress(string? address)
-        {
-            if (string.IsNullOrWhiteSpace(address)) return true;
-            var parts = address.Split(',');
-            return parts.Length == 2 && parts.All(p => !string.IsNullOrWhiteSpace(p.Trim()));
         }
     }
 }

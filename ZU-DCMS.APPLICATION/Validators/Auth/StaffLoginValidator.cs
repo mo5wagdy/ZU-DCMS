@@ -12,7 +12,9 @@ namespace ZU_DCMS.APPLICATION.Validators.Auth
         {
             RuleFor(x => x.Email)
                 .NotEmpty()
-                .WithMessage("الإيميل مطلوب");
+                .WithMessage("الإيميل مطلوب")
+                .EmailAddress()
+                .WithMessage("الإيميل غير صالح");
 
             RuleFor(x => x.Password)
                 .NotEmpty()

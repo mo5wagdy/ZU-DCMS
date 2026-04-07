@@ -14,8 +14,8 @@ namespace ZU_DCMS.APPLICATION.DTOs.Patient
         public string PhoneNumber { get; set; } = string.Empty;
         public IdentityType IdentityType { get; set; }
         public string IdentityNumber { get; set; } = string.Empty;
+        public string Address { get; set; } = string.Empty;
         public string? Email { get; set; }
-        public string NationalityCode { get; set; } = string.Empty;
         public DateTime DateOfBirth { get; set; }
         public int Age { get; set; }
         public Gender Gender { get; set; }

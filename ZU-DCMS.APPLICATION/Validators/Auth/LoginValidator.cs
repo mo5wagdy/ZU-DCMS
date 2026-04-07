@@ -11,10 +11,12 @@ namespace ZU_DCMS.APPLICATION.Validators.Auth
         public LoginValidator()
         {
             RuleFor(x => x.Username)
-                   .NotEmpty().WithMessage("اسم المستخدم مطلوب");
+                   .NotEmpty()
+                   .WithMessage("اسم المستخدم مطلوب");
 
-            RuleFor(x => x.Password)
-                   .NotEmpty().WithMessage("كلمة المرور مطلوبة");
+            RuleFor(x => x.IdentityNumber)
+                   .NotEmpty()
+                   .WithMessage("رقم الهوية مطلوب");
         }
     }
 }

@@ -46,9 +46,9 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
             builder.Property(p => p.Email)
                    .HasMaxLength(100);
 
-            builder.Property(p => p.NationalityCode)
+            builder.Property(p => p.Address)
                    .IsRequired()
-                   .HasMaxLength(50);
+                   .HasMaxLength(200);
 
 
             builder.Property(p => p.OtherConditions)

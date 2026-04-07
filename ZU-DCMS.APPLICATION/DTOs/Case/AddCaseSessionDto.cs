@@ -8,8 +8,9 @@ namespace ZU_DCMS.APPLICATION.DTOs.Case
     public class AddCaseSessionDto
     {
         public int CaseAssignmentId { get; set; }
-        public string ProceduresDone { get; set; } = string.Empty;
+        public List<int> ProcedureIds { get; set; } = new();
         public bool IsCompleted { get; set; }
+        public bool HasFollowUp { get; set; }
         public string? Notes { get; set; }
     }
 }

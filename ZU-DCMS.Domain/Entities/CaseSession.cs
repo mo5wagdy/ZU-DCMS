@@ -9,8 +9,8 @@ namespace ZU_DCMS.Domain.Entities
     {
         // _____________ Main Properties _____________ //
         public DateTime SessionDate { get; set; } = DateTime.UtcNow;
-        public string ProceduresDone { get; set; } = string.Empty;
         public bool IsCompleted { get; set; } = false;
+        public bool HasFollowUp { get; set; }
         public string? Notes { get; set; }
         public string? InternApprovalId { get; set; }
         public DateTime? ApprovedAt { get; set; }
@@ -22,5 +22,6 @@ namespace ZU_DCMS.Domain.Entities
         // _____________ Navigation _____________ //
         public CaseAssignment CaseAssignment { get; set; } = null!;
         public Student Student { get; set; } = null!;
+        public ICollection<CaseSessionProcedure> Procedures { get; set; } = new List<CaseSessionProcedure>();
     }
 }

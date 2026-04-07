@@ -6,22 +6,26 @@ using ZU_DCMS.APPLICATION.DTOs.Diagnosis;
 
 namespace ZU_DCMS.APPLICATION.Validators.Diagnosis
 {
-    public class AssignStudentValidator
-    : AbstractValidator<AssignStudentDto>
+    public class AssignStudentValidator : AbstractValidator<AssignStudentDto>
     {
+        // __ This validator ensures that the AssignStudentDto object adheres to the specified rules. __ //
         public AssignStudentValidator()
         {
             RuleFor(x => x.DiagnosisRecordId)
-                   .GreaterThan(0).WithMessage("التشخيص مطلوب");
+                   .GreaterThan(0)
+                   .WithMessage("التشخيص مطلوب");
 
             RuleFor(x => x.StudentId)
-                   .GreaterThan(0).WithMessage("الطالب مطلوب");
+                   .GreaterThan(0)
+                   .WithMessage("الطالب مطلوب");
 
             RuleFor(x => x.ClinicId)
-                   .GreaterThan(0).WithMessage("العيادة مطلوبة");
+                   .GreaterThan(0)
+                   .WithMessage("العيادة مطلوبة");
 
             RuleFor(x => x.Notes)
-                   .MaximumLength(500).WithMessage("الملاحظات لازم تكون أقل من 500 حرف")
+                   .MaximumLength(500)
+                   .WithMessage("الملاحظات لازم تكون أقل من 500 حرف")
                    .When(x => !string.IsNullOrEmpty(x.Notes));
         }
     }

@@ -12,7 +12,7 @@ namespace ZU_DCMS.APPLICATION.DTOs.Diagnosis
         public string InternDoctorName { get; set; } = string.Empty;
         public string ClinicName { get; set; } = string.Empty;
         public string Complaint { get; set; } = string.Empty;
-        public string Diagnosis { get; set; } = string.Empty;
+        public string DiagnosisTypeName { get; set; } = string.Empty;
         public string? Notes { get; set; }
         public DateTime DiagnosedAt { get; set; }
         public bool IsAssigned { get; set; }

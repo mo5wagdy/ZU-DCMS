@@ -11,8 +11,6 @@ namespace ZU_DCMS.APPLICATION.DTOs.Admin
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
-        public string? StudentCode { get; set; }
-        public string? DoctorCode { get; set; }
         public int? AcademicYear { get; set; }
     }
 }

@@ -16,8 +16,4 @@
     <ProjectReference Include="..\ZU-DCMS.Domain\ZU-DCMS.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Validators\Patient\" />
-  </ItemGroup>
-
 </Project>

@@ -10,6 +10,7 @@ namespace ZU_DCMS.APPLICATION.DTOs.Patient
     {
         public string? PhoneNumber { get; set; }
         public string? Email { get; set; }
+        public string Address { get; set; } = null!;
         public ChronicCondition? ChronicConditions { get; set; }
         public string? OtherConditions { get; set; }
     }

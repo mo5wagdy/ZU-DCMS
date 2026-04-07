@@ -17,10 +17,6 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                    .IsRequired()
                    .HasMaxLength(500);
 
-            builder.Property(d => d.Diagnosis)
-                   .IsRequired()
-                   .HasMaxLength(500);
-
             builder.Property(d => d.Notes)
                    .HasMaxLength(1000);
 

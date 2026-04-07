@@ -33,6 +33,11 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence
         public DbSet<CaseAssignment> CaseAssignments => Set<CaseAssignment>();
         public DbSet<CaseSession> CaseSessions => Set<CaseSession>();
 
+        // __ Entities for managing diagnoses and procedures __ //
+        public DbSet<DiagnosisType> DiagnosisTypes => Set<DiagnosisType>();
+        public DbSet<Procedure> Procedures => Set<Procedure>();
+        public DbSet<CaseSessionProcedure> CaseSessionProcedures => Set<CaseSessionProcedure>();
+
         // __ Academic entities to manage terms, requirements, and related information __ //
         public DbSet<Term> Terms => Set<Term>();
         public DbSet<TermRequirement> TermRequirements => Set<TermRequirement>();

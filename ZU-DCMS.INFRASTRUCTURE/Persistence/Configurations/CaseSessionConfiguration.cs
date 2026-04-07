@@ -13,10 +13,6 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
         {
             builder.HasKey(s => s.Id);
 
-            builder.Property(s => s.ProceduresDone)
-                   .IsRequired()
-                   .HasMaxLength(1000);
-
             builder.Property(s => s.Notes)
                    .HasMaxLength(500);
 

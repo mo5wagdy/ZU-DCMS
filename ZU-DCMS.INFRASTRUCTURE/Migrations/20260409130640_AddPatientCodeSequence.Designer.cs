@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ZU_DCMS.INFRASTRUCTURE.Persistence;
 
@@ -11,9 +12,11 @@ using ZU_DCMS.INFRASTRUCTURE.Persistence;
 namespace ZU_DCMS.INFRASTRUCTURE.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260409130640_AddPatientCodeSequence")]
+    partial class AddPatientCodeSequence
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -894,10 +897,8 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
 
                     b.Property<string>("PatientCode")
                         .IsRequired()
-                        .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasDefaultValueSql("'PAT-' + CAST(YEAR(GETDATE()) AS VARCHAR) + '-' + RIGHT('0000' + CAST(NEXT VALUE FOR PatientCodeSeq AS VARCHAR), 4)");
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()

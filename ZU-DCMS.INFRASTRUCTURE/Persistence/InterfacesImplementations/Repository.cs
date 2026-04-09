@@ -6,7 +6,7 @@ using System.Text;
 using ZU_DCMS.Domain.Common;
 using ZU_DCMS.Domain.Interfaces;
 
-namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Repositories
+namespace ZU_DCMS.INFRASTRUCTURE.Persistence.InterfacesImplementations
 {
     // __ Generic repository implementation for basic CRUD operations __ //
     public class Repository<T> : IRepository<T> where T : BaseEntity

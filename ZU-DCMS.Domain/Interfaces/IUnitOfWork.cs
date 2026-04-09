@@ -13,6 +13,7 @@ namespace ZU_DCMS.Domain.Interfaces
          */
         IRepository<T> Repository<T>() where T : BaseEntity;
 
+
         /*
          * This method is responsible for saving all changes made in the context to the database. It returns the number of state entries written to the database.
          * The method is asynchronous and accepts an optional CancellationToken to allow for cancellation of the operation if needed. 

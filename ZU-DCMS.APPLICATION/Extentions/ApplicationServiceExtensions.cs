@@ -19,8 +19,9 @@ namespace ZU_DCMS.APPLICATION.Extentions
             // __________ AutoMapper __________ //
             services.AddAutoMapper(cfg => { }, typeof(ApplicationServiceExtensions));
 
-            /* Services
+            // __________ Service Registrations __________ //
             services.AddScoped<IAuthService, AuthService>();
+            /* Services
             services.AddScoped<IPatientService, PatientService>();
             services.AddScoped<IBookingService, BookingService>();
             services.AddScoped<ISessionService, SessionService>();

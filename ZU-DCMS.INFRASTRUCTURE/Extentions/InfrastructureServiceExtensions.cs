@@ -5,12 +5,15 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Contracts;
 using ZU_DCMS.Domain.Interfaces;
 using ZU_DCMS.INFRASTRUCTURE.Cache;
 using ZU_DCMS.INFRASTRUCTURE.Identity;
+using ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation;
 using ZU_DCMS.INFRASTRUCTURE.Persistence;
-using ZU_DCMS.INFRASTRUCTURE.Persistence.Repositories;
+using ZU_DCMS.INFRASTRUCTURE.Persistence.ContractImplementation;
+using ZU_DCMS.INFRASTRUCTURE.Persistence.InterfacesImplementations;
 
 namespace ZU_DCMS.INFRASTRUCTURE.Extentions
 {
@@ -52,6 +55,25 @@ namespace ZU_DCMS.INFRASTRUCTURE.Extentions
 
             // __ Add default token providers for password reset, email confirmation, etc. __ //
             .AddDefaultTokenProviders();
+
+            /// _________________ Add raw SQL executor service to the DI container ________________ 
+            /// This service will be used to execute raw SQL queries and commands against the database,
+            /// which is useful for complex queries or performance-critical operations that cannot be easily achieved with Entity Framework Core's LINQ capabilities.///
+            services.AddScoped<IRawSqlExecutor, RawSqlExecutor>();
+
+            /// __ Add user code generator service to the DI container __ //
+            /// This service will be responsible for generating unique user codes, which can be used for various purposes such as user identification, referral codes, etc.
+            /// The implementation of this service will ensure that the generated codes are unique and follow a specific format if needed.///
+            services.AddScoped<IUserCodeGenerator, UserCodeGenerator>();
+
+            // _____________________ JWT Settings _____________________ //
+            services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
+
+            // __ Add JWT service to the DI container __ //
+            services.AddScoped<IJWTService, JwtService>();
+
+            // __ Add identity service to the DI container __ //
+            services.AddScoped<IIdentityService, IdentityService>();
 
             // __ Add repositories and unit of work to the DI container __ //
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));

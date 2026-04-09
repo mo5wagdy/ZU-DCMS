@@ -1,4 +1,5 @@
 using ZU_DCMS.INFRASTRUCTURE.Extentions;
+using ZU_DCMS.APPLICATION.Extentions;
 
 namespace ZU_DCMS.API
 {
@@ -12,6 +13,9 @@ namespace ZU_DCMS.API
 
             // Add infrastructure services
             builder.Services.AddInfrastructureServices(builder.Configuration);
+
+            // Add application services
+            builder.Services.AddApplicationServices();
 
             builder.Services.AddControllers();
 

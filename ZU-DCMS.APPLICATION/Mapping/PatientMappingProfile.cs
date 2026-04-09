@@ -20,9 +20,13 @@ namespace ZU_DCMS.APPLICATION.Mapping
             // => RegisterPatientDto → Patient
             CreateMap<RegisterPatientDto, Patient>()
                      .ForMember(d => d.Id, o => o.Ignore())
-                     .ForMember(d => d.PatientCode, o => o.Ignore()) // => PatientCode will be auto generated in the service layer
+                     .ForMember(d => d.PatientCode, o => o.Ignore())
+                     .ForMember(d => d.ApplicationUserId, o => o.Ignore())
                      .ForMember(d => d.CreatedAt, o => o.Ignore())
+                     .ForMember(d => d.UpdatedAt, o => o.Ignore())
                      .ForMember(d => d.IsDeleted, o => o.Ignore())
+                     .ForMember(d => d.CreatedByUserId, o => o.Ignore())
+                     .ForMember(d => d.UpdatedByUserId, o => o.Ignore())
                      .ForMember(d => d.Bookings, o => o.Ignore())
                      .ForMember(d => d.Payments, o => o.Ignore());
         }

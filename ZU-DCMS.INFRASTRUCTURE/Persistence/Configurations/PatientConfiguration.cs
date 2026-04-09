@@ -15,6 +15,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
 
             builder.Property(p => p.PatientCode)
                    .IsRequired()
+                   .HasDefaultValueSql("'PAT-' + CAST(YEAR(GETDATE()) AS VARCHAR) + '-' + RIGHT('0000' + CAST(NEXT VALUE FOR PatientCodeSeq AS VARCHAR), 4)") // => This sets a default value for PatientCode using a SQL expression that generates a unique code based on the current year and a sequence.
                    .HasMaxLength(20);
 
             builder.HasIndex(p => p.PatientCode)
@@ -27,6 +28,8 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
             builder.Property(p => p.IdentityNumber)
                    .IsRequired()
                    .HasMaxLength(20);
+
+            builder.Ignore(p => p.Age); // => Age is a computed property based on DateOfBirth, so we ignore it in EF Core mapping.
 
             // __ Enum Conversions to string for better readability in the database __ //
             builder.Property(p => p.IdentityType)  

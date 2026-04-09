@@ -13,7 +13,7 @@ namespace ZU_DCMS.Domain.Interfaces
      */
     public interface IRepository<T> where T : BaseEntity
     {
-        Task<T?> GetByIdAsync(int id); // => Asynchronous method to retrieve an entity by its unique identifier
+        Task<T?> GetByIdAsync(int id); // => Asynchronous method to retrieve an entity by its unique identifier - includes parameter allows for eager loading of related entities
         Task<T?> GetFirstOrDefaultAsync(Expression<Func<T, bool>> predicate); // => Asynchronous method to retrieve the first entity that matches a given predicate, or null if no such entity exists
         Task<IEnumerable<T>> GetAllAsync(); // => Asynchronous method to retrieve all entities of type T
         IQueryable<T> GetQueryable(); // => Method to retrieve an IQueryable of type T, allowing for further querying and deferred execution

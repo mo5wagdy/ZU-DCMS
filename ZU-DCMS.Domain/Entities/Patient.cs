@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 using ZU_DCMS.Domain.Common;
 using ZU_DCMS.Domain.Enums;
@@ -18,6 +19,8 @@ namespace ZU_DCMS.Domain.Entities
         public string PhoneNumber { get; set; } = string.Empty;
         public string? Email { get; set; }
         public DateTime DateOfBirth { get; set; }
+
+        [NotMapped] // => This property is not mapped to the database, as it's computed based on DateOfBirth.
         public int Age => DateTime.Today.Year - DateOfBirth.Year - (DateOfBirth.Date > DateTime.Today.AddYears(-(DateTime.Today.Year - DateOfBirth.Year)) ? 1 : 0); // => Computed property to calculate age based on DateOfBirth.
         public Gender Gender { get; set; }
         public ChronicCondition ChronicConditions { get; set; } = ChronicCondition.None;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ZU_DCMS.APPLICATION.Common;
 
 namespace ZU_DCMS.APPLICATION.DTOs.Auth
 {
@@ -9,13 +10,20 @@ namespace ZU_DCMS.APPLICATION.DTOs.Auth
      * This class encapsulates the result of an authentication attempt, 
      * including success status, tokens, user role, and any error messages.
      */
-    public class AuthResult
+    public class AuthResult : Result<AuthData>
     {
-        public bool IsSuccess { get; set; }
-        public string? AccessToken { get; set; }
-        public string? RefreshToken { get; set; }
-        public string? Role { get; set; }
-        public string? RedirectUrl { get; set; }
-        public string? ErrorMessage { get; set; }
+        private AuthResult(AuthData value, bool isSuccess, string error) : base(value, isSuccess, error) { }
+        
+        public static AuthResult Ok(AuthData data) => new(data, true, string.Empty);
+
+        public static  AuthResult Fail(string error) => new(default!, false, error);
+    }
+
+    public class AuthData
+    {
+        public string AccessToken { get; set; } = string.Empty;
+        public string RefreshToken { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
+        public string RedirectUrl { get; set; } = string.Empty;
     }
 }

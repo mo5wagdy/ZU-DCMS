@@ -21,6 +21,7 @@ namespace ZU_DCMS.APPLICATION.Extentions
 
             // __________ Service Registrations __________ //
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<ITokenService, TokenService>();
             /* Services
             services.AddScoped<IPatientService, PatientService>();
             services.AddScoped<IBookingService, BookingService>();

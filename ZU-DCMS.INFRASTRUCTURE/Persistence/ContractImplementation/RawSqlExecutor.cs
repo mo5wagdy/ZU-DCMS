@@ -9,6 +9,7 @@ using ZU_DCMS.INFRASTRUCTURE.Persistence;
 
 namespace ZU_DCMS.INFRASTRUCTURE.Persistence.ContractImplementation
 {
+    // _________________________ Raw SQL Executor _________________________ //
     public class RawSqlExecutor : IRawSqlExecutor
     {
         private readonly AppDbContext _context;
@@ -17,6 +18,11 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.ContractImplementation
         {
             _context = context;
         }
+
+        /// <summary>
+        /// Executes a raw SQL query and returns a single value of the specified type.
+        /// It is the caller's responsibility to ensure that the SQL query returns a single value and that it can be cast to the specified type.
+        /// </summary>
 
         public async Task<T> ExecuteScalarAsync<T>(string sql, params DbParameter[] parameters)
         {

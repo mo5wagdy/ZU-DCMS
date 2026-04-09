@@ -17,29 +17,23 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
     {
         private readonly IIdentityService _identity;
         private readonly IUnitOfWork _uow;
-        private readonly IRawSqlExecutor _sql;
         private readonly IUserCodeGenerator _codeGen;
-        private readonly IJWTService _jwt;
-        //private readonly INotificationService _notification;
+        private readonly ITokenService _token;
         private readonly IMapper _mapper;
 
         public AuthService
         (
             IIdentityService identity,
             IUnitOfWork uow,
-            IRawSqlExecutor sql,
-            IUserCodeGenerator codegen,
-            IJWTService jwt,
-           // INotificationService notification,
+            IUserCodeGenerator codeGen,
+            ITokenService token,
             IMapper mapper
         )
         {
             _identity = identity;
             _uow = uow;
-            _sql = sql;
-            _codeGen = codegen;
-            _jwt = jwt;
-            //_notification = notification;
+            _codeGen = codeGen;
+            _token = token;
             _mapper = mapper;
         }
 
@@ -85,7 +79,15 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
                 await _uow.Repository<Patient>().AddAsync(patient);
 
                 // __ Prepare tokens (AddAsync only — no SaveChanges yet) __ //
-                var (accessToken, refreshToken) = await PrepareTokensAsync(userId);
+                var tokens = await _token.GenerateAsync(userId);
+
+                // __ If token generation failed, return the error __ //
+                if (!tokens.IsSuccess) 
+                {
+                    await _uow.RollbackTransactionAsync();
+                    return Failure(tokens.Error);
+                }
+                    
 
                 // __ Single SaveChanges for everything __ //
                 await _uow.SaveChangesAsync();
@@ -93,8 +95,8 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
 
                 return AuthResult.Ok(new AuthData
                 {
-                    AccessToken = accessToken,
-                    RefreshToken = refreshToken,
+                    AccessToken = tokens.Value.AccessToken,
+                    RefreshToken = tokens.Value.RefreshToken,
                     Role = UserRoles.Patient,
                     RedirectUrl = RedirectUrls.GetByRole(UserRoles.Patient)
                 });
@@ -128,16 +130,38 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             if (!roles.Contains(UserRoles.Patient))
                 return Failure("بيانات الدخول غير صحيحة");
 
-            var (accessToken, refreshToken) = await PrepareTokensAsync(user.Id);
-            await _uow.SaveChangesAsync();
+            // __ Generate tokens __ //
+            await _uow.BeginTransactionAsync(); // => Transaction needed if token generation modifies the database (e.g. refresh tokens)
 
-            return AuthResult.Ok(new AuthData
+            try
             {
-                AccessToken = accessToken,
-                RefreshToken = refreshToken,
-                Role = UserRoles.Patient,
-                RedirectUrl = RedirectUrls.GetByRole(UserRoles.Patient)
-            });
+                // __ Prepare tokens (no SaveChanges yet) __ //
+                var tokens = await _token.GenerateAsync(user.Id);
+
+                // __ If token generation failed, return the error __ //
+                if (!tokens.IsSuccess)
+                {
+                    await _uow.RollbackTransactionAsync();
+                    return Failure(tokens.Error);
+                }
+
+                // __ Single SaveChanges for everything __ //
+                await _uow.SaveChangesAsync();
+                await _uow.CommitTransactionAsync();
+
+                return AuthResult.Ok(new AuthData
+                {
+                    AccessToken = tokens.Value.AccessToken,
+                    RefreshToken = tokens.Value.RefreshToken,
+                    Role = UserRoles.Patient,
+                    RedirectUrl = RedirectUrls.GetByRole(UserRoles.Patient)
+                });
+            }
+            catch
+            {
+                await _uow.RollbackTransactionAsync();
+                return Failure("حدث خطأ أثناء تسجيل الدخول، حاول مرة أخرى");
+            }
         }
 
         // _________________________ Staff Login _________________________ //
@@ -160,114 +184,43 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             if (roles.Contains(UserRoles.Patient))
                 return Failure("بيانات الدخول غير صحيحة");
 
-            var (accessToken, refreshToken) = await PrepareTokensAsync(user.Id);
-            await _uow.SaveChangesAsync();
+            // __ Generate tokens __ //
+            await _uow.BeginTransactionAsync(); // => Transaction needed if token generation modifies the database (e.g. refresh tokens)
 
-            var role = roles.FirstOrDefault() ?? string.Empty;
-
-            return AuthResult.Ok(new AuthData
+            try
             {
-                AccessToken = accessToken,
-                RefreshToken = refreshToken,
-                Role = role,
-                RedirectUrl = RedirectUrls.GetByRole(role)
-            });
-        }
+                // __ Prepare tokens (no SaveChanges yet) __ //
+                var tokens = await _token.GenerateAsync(user.Id);
 
-        // _____________ Refresh Token _____________ //
-        public async Task<AuthResult> RefreshTokenAsync(string refreshToken)
-        {
-            // Find stored token
-            var stored = await _uow.Repository<RefreshToken>().GetFirstOrDefaultAsync(t => t.Token == refreshToken);
+                // __ If token generation failed, return the error __ //
+                if (!tokens.IsSuccess)
+                {
+                    await _uow.RollbackTransactionAsync();
+                    return Failure(tokens.Error);
+                }
 
-            if (stored == null || !stored.IsActive)
-                return Failure("الـ Token غير صالح");
+                // __ Single SaveChanges for everything __ //
+                await _uow.SaveChangesAsync();
+                await _uow.CommitTransactionAsync();
 
-            // Verify user still valid
-            var user = await _identity.FindByIdAsync(stored.UserId);
-            if (user == null || !user.IsActive)
-                return Failure("الحساب غير موجود أو موقوف");
+                var role = roles.FirstOrDefault() ?? string.Empty;
 
-            // Revoke old token — keep audit trail
-            stored.IsRevoked = true;
-            stored.RevokedAt = DateTime.UtcNow;
-            _uow.Repository<RefreshToken>().Update(stored);
-
-            // Generate new tokens
-            var (newAccessToken, newRefreshToken) = await PrepareTokensAsync(stored.UserId);
-
-            // Link old → new for audit
-            stored.ReplacedByToken = newRefreshToken;
-
-            await _uow.SaveChangesAsync();
-
-            return AuthResult.Ok(new AuthData
+                return AuthResult.Ok(new AuthData
+                {
+                    AccessToken = tokens.Value.AccessToken,
+                    RefreshToken = tokens.Value.RefreshToken,
+                    Role = role,
+                    RedirectUrl = RedirectUrls.GetByRole(role)
+                });
+            }
+            catch
             {
-                AccessToken = newAccessToken,
-                RefreshToken = newRefreshToken
-            });
-        }
-
-        // _____________ Revoke Token _____________ //
-        public async Task RevokeTokenAsync(string refreshToken)
-        {
-            var stored = await _uow.Repository<RefreshToken>()
-                .GetFirstOrDefaultAsync(t => t.Token == refreshToken);
-
-            if (stored == null || !stored.IsActive) return;
-
-            stored.IsRevoked = true;
-            stored.RevokedAt = DateTime.UtcNow;
-            _uow.Repository<RefreshToken>().Update(stored);
-            await _uow.SaveChangesAsync();
+                await _uow.RollbackTransactionAsync();
+                return Failure("حدث خطأ أثناء تسجيل الدخول، حاول مرة أخرى");
+            }
         }
 
         // _____________ Private Helpers _____________ //
-
-        /// <summary>
-        /// Builds JWT claims from user data and roles.
-        /// </summary>
-        private async Task<IEnumerable<Claim>> BuildClaimsAsync(string userId)
-        {
-            var user = await _identity.FindByIdAsync(userId);
-            var roles = await _identity.GetRolesAsync(userId);
-
-            var claims = new List<Claim>
-            {
-            new(ClaimTypes.NameIdentifier, userId),
-            new(ClaimTypes.Name,  user?.Username  ?? string.Empty),
-            new(ClaimTypes.Email, user?.Email     ?? string.Empty),
-            new("fullName",       user?.FullName  ?? string.Empty),
-            };
-
-            foreach (var role in roles)
-                claims.Add(new Claim(ClaimTypes.Role, role));
-
-            return claims;
-        }
-
-        /// <summary>
-        /// Generates Access + Refresh tokens.
-        /// Only adds RefreshToken to Repository — caller must SaveChanges.
-        /// </summary>
-        private async Task<(string AccessToken, string RefreshToken)>PrepareTokensAsync(string userId)
-        {
-            var claims = await BuildClaimsAsync(userId);
-            var accessToken = _jwt.GenerateAccessToken(claims);
-            var refreshToken = _jwt.GenerateRefreshToken();
-
-            // __ Add to repo — SaveChanges is caller's responsibility __ //
-            await _uow.Repository<RefreshToken>().AddAsync(new RefreshToken
-            {
-                Token = refreshToken,
-                UserId = userId,
-                ExpiresAt = DateTime.UtcNow.AddDays(7),
-                CreatedAt = DateTime.UtcNow
-            });
-
-            return (accessToken, refreshToken);
-        }
-
         /// <summary>
         /// Creates a failed AuthResult.
         /// </summary>

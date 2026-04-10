@@ -13,9 +13,11 @@ namespace ZU_DCMS.Domain.Interfaces
      */
     public interface IRepository<T> where T : BaseEntity
     {
-        Task<T?> GetByIdAsync(int id); // => Asynchronous method to retrieve an entity by its unique identifier - includes parameter allows for eager loading of related entities
-        Task<T?> GetFirstOrDefaultAsync(Expression<Func<T, bool>> predicate); // => Asynchronous method to retrieve the first entity that matches a given predicate, or null if no such entity exists
+        Task<T?> GetByIdAsync(int id, params string[] includes); // => Asynchronous method to retrieve an entity by its unique identifier, with optional related entities to include in the query
+        Task<T?> GetFirstOrDefaultAsync(Expression<Func<T, bool>> predicate, bool disabledTracking = true, params Expression<Func<T, object>>[] includes ); // => Asynchronous method to retrieve the first entity that matches a given predicate, or null if no such entity exists
         Task<IEnumerable<T>> GetAllAsync(); // => Asynchronous method to retrieve all entities of type T
+        Task<IReadOnlyList<T>> GetListAsync(Expression<Func<T, bool>>? predicate = null, bool disabledTracking = true, params Expression<Func<T, object>>[] includes); // => Asynchronous method to retrieve a list of entities that match a given predicate, with optional related entities to include in the query; if no predicate is provided, all entities are retrieved
+        Task<(IReadOnlyList<T> Items, int TotalCount)> GetPagedListAsync(int skip, int take, Expression<Func<T, bool>>? predicate = null, bool disabledTracking = true, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, params Expression<Func<T, object>>[] includes); // => Asynchronous method to retrieve a paged list of entities that match a given predicate, with optional related entities to include in the query; if no predicate is provided, all entities are retrieved
         IQueryable<T> GetQueryable(); // => Method to retrieve an IQueryable of type T, allowing for further querying and deferred execution
         Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate); // => Asynchronous method to check if any entities match a given predicate, returning true if at least one entity matches
         Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null); // => Asynchronous method to count the number of entities that match a given predicate, or count all entities if no predicate is provided

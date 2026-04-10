@@ -1,10 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.Domain.Enums;
 
 namespace ZU_DCMS.APPLICATION.DTOs.Patient
 {
+    // __ Result wrapper for patient operations, encapsulating success status, error messages, and patient data __ //
+    public class PatientResult : Result<PatientDto>
+    {
+        private PatientResult(PatientDto value, bool isSuccess, string error) : base(value, isSuccess, error) { }
+        public static PatientResult Success(PatientDto data) => new(data, true, string.Empty);
+        public static PatientResult Fail(string error) => new(default!, false, error);
+    }
+
     // __ DTO for transferring patient data __ //
     public class PatientDto
     {

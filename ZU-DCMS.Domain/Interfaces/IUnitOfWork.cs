@@ -16,9 +16,10 @@ namespace ZU_DCMS.Domain.Interfaces
 
         /*
          * This method is responsible for saving all changes made in the context to the database. It returns the number of state entries written to the database.
-         * The method is asynchronous and accepts an optional CancellationToken to allow for cancellation of the operation if needed. 
+         * The method is asynchronous and accepts an optional CancellationToken to allow for cancellation of the operation if needed.
+         * Auto-filling of audit fields (CreatedAt, CreatedByUserId, UpdatedAt, UpdatedByUserId) is handled in the implementation before saving changes to the database.
          */
-        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+        Task<int> SaveChangesAsync(string? userId = null, CancellationToken cancellationToken = default);
 
         // __ These methods are related to transaction management. They allow you to begin a transaction, commit it, or roll it back in case of an error. __ //
         Task BeginTransactionAsync();

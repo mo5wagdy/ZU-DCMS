@@ -37,7 +37,33 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.InterfacesImplementations
         }
 
         // ________ Save changes to the database ________ //
-        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) => await _context.SaveChangesAsync(cancellationToken);
+        
+        /* 
+         * This method iterates through all the tracked entities in the context that inherit from BaseEntity and automatically
+         * fills in the audit fields (CreatedAt, CreatedByUserId, UpdatedAt, UpdatedByUserId)
+         * based on the entity state (Added or Modified) before saving changes to the database. 
+         */
+        public async Task<int> SaveChangesAsync(string? userId = null, CancellationToken cancellationToken = default)
+        {
+            // __ Auto-fill Audit fields before saving __ //
+            foreach (var entry in _context.ChangeTracker.Entries<BaseEntity>()) // => Iterate through all tracked entities of type BaseEntity
+            {
+                switch (entry.State)
+                {
+                    case EntityState.Added:
+                        entry.Entity.CreatedAt = DateTime.UtcNow;
+                        entry.Entity.CreatedByUserId = userId;
+                        break;
+
+                    case EntityState.Modified:
+                        entry.Entity.UpdatedAt = DateTime.UtcNow;
+                        entry.Entity.UpdatedByUserId = userId;
+                        break;
+                }
+            }
+
+           return await _context.SaveChangesAsync(cancellationToken);
+        }
 
         // ________ Transaction management methods ________ //
         public async Task BeginTransactionAsync() => _transaction = await _context.Database.BeginTransactionAsync();

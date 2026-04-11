@@ -86,20 +86,19 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
                 // __ Prepare tokens (AddAsync only — no SaveChanges yet) __ //
                 var tokens = await _token.GenerateAsync(userId);
 
-                await _uow.Repository<RefreshToken>().AddAsync(new RefreshToken
-                {
-                    Token = tokens.Value.RefreshToken,
-                    UserId = userId,
-                    ExpiresAt = DateTime.UtcNow.AddDays(_settings.RefreshTokenExpiryDays)
-                });
-
                 // __ If token generation failed, return the error __ //
                 if (!tokens.IsSuccess) 
                 {
                     await _uow.RollbackTransactionAsync();
                     return Result.Failure<AuthDto>(tokens.Error);
                 }
-                    
+                
+                await _uow.Repository<RefreshToken>().AddAsync(new RefreshToken
+                {
+                    Token = tokens.Value.RefreshToken,
+                    UserId = userId,
+                    ExpiresAt = DateTime.UtcNow.AddDays(_settings.RefreshTokenExpiryDays)
+                });
 
                 // __ Single SaveChanges for everything __ //
                 await _uow.SaveChangesAsync();
@@ -121,7 +120,7 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
         }
 
         // _________________________ Patient Login _________________________ //
-        public async Task<Result<AuthDto>> LoginAsync(LoginDto dto)
+        public async Task<Result<AuthDto>> LoginAsync(LoginPatientDto dto)
         {
             // __ Find by username __ //
             var user = await _identity.FindByUsernameAsync(dto.Username);

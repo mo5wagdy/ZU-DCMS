@@ -83,7 +83,7 @@ public class SessionService : ISessionService
                     s.IsActive &&
                     !s.IsDeleted);
 
-            if (sessions is null)
+            if (!sessions.Any())
             {
                 await GenerateSessionsAsync(currentDate);
 
@@ -109,6 +109,8 @@ public class SessionService : ISessionService
                     AvailableFollowUpSlots = session.MaxFollowUpPatients - session.CurrentFollowUpCount,
                     IsAvailable = true
                 });
+
+                if (slots.Count >= 4) break;
             }
 
             currentDate = currentDate.AddDays(1);
@@ -128,7 +130,7 @@ public class SessionService : ISessionService
                 s.IsActive &&
                 !s.IsDeleted);
 
-        if (sessions.Count == 0)
+        if (!sessions.Any())
         {
             var generateResult = await GenerateSessionsAsync(today);
             if (generateResult.IsFailure)
@@ -148,7 +150,7 @@ public class SessionService : ISessionService
     {
         var session = await _uow.Repository<Session>().GetByIdAsync(sessionId);
 
-        if (session == null)
+        if (session is null)
             return Result.Failure<bool>("السكشن غير موجود");
 
         if (!session.IsActive)
@@ -164,7 +166,7 @@ public class SessionService : ISessionService
     {
         var session = await _uow.Repository<Session>().GetByIdAsync(sessionId);
 
-        if (session == null)
+        if (session is null)
             return Result.Failure<SessionDto>("السكشن غير موجود");
 
         return Result.Success(_mapper.Map<SessionDto>(session));

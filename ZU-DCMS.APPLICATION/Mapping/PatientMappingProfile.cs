@@ -1,7 +1,4 @@
 ﻿using AutoMapper;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using ZU_DCMS.APPLICATION.DTOs.Auth;
 using ZU_DCMS.APPLICATION.DTOs.Patient;
 using ZU_DCMS.Domain.Entities;
@@ -16,6 +13,9 @@ namespace ZU_DCMS.APPLICATION.Mapping
             // => Patient → PatientDto
             CreateMap<Patient, PatientDto>()
                      .ForMember(d => d.Age, o => o.MapFrom(s => s.Age)); // => Calculate age from DateOfBirth in the Patient entity
+
+            // => Patient → UpdatePatientDto
+            CreateMap<Patient, UpdatePatientDto>();
 
             // => RegisterPatientDto → Patient
             CreateMap<RegisterPatientDto, Patient>()

@@ -1,8 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using ZU_DCMS.Domain.Entities;
 
 namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
@@ -15,6 +12,13 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
 
             // __ Index on Date for faster queries __ //
             builder.HasIndex(s => s.Date);
+
+            builder.Property(s => s.Date)
+                   .IsRequired()
+                   .HasColumnType("date");
+
+            // __ Unique index on StartTime to prevent overlapping sessions __ //
+            builder.HasIndex(s => s.StartTime).IsUnique();
 
             // __ Global Query Filter to exclude soft-deleted __ //
             builder.HasQueryFilter(s => !s.IsDeleted);

@@ -6,7 +6,7 @@ using ZU_DCMS.APPLICATION.DTOs.Auth;
 
 namespace ZU_DCMS.APPLICATION.Validators.Auth
 {
-    public class LoginValidator : AbstractValidator<LoginDto>
+    public class LoginValidator : AbstractValidator<LoginPatientDto>
     {
         public LoginValidator()
         {

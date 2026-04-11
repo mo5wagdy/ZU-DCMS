@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.Domain.Enums;
 
 namespace ZU_DCMS.APPLICATION.DTOs.Patient
-{
+{  
     // __ DTO for updating patient data __ //
     public class UpdatePatientDto
     {

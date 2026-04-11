@@ -15,13 +15,11 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
     /// __ The TokenService class implements the ITokenService interface to handle JWT access token generation, refresh token management, and revocation. __ //
     public class TokenService : ITokenService
     {
-        private readonly JwtSettings _settings;
         private readonly IJWTService _jwt;
         private readonly IUnitOfWork _uow;
         private readonly IIdentityService _identity;
-        public TokenService(IOptions<JwtSettings> settings, IJWTService jwt, IUnitOfWork uow, IIdentityService identity)
+        public TokenService(IJWTService jwt, IUnitOfWork uow, IIdentityService identity)
         {
-            _settings = settings.Value;
             _jwt = jwt;
             _uow = uow;
             _identity = identity;
@@ -52,14 +50,6 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             // __ Generate the JWT access token and a new refresh token, then store the refresh token in the database with an expiration date __ //
             var accessToken = _jwt.GenerateAccessToken(claims);
             var refreshToken = _jwt.GenerateRefreshToken();
-
-            await _uow.Repository<RefreshToken>()
-                      .AddAsync(new RefreshToken
-                      {
-                          Token = refreshToken,
-                          UserId = userId,
-                          ExpiresAt = DateTime.UtcNow.AddDays(_settings.RefreshTokenExpiryDays)
-                      });
 
             // __ Return the generated access token and refresh token __ //
             return TokenResult.Success(new TokenData
@@ -97,7 +87,11 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
                 var newTokens = await GenerateAsync(stored.UserId);
 
                 if (!newTokens.IsSuccess)
+                {
+                    await _uow.RollbackTransactionAsync();
                     return newTokens;
+                }
+
 
                 // __ Update the stored refresh token with the new token value to track token replacement __ //
                 stored.ReplacedByToken = newTokens.Value.RefreshToken;

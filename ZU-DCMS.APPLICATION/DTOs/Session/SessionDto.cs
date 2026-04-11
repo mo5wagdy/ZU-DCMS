@@ -1,9 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ZU_DCMS.APPLICATION.DTOs.Session
+﻿namespace ZU_DCMS.APPLICATION.DTOs.Session
 {
+    //// __ Result wrapper for session operations, encapsulating success status, error messages, and session data __ //
+    //public class SessionResult : Result<SessionDto>
+    //{
+    //    public SessionResult(SessionDto value, bool isSuccess, string error) : base(value, isSuccess, error) {}
+    //    public static SessionResult Success(SessionDto data) => new(data, true, string.Empty);
+    //    public static SessionResult Fail(string error) => new(default!, false, error);
+    //}
+
     // __ DTO for transferring session data __ //
     public class SessionDto
     {

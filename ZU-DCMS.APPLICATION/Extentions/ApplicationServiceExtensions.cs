@@ -6,6 +6,7 @@ using ZU_DCMS.APPLICATION.Services.Interfaces;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using AutoMapper;
+using ZU_DCMS.Application.Services.Implementations;
 
 namespace ZU_DCMS.APPLICATION.Extentions
 {
@@ -22,10 +23,10 @@ namespace ZU_DCMS.APPLICATION.Extentions
             // __________ Service Registrations __________ //
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ITokenService, TokenService>();
-            /* Services
             services.AddScoped<IPatientService, PatientService>();
-            services.AddScoped<IBookingService, BookingService>();
             services.AddScoped<ISessionService, SessionService>();
+            /* Services
+            services.AddScoped<IBookingService, BookingService>();
             services.AddScoped<IDiagnosisService, DiagnosisService>();
             services.AddScoped<ICaseService, CaseService>();
             services.AddScoped<IStudentService, StudentService>();

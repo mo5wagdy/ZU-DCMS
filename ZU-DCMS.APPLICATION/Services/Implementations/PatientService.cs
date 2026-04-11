@@ -28,41 +28,42 @@ public class PatientService : IPatientService
     // __ Since the patient is linked to the user, we can get the patient by user id or by patient id. __ // 
     
     // ________________ Get By Id ________________ //
-    public async Task<PatientResult> GetByIdAsync(int id)
+    public async Task<Result<PatientDto>> GetByIdAsync(int id)
     {
         var patient = await _uow.Repository<Patient>().GetByIdAsync(id);
 
         if (patient is null) 
-            return PatientResult.Fail("المريض غير موجود");
+            return Result.Failure<PatientDto>("المريض غير موجود");
         
-        return PatientResult.Success(_mapper.Map<PatientDto>(patient));
+        return Result.Success<PatientDto>(_mapper.Map<PatientDto>(patient));
     }
 
     // ________________ Get By UserId ________________ //
 
-    public async Task<PatientResult> GetByUserIdAsync(string userId)
+    public async Task<Result<PatientDto>> GetByUserIdAsync(string userId)
     {
         var patient = await _uow.Repository<Patient>().GetFirstOrDefaultAsync(p => p.ApplicationUserId == userId);
 
         if (patient is null) 
-            return PatientResult.Fail("المريض غير موجود"); 
+            return Result.Failure<PatientDto>("المريض غير موجود"); 
         
-        return PatientResult.Success(_mapper.Map<PatientDto>(patient));
+        return Result.Success<PatientDto>(_mapper.Map<PatientDto>(patient));
     }
 
     // ________________ Update Profile ________________ //
-
-    public async Task<PatientResult> UpdateProfileAsync(int id, UpdatePatientDto dto)
+    public async Task<Result<UpdatePatientDto>> UpdateProfileAsync(int id, UpdatePatientDto dto)
     {
+
+        var patient = await _uow.Repository<Patient>().GetByIdAsync(id);  
         
-        var patient = await _uow.Repository<Patient>().GetByIdAsync(id) ?? throw new KeyNotFoundException("المريض غير موجود");
+        if(patient is null)
+           return Result.Failure<UpdatePatientDto>("المريض غير موجود");
         
         // __ We use transaction here because we might need to update the username in the identity service, and if that fails, we don't want to update the patient data. __ //
         await _uow.BeginTransactionAsync();
 
         try
         {
-
             // ________________ Username Change ________________ //
 
             if (!string.IsNullOrWhiteSpace(dto.Username))
@@ -78,7 +79,7 @@ public class PatientService : IPatientService
                     if (await _identity.UsernameExistsAsync(newUsername))
                     {
                         await _uow.RollbackTransactionAsync();
-                        return PatientResult.Fail("اسم المستخدم موجود بالفعل");
+                        return Result.Failure<UpdatePatientDto>("اسم المستخدم موجود بالفعل");
                     }
 
                     var updated = await _identity.UpdateUsernameAsync(patient.ApplicationUserId,newUsername);
@@ -86,7 +87,7 @@ public class PatientService : IPatientService
                     if (!updated)
                     {
                         await _uow.RollbackTransactionAsync();
-                        return PatientResult.Fail("فشل تحديث اسم المستخدم");
+                        return Result.Failure<UpdatePatientDto>("فشل تحديث اسم المستخدم");
                     }
                 }
             }
@@ -116,22 +117,20 @@ public class PatientService : IPatientService
             await _uow.SaveChangesAsync();
             await _uow.CommitTransactionAsync();
 
-            return PatientResult.Success(_mapper.Map<PatientDto>(patient));
+            return Result.Success<UpdatePatientDto>(_mapper.Map<UpdatePatientDto>(patient));
         }
         catch
         {
             // __ Rollback Transaction on Error __ //
             await _uow.RollbackTransactionAsync();
-            throw;
+            return Result.Failure<UpdatePatientDto>("حدث خطأ ، حاول مرة أخرى");
         }
     }
 
     // ________________ Get All (Admin) ________________ //
-
     public async Task<PagedResult<PatientDto>> GetAllAsync(PagedRequest request)
     {
         // ________________ Search ________________ //
-        // E
         Expression<Func<Patient, bool>> filter = p => 
             string.IsNullOrWhiteSpace(request.SearchTerm) ||
             p.FullName.Contains(request.SearchTerm) ||

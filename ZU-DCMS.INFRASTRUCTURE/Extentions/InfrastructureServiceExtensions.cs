@@ -2,9 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Contracts;
 using ZU_DCMS.Domain.Interfaces;
@@ -74,6 +71,9 @@ namespace ZU_DCMS.INFRASTRUCTURE.Extentions
 
             // __ Add identity service to the DI container __ //
             services.AddScoped<IIdentityService, IdentityService>();
+
+            // __ Add application logger to the DI container __ //
+            services.AddScoped(typeof(IAppLogger<>), typeof(AppLogger<>));
 
             // __ Add repositories and unit of work to the DI container __ //
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));

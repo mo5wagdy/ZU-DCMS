@@ -16,6 +16,15 @@ namespace ZU_DCMS.APPLICATION.Mapping
                      .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => src.EndTime.ToString(@"hh\:mm")))
                      // __ A session is considered full if both new and follow-up counts have reached their respective maximums __ //
                      .ForMember(dest => dest.IsFull, opt => opt.MapFrom(src => src.IsNewFull && src.IsFollowUpFull)); ;
+
+
+            // => Session → AvailableSlotDto
+            CreateMap<Session, AvailableSlotDto>()
+                     .ForMember(d => d.StartTime, o => o.MapFrom(s => s.StartTime.ToString(@"hh\:mm")))
+                     .ForMember(d => d.EndTime, o => o.MapFrom(s => s.EndTime.ToString(@"hh\:mm")))
+                     .ForMember(d => d.AvailableNewSlots, o => o.MapFrom(s => s.MaxNewPatients - s.CurrentNewCount))
+                     .ForMember(d => d.AvailableFollowUpSlots, o => o.MapFrom(s => s.MaxFollowUpPatients - s.CurrentFollowUpCount))
+                     .ForMember(d => d.IsAvailable, o => o.MapFrom(s => !s.IsFull));
         }
     }
 }

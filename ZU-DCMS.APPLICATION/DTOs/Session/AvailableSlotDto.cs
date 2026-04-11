@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ZU_DCMS.APPLICATION.DTOs.Booking
+﻿
+namespace ZU_DCMS.APPLICATION.DTOs.Session
 {
     // __ DTO for transferring available slot data __ //
     public class AvailableSlotDto

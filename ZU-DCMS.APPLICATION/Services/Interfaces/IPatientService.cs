@@ -12,6 +12,6 @@ namespace ZU_DCMS.APPLICATION.Services.Interfaces
         Task<Result<PatientDto>> GetByIdAsync(int id); // => Method to retrieve patient information by patient ID, returning a data transfer object if found
         Task<Result<PatientDto>> GetByUserIdAsync(string userId); // => Method to retrieve patient information by associated user ID, returning a data transfer object if found
         Task<Result<UpdatePatientDto>> UpdateProfileAsync(int id, UpdatePatientDto dto); // => Method to update a patient's profile using the provided patient ID and update data transfer object
-        Task<PagedResult<PatientDto>> GetAllAsync(PagedRequest request); // Method to retrieve a paginated list of patients based on the provided pagination request, returning a paged result containing patient data transfer objects
+        Task<Result<PagedResult<PatientDto>>> GetAllAsync(PagedRequest request); // Method to retrieve a paginated list of patients based on the provided pagination request, returning a paged result containing patient data transfer objects
     }
 }

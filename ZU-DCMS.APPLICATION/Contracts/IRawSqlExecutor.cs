@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿
 using System.Data.Common;
-using System.Text;
 
 namespace ZU_DCMS.APPLICATION.Contracts
 {

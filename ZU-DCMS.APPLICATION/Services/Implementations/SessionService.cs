@@ -251,6 +251,135 @@ public class SessionService : ISessionService
         return Result.Success(_mapper.Map<SessionDto>(session));
     }
 
+    /*
+     * This method is used internally to fetch the session entity by Id without mapping it to a DTO,
+     * mainly for use in booking operations where we need to update the session counts
+     */
+    public async Task<Result<Session>> GetEntityByIdAsync(int sessionId)
+    {
+        // __ Fetch the session entity by Id __ //
+        var session = await _uow.Repository<Session>().GetByIdAsync(sessionId);
+
+        return session is null ? Result.Failure<Session>("السكشن غير موجود") : Result.Success(session);
+    }
+
+    // __________ Reserve Slot __________ //
+    // __ This method is called when a booking is made to reserve a slot in the session by incrementing the appropriate count __ //
+    public async Task<Result> ReserveSlotAsync(int sessionId, BookingType type)
+    {
+        _logger.LogInfo("Reserving slot for SessionId: {SessionId}, BookingType: {BookingType}", sessionId, type);
+        
+        // __ Fetch the session by Id __ //
+        var session = await _uow.Repository<Session>().GetByIdAsync(sessionId);
+
+        // __ If session is not found, return failure __ //
+        if (session is null)
+        {
+            _logger.LogWarning("Session not found for SessionId: {SessionId}", sessionId);
+
+            return Result.Failure("السكشن غير موجود");
+        }
+
+        // __ If session is not active, return failure __ //
+        if (!session.IsActive)
+        {
+            _logger.LogWarning("Session is not active for SessionId: {SessionId}", sessionId);
+            
+            return Result.Failure("السكشن غير نشط");
+        }
+
+
+        // __ Check availability and increment the appropriate count based on booking type __ //
+        if (type == BookingType.New)
+        {
+            if (session.IsNewFull)
+            {
+                _logger.LogWarning("Session is full for new patients for SessionId: {SessionId}", sessionId);
+
+                return Result.Failure("السكشن ممتلئ");
+            }
+
+            _logger.LogInfo("Incrementing new patient count for SessionId: {SessionId}", sessionId);
+            
+            session.CurrentNewCount++;
+        }
+        else
+        {
+            if (session.IsFollowUpFull)
+            {
+                _logger.LogWarning("Session is full for follow-up patients for SessionId: {SessionId}", sessionId);
+
+                return Result.Failure("السكشن ممتلئ");
+            }
+
+            _logger.LogInfo("Incrementing follow-up patient count for SessionId: {SessionId}", sessionId);
+            
+            session.CurrentFollowUpCount++;
+        }
+
+        // __ Update the session in the database __ //
+
+        _uow.Repository<Session>().Update(session);
+
+        _logger.LogInfo("Updating session counts for SessionId: {SessionId}", sessionId);
+
+        return Result.Success();
+    }
+
+    // __________ Release Slot __________ //
+    // __ This method is called when a booking is cancelled to release a slot in the session by decrementing the appropriate count __ //
+    public async Task<Result> ReleaseSlotAsync(int sessionId, BookingType type)
+    {
+        _logger.LogInfo("Releasing slot for SessionId: {SessionId}, BookingType: {BookingType}", sessionId, type);
+
+        // __ Fetch the session by Id __ //
+        var session = await _uow.Repository<Session>().GetByIdAsync(sessionId);
+
+        // __ If session is not found, return failure __ //
+        if (session is null)
+        {
+            _logger.LogWarning("Session not found for SessionId: {SessionId}", sessionId);
+
+            return Result.Failure("السكشن غير موجود");
+        }
+
+        // __ Since we are releasing a slot, we will decrement the appropriate count based on booking type, ensuring it does not go below zero __ //
+       
+        _logger.LogInfo("Decrementing patient count for SessionId: {SessionId}, BookingType: {BookingType}", sessionId, type);
+
+        if (type == BookingType.New)
+            session.CurrentNewCount = Math.Max(0, session.CurrentNewCount - 1);
+        else
+            session.CurrentFollowUpCount = Math.Max(0, session.CurrentFollowUpCount - 1);
+
+        _logger.LogInfo("Decrementing patient count for SessionId: {SessionId}", sessionId);
+
+        // __ Update the session in the database __ //
+        _uow.Repository<Session>().Update(session);
+
+        return Result.Success();
+    }
+
+    // __________ Find Session by Date and Time Slot __________ //
+    public async Task<Result<Session>> FindSessionAsync(DateTime date, string timeSlot)
+    {
+        // __ Validate time slot format __ //
+        if (!TimeSpan.TryParse(timeSlot, out var time))
+            return Result.Failure<Session>("صيغة الوقت غير صحيحة");
+
+        // __ Fetch the session that matches the date and time slot __ //
+        var session = await _uow.Repository<Session>().GetFirstOrDefaultAsync
+            (s => s.Date.Date == date.Date &&
+                  s.StartTime == time &&
+                  s.IsActive &&
+                 !s.IsDeleted
+            );
+
+        // __ If session is not found, return failure __ //
+        return session == null ? Result.Failure<Session>("السكشن غير موجود") : Result.Success(session);
+    }
+
+
     // __________ Private Helpers __________ //
     private async Task<SessionConfig?> GetSessionConfigAsync()
     {

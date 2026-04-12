@@ -23,7 +23,7 @@ namespace ZU_DCMS.Domain.Interfaces
 
         // __ These methods are related to transaction management. They allow you to begin a transaction, commit it, or roll it back in case of an error. __ //
         Task BeginTransactionAsync();
-        Task CommitTransactionAsync();
+        Task CommitTransactionAsync(string? userId = null);
         Task RollbackTransactionAsync();
     }
 }

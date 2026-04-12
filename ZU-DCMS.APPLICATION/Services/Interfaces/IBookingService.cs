@@ -17,14 +17,9 @@ namespace ZU_DCMS.APPLICATION.Services.Interfaces
         Task<Result<BookingDto>> CreateBookingAsync(int patientId, CreateBookingDto dto);
 
         /* 
-         * Method to retrieve a list of available booking slots for a specific booking type, returning a list of available slot data transfer objects
-        */
-        Task<Result<List<AvailableSlotDto>>> GetAvailableSlotsAsync(string bookingType);
-
-        /* 
          * Method to retrieve booking information by booking ID, returning a data transfer object if found
         */
-        Task<Result<BookingDto?>> GetByIdAsync(int id);
+        Task<Result<BookingDto>> GetByIdAsync(int id);
 
         /* 
          * Method to retrieve a paginated list of bookings for a specific patient using the patient ID and pagination request,

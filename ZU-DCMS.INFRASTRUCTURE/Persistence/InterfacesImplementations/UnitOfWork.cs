@@ -68,12 +68,12 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.InterfacesImplementations
         // ________ Transaction management methods ________ //
         public async Task BeginTransactionAsync() => _transaction = await _context.Database.BeginTransactionAsync();
 
-        public async Task CommitTransactionAsync()
+        public async Task CommitTransactionAsync(string? userId = null)
         {
             try
             {
-                await _context.SaveChangesAsync();
-                await _transaction!.CommitAsync();
+                await SaveChangesAsync(userId);
+                await _transaction!.CommitAsync();  
             }
             finally
             {

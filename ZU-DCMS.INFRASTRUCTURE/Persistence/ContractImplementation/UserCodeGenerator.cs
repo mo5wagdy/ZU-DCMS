@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿
 using ZU_DCMS.APPLICATION.Contracts;
 
 namespace ZU_DCMS.INFRASTRUCTURE.Persistence.ContractImplementation

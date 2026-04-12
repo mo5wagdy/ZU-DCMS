@@ -25,7 +25,7 @@ namespace ZU_DCMS.Domain.Entities
         // _____________ Navigation _____________ //
         public Patient Patient { get; set; } = null!;
         public Session Session { get; set; } = null!;
-        public Payment? Payment { get; set; }
+        public Payment Payment { get; set; } = null!;
         public DiagnosisRecord? DiagnosisRecord { get; set; }
     }
 }

@@ -118,7 +118,7 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             var patient = await _patientService.GetByIdAsync(patientId);
 
             // __ If patient not found, return failure __ //
-            if (patient is null)
+            if (patient.IsFailure)
             {
                 _logger.LogWarning("Patient not found for PatientId: {PatientId}", patientId);
 
@@ -191,8 +191,6 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             {
                 _logger.LogInfo("Reserving slot for SessionId: {SessionId} and BookingType: {BookingType}", session.Id, dto.BookingType);
 
-                //var affectedRaws = await _sql.TryRes
-
                 // __ Create booking entity __ //
                 var booking = new Booking
                 {
@@ -262,7 +260,7 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
                 _logger.LogInfo("Booking created {BookingId}", booking.Id);
 
                 // __ Handle post-booking side effects (cache invalidation, notifications, SignalR) __ //
-                await HandlePostBookingAsync(booking);
+                await HandleBookingSideEffectsAsync(booking, () => _notification.SendBookingConfirmedAsync(booking.Id), SignalREvents.BookingCreated);
 
                 // __ Load full booking details to return in response __ //
                 var full = await LoadFullBookingAsync(booking.Id);
@@ -333,7 +331,7 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
                 _logger.LogInfo("Booking cancelled {BookingId}", bookingId);
 
                 // __ Handle post-cancellation side effects (cache invalidation, notifications, SignalR) __ //
-                await HandleCancelBookingAsync(booking);
+                await HandleBookingSideEffectsAsync(booking, () => _notification.SendBookingConfirmedAsync(booking.Id), SignalREvents.BookingCreated);
 
                 return Result.Success();
             }
@@ -425,7 +423,7 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
                 _logger.LogInfo("Booking postponed {BookingId}", bookingId);
 
                 // __ Handle post-postponement side effects (cache invalidation, notifications, SignalR) __ //
-                await HandlePostponedBookingAsync(booking, reason);
+                await HandleBookingSideEffectsAsync(booking, () => _notification.SendBookingPostponedAsync(booking.Id, reason), SignalREvents.BookingPostponed);
 
                 return Result.Success();
             }
@@ -454,61 +452,17 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
                   b => b.Payment
             );
 
-        // __ Helper method to handle post-booking side effects (cache invalidation, notifications, SignalR) __ //
-        private async Task HandlePostBookingAsync(Booking booking)
+        // __ Helper method to handle side effects after booking operations __ //
+        private async Task HandleBookingSideEffectsAsync(Booking booking, Func<Task> notificationAction, string signalREvent)
         {
-            // 1. Invalidate cache
+            // 1. Cache
             await _cache.RemoveAsync(CacheKeys.SessionStatus(booking.SessionId));
 
-            // 2. Notifications
-            await TrySafe(async () =>
-                await _notification.SendBookingConfirmedAsync(booking.Id),
-                $"SendBookingConfirmedAsync - BookingId: {booking.Id}");
+            // 2. Notification
+            await TrySafe(notificationAction, $"Notification - BookingId: {booking.Id}");
 
             // 3. SignalR
-            await TrySafe(async () =>
-                await _signalR.SendDashboardUpdateAsync(
-                    SignalREvents.BookingCreated,
-                    new { bookingId = booking.Id, sessionId = booking.SessionId }),
-                $"SignalR BookingCreated - BookingId: {booking.Id}");
-        }
-
-        // __ Helper method to handle post-cancellation side effects (cache invalidation, notifications, SignalR) __ //
-        private async Task HandleCancelBookingAsync(Booking booking)
-        {
-            // 1. Invalidate cache
-            await _cache.RemoveAsync(CacheKeys.SessionStatus(booking.SessionId));
-
-            // 2. Notifications
-            await TrySafe(async () =>
-                await _notification.SendBookingCancelledAsync(booking.Id),
-                $"SendBookingCancelledAsync - BookingId: {booking.Id}");
-
-            // 3. SignalR
-            await TrySafe(async () =>
-                await _signalR.SendDashboardUpdateAsync(
-                    SignalREvents.BookingCancelled,
-                    new { bookingId = booking.Id, sessionId = booking.SessionId }),
-                $"SignalR BookingCancelled - BookingId: {booking.Id}");
-        }
-
-        // __ Helper method to handle post-postponement side effects (cache invalidation, notifications, SignalR) __ //
-        private async Task HandlePostponedBookingAsync(Booking booking, string reason)
-        {
-            // 1. Invalidate cache
-            await _cache.RemoveAsync(CacheKeys.SessionStatus(booking.SessionId));
-
-            // 2. Notifications
-            await TrySafe(async () =>
-                await _notification.SendBookingPostponedAsync(booking.Id, reason),
-                $"SendBookingPostponedAsync - BookingId: {booking.Id}");
-
-            // 3. SignalR
-            await TrySafe(async () =>
-                await _signalR.SendDashboardUpdateAsync(
-                    SignalREvents.BookingPostponed,
-                    new { bookingId = booking.Id, sessionId = booking.SessionId }),
-                $"SignalR BookingPostponed - BookingId: {booking.Id}");
+            await TrySafe(async () => await _signalR.SendDashboardUpdateAsync(signalREvent, new { bookingId = booking.Id, sessionId = booking.SessionId }), $"SignalR - {signalREvent} - BookingId: {booking.Id}");
         }
 
         // __ Helper method to get the diagnosis fee from system configuration __ //

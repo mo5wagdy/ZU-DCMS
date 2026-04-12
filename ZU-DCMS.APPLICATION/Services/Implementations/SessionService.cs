@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using System.Security.Cryptography.X509Certificates;
 using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Contracts;
 using ZU_DCMS.APPLICATION.DTOs.Session;
@@ -16,17 +17,20 @@ public class SessionService : ISessionService
     private readonly IUnitOfWork _uow;
     private readonly ICacheService _cache;
     private readonly IMapper _mapper;
+    private readonly IRawSqlExecutor _sql;
     private readonly IAppLogger<SessionService> _logger;
 
     public SessionService(
         IUnitOfWork uow,
         ICacheService cache,
         IMapper mapper,
+        IRawSqlExecutor sql,
         IAppLogger<SessionService> logger)
     {
         _uow = uow;
         _cache = cache;
         _mapper = mapper;
+        _sql = sql;
         _logger = logger;
     }
 
@@ -267,62 +271,38 @@ public class SessionService : ISessionService
     // __ This method is called when a booking is made to reserve a slot in the session by incrementing the appropriate count __ //
     public async Task<Result> ReserveSlotAsync(int sessionId, BookingType type)
     {
-        _logger.LogInfo("Reserving slot for SessionId: {SessionId}, BookingType: {BookingType}", sessionId, type);
-        
-        // __ Fetch the session by Id __ //
-        var session = await _uow.Repository<Session>().GetByIdAsync(sessionId);
+        _logger.LogInfo("Reserving slot for SessionId: {SessionId}, Type: {Type}", sessionId, type);
 
-        // __ If session is not found, return failure __ //
-        if (session is null)
+        // __ We will use a raw SQL update to increment the count atomically and ensure we do not exceed the max limits __ //
+
+        // __ Determine which column to update based on booking type __ //
+        var column = type == BookingType.New ? nameof(Session.CurrentNewCount) : nameof(Session.CurrentFollowUpCount);
+
+        // __ Determine the max column for the check __ //
+        var maxColumn = type == BookingType.New ? nameof(Session.MaxNewPatients) : nameof(Session.MaxFollowUpPatients);
+
+        // __ Construct the SQL query to increment the count if it does not exceed the max and the session is active and not deleted __ //
+        var sql = $@"
+        UPDATE Sessions
+        SET {column} = {column} + 1
+        WHERE Id = @id
+        AND {column} < {maxColumn}
+        AND IsActive = 1
+        AND IsDeleted = 0
+        AND Date >= CAST(GETDATE() AS DATE)";
+
+        // __ Execute the SQL query and check how many rows were affected __ //
+        var affected = await _sql.ExecuteAsync(sql, new { id = sessionId });
+
+        // __ If no rows were affected, it means the session was either full, inactive, deleted, or does not exist __ //
+        if (affected == 0)
         {
-            _logger.LogWarning("Session not found for SessionId: {SessionId}", sessionId);
+            _logger.LogWarning("Failed to reserve slot for SessionId: {SessionId}, BookingType: {Type}", sessionId, type);
 
-            return Result.Failure("السكشن غير موجود");
+            return Result.Failure("السكشن غير متاح أو تم حجزه للتو، حاول اختيار موعد آخر");
         }
 
-        // __ If session is not active, return failure __ //
-        if (!session.IsActive)
-        {
-            _logger.LogWarning("Session is not active for SessionId: {SessionId}", sessionId);
-            
-            return Result.Failure("السكشن غير نشط");
-        }
-
-
-        // __ Check availability and increment the appropriate count based on booking type __ //
-        if (type == BookingType.New)
-        {
-            if (session.IsNewFull)
-            {
-                _logger.LogWarning("Session is full for new patients for SessionId: {SessionId}", sessionId);
-
-                return Result.Failure("السكشن ممتلئ");
-            }
-
-            _logger.LogInfo("Incrementing new patient count for SessionId: {SessionId}", sessionId);
-            
-            session.CurrentNewCount++;
-        }
-        else
-        {
-            if (session.IsFollowUpFull)
-            {
-                _logger.LogWarning("Session is full for follow-up patients for SessionId: {SessionId}", sessionId);
-
-                return Result.Failure("السكشن ممتلئ");
-            }
-
-            _logger.LogInfo("Incrementing follow-up patient count for SessionId: {SessionId}", sessionId);
-            
-            session.CurrentFollowUpCount++;
-        }
-
-        // __ Update the session in the database __ //
-
-        _uow.Repository<Session>().Update(session);
-
-        _logger.LogInfo("Updating session counts for SessionId: {SessionId}", sessionId);
-
+        // __ If we reach here, it means the slot was successfully reserved __ //
         return Result.Success();
     }
 
@@ -330,33 +310,34 @@ public class SessionService : ISessionService
     // __ This method is called when a booking is cancelled to release a slot in the session by decrementing the appropriate count __ //
     public async Task<Result> ReleaseSlotAsync(int sessionId, BookingType type)
     {
-        _logger.LogInfo("Releasing slot for SessionId: {SessionId}, BookingType: {BookingType}", sessionId, type);
+        _logger.LogInfo("Releasing slot for SessionId: {SessionId}, Type: {Type}", sessionId, type);
 
-        // __ Fetch the session by Id __ //
-        var session = await _uow.Repository<Session>().GetByIdAsync(sessionId);
+        // __ We will use a raw SQL update to decrement the count atomically and ensure we do not go below zero __ //
 
-        // __ If session is not found, return failure __ //
-        if (session is null)
+        // __ Determine which column to update based on booking type __ //
+        var column = type == BookingType.New ? nameof(Session.CurrentNewCount) : nameof(Session.CurrentFollowUpCount);
+
+        // __ Construct the SQL query to decrement the count if it is greater than zero and the session is active and not deleted __ //
+        var sql = $@"
+        UPDATE Sessions
+        SET {column} = {column} - 1
+        WHERE Id = @id
+        AND {column} > 0
+        AND IsActive = 1
+        AND IsDeleted = 0";
+
+        // __ Execute the SQL query and check how many rows were affected __ //
+        var affected = await _sql.ExecuteAsync(sql, new { id = sessionId });
+
+        // __ If no rows were affected, it means the session was either inactive, deleted, does not exist, or the count was already at zero __ //
+        if (affected == 0)
         {
-            _logger.LogWarning("Session not found for SessionId: {SessionId}", sessionId);
+            _logger.LogWarning("Failed to release slot for SessionId: {SessionId}, Type: {Type}", sessionId, type);
 
-            return Result.Failure("السكشن غير موجود");
+            return Result.Failure("فشل تحرير مكان الحجز");
         }
 
-        // __ Since we are releasing a slot, we will decrement the appropriate count based on booking type, ensuring it does not go below zero __ //
-       
-        _logger.LogInfo("Decrementing patient count for SessionId: {SessionId}, BookingType: {BookingType}", sessionId, type);
-
-        if (type == BookingType.New)
-            session.CurrentNewCount = Math.Max(0, session.CurrentNewCount - 1);
-        else
-            session.CurrentFollowUpCount = Math.Max(0, session.CurrentFollowUpCount - 1);
-
-        _logger.LogInfo("Decrementing patient count for SessionId: {SessionId}", sessionId);
-
-        // __ Update the session in the database __ //
-        _uow.Repository<Session>().Update(session);
-
+        // __ If we reach here, it means the slot was successfully released __ //
         return Result.Success();
     }
 

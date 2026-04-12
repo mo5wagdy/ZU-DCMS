@@ -18,7 +18,6 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
         private readonly IPaymentService _paymentService;
         private readonly INotificationService _notification;
         private readonly IUserCodeGenerator _codeGen;
-        private readonly IRawSqlExecutor _sql;
         private readonly ISignalRService _signalR;
         private readonly ICacheService _cache;
         private readonly IMapper _mapper;
@@ -32,7 +31,6 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             IPaymentGateway paymentGateway,
             INotificationService notification,
             IUserCodeGenerator codeGen,
-            IRawSqlExecutor sql,
             ISignalRService signalR,
             ICacheService cache,
             IMapper mapper,
@@ -45,7 +43,6 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             _paymentService = paymentService;
             _notification = notification;
             _codeGen = codeGen;
-            _sql = sql;
             _signalR = signalR;
             _cache = cache;
             _mapper = mapper;
@@ -154,25 +151,6 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             // __ Session found, proceed with booking creation __ //
             var session = sessionResult.Value;
 
-            // __ Check if session has available slots for the requested booking type __ //
-            var availableResult = await _sessionService.IsSessionAvailableAsync(session.Id, dto.BookingType);
-
-            // __ If session is not available, return failure __ //
-            if (availableResult.IsFailure)
-            {
-                _logger.LogWarning("Session {SessionId} is not available for BookingType: {BookingType}", session.Id, dto.BookingType);
-
-                return Result.Failure<BookingDto>(availableResult.Error);
-            }
-
-            // __ If session is full, return failure __ //
-            if (!availableResult.Value)
-            {
-                _logger.LogWarning("Session {SessionId} is full for BookingType: {BookingType}", session.Id, dto.BookingType);
-
-                return Result.Failure<BookingDto>("السكشن اكتمل، اختار موعد آخر");
-            }
-
             // __ Get diagnosis fee from system config __ //
             var feeResult = await GetDiagnosisFeeAsync();
 
@@ -191,6 +169,19 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             {
                 _logger.LogInfo("Reserving slot for SessionId: {SessionId} and BookingType: {BookingType}", session.Id, dto.BookingType);
 
+                // __ Reserve a slot in the session __ //
+                var reserve = await _sessionService.ReserveSlotAsync(session.Id, dto.BookingType);
+
+                // __ If failed to reserve slot, rollback transaction and return failure __ //
+                if (reserve.IsFailure)
+                {
+                    await _uow.RollbackTransactionAsync();
+                    
+                    _logger.LogError("Failed to reserve slot for Session");
+                    
+                    return Result.Failure<BookingDto>(reserve.Error);
+                }
+
                 // __ Create booking entity __ //
                 var booking = new Booking
                 {
@@ -205,15 +196,6 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
 
                 // __ Add booking to database __ //
                 await _uow.Repository<Booking>().AddAsync(booking);
-
-                // __ Increment session's current count for the booking type __ //
-                if (dto.BookingType == BookingType.New)
-                    session.CurrentNewCount++;
-                else
-                    session.CurrentFollowUpCount++;
-
-                // __ Update session entity __ //
-                _uow.Repository<Session>().Update(session);
 
                 // __ Create payment record __ //
                 var payment = new Payment
@@ -238,9 +220,10 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
                 // __ If failed to generate payment code, rollback transaction and return failure __ //
                 if (!paymentResult.IsSuccess)
                 {
-                    _logger.LogError("Failed to generate payment code for PaymentId");
 
                     await _uow.RollbackTransactionAsync();
+                    
+                    _logger.LogError("Failed to generate payment code for PaymentId");
 
                     return Result.Failure<BookingDto>("حدث خطأ في توليد كود الدفع، حاول مرة أخرى");
                 }
@@ -270,9 +253,9 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             // __ Catch any exceptions, log error, rollback transaction, and return failure __ //
             catch (Exception ex)
             {
-                _logger.LogError("Error creating booking", ex);
-
                 await _uow.RollbackTransactionAsync();
+                
+                _logger.LogError("Error creating booking", ex);
 
                 return Result.Failure<BookingDto>("حدث خطأ أثناء الحجز");
             }
@@ -303,6 +286,14 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
                 return Result.Failure("غير مصرح");
             }
 
+            // __ If booking paid, cannot cancel __ //
+            if (booking.Payment?.Status == PaymentStatus.Paid)
+            {
+                _logger.LogWarning("Attempt to cancel paid booking {BookingId}", bookingId);
+
+                return Result.Failure("لا يمكن إلغاء الحجز بعد الدفع");
+            }
+
             // __ Transaction for cancellation process __ //
             await _uow.BeginTransactionAsync();
 
@@ -318,9 +309,9 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
                 // __ If failed to release slot, rollback transaction and return failure __ //
                 if (release.IsFailure)
                 {
-                    _logger.LogError("Failed to release slot during cancellation of BookingId");
-
                     await _uow.RollbackTransactionAsync();
+
+                    _logger.LogError("Failed to release slot during cancellation of BookingId");
 
                     return Result.Failure(release.Error);
                 }
@@ -331,7 +322,7 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
                 _logger.LogInfo("Booking cancelled {BookingId}", bookingId);
 
                 // __ Handle post-cancellation side effects (cache invalidation, notifications, SignalR) __ //
-                await HandleBookingSideEffectsAsync(booking, () => _notification.SendBookingConfirmedAsync(booking.Id), SignalREvents.BookingCreated);
+                await HandleBookingSideEffectsAsync(booking, () => _notification.SendBookingCancelledAsync(booking.Id), SignalREvents.BookingCancelled);
 
                 return Result.Success();
             }
@@ -339,13 +330,14 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             // __ Catch any exceptions, log error, rollback transaction, and return failure __ //
             catch (Exception ex)
             {
-                _logger.LogError("Error cancelling booking", ex);
-                
                 await _uow.RollbackTransactionAsync();
+                
+                _logger.LogError("Error cancelling booking", ex);
                 
                 return Result.Failure("فشل الإلغاء");
             }
         }
+
 
         // __ Postpone an existing booking to a new session __ //
         public async Task<Result> PostponeBookingAsync(int bookingId, string reason, string adminId)
@@ -367,7 +359,7 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             var slots = await _sessionService.GetAvailableSlotsAsync(booking.BookingType);
 
             // __ If no available slots, return failure __ //
-            if (slots.IsFailure || !slots.Value.Any())
+            if (slots.IsFailure || slots.Value.Count == 0)
             {
                 _logger.LogWarning("No available slots found for BookingType: {BookingType} during postponement of BookingId", booking.BookingType);
 
@@ -388,9 +380,9 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
                 // __ If failed to release old slot, rollback transaction and return failure __ //
                 if (release.IsFailure)
                 {
-                    _logger.LogError("Failed to release old slots");
-                    
                     await _uow.RollbackTransactionAsync();
+                    
+                    _logger.LogError("Failed to release old slots");
                     
                     return Result.Failure(release.Error);
                 }
@@ -401,9 +393,9 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
                 // __ If failed to reserve new slot, rollback transaction and return failure __ //
                 if (reserve.IsFailure)
                 {
-                    _logger.LogError("Failed to reserve new slot for Session during postponement");    
-                    
                     await _uow.RollbackTransactionAsync();
+                    
+                    _logger.LogError("Failed to reserve new slot for Session during postponement");    
                     
                     return Result.Failure(reserve.Error);
                 }

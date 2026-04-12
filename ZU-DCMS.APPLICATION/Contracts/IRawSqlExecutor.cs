@@ -1,5 +1,4 @@
 ﻿
-using System.Data.Common;
 
 namespace ZU_DCMS.APPLICATION.Contracts
 {
@@ -7,6 +6,6 @@ namespace ZU_DCMS.APPLICATION.Contracts
     public interface IRawSqlExecutor
     {
         // __ This method is responsible for executing a raw SQL query and returning a single value of type T. __ //
-        Task<T> ExecuteScalarAsync<T>(string sql, params DbParameter[] parameters);
+        Task<int> ExecuteAsync(string sql, object? parameters = null);
     }
 }

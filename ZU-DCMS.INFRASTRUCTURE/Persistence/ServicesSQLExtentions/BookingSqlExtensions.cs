@@ -26,7 +26,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.ServicesSQLExtentions
             WHERE Id = @id AND {targetSlotCount} < {targetSlotLimit};
             SELECT @@ROWCOUNT;";
 
-            return await executor.ExecuteScalarAsync<int>(sessionCapacityUpdateSql, new SqlParameter("@id", sessionId));
+            return await executor.ExecuteAsync<int>(sessionCapacityUpdateSql, new SqlParameter("@id", sessionId));
         }
     }
 }

@@ -16,7 +16,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.ContractImplementation
         // __ Generate a unique code for a user based on the provided prefix and sequence name __ //
         public async Task<string> GenerateAsync(string prefix, string sequenceName)
         {
-            var seq = await _sql.ExecuteScalarAsync<long>($"SELECT NEXT VALUE FOR {sequenceName}");
+            var seq = await _sql.ExecuteAsync<long>($"SELECT NEXT VALUE FOR {sequenceName}");
 
             return $"{prefix}-{DateTime.UtcNow.Year}-{seq:D4}";
         }

@@ -151,7 +151,7 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             var user = await _identity.FindByUsernameAsync(dto.Username);
 
             // __ Generic error for security — don't reveal which field is wrong __ //
-            if (user == null)
+            if (user is null)
             {
                 _logger.LogWarning("Login failed: User not found for Username: {Username}", dto.Username);
 
@@ -235,7 +235,7 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             // __ Staff uses email to login __ //
             var user = await _identity.FindByEmailAsync(dto.Email);
 
-            if (user == null)
+            if (user is null)
             {
                 _logger.LogWarning("Login failed: User not found for Email: {Email}", dto.Email);
 

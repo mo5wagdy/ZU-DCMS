@@ -19,6 +19,12 @@ namespace ZU_DCMS.APPLICATION.Common
         public const string BookingCancelled = "booking_cancelled";
         public const string BookingPostponed = "booking_postponed";
 
+        // ________ Payment Events ________ //
+        public const string PaymentPaid = "payment_paid";
+
+        // ________ Diagnosis Events ________ //
+        public const string DiagnosisCreated = "diagnosis_created";
+
         // ________ Case Events ________ //
         public const string CaseAssigned = "case_assigned";
         public const string CaseCompleted = "case_completed";

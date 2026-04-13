@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using System.Security.Cryptography.X509Certificates;
 using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Contracts;
 using ZU_DCMS.APPLICATION.DTOs.Session;

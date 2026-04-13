@@ -1,25 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.DTOs.Case;
 using ZU_DCMS.APPLICATION.DTOs.Diagnosis;
 using ZU_DCMS.APPLICATION.DTOs.Student;
 
 namespace ZU_DCMS.APPLICATION.Services.Interfaces
 {
-    // This interface defines the contract for diagnosis-related operations in the application.
+    // __ This interface defines the contract for diagnosis-related operations in the application. __ //
     public interface IDiagnosisService
     {
-        // Retrieves a list of patients associated with a specific session for diagnosis purposes.
-        Task<List<BookingForDiagnosisDto>> GetSessionPatientsAsync(int sessionId);
+        // __ This method retrieves a list of patients booked for diagnosis in a specific session, filtered by the intern doctor's ID. __ //
+        Task<Result<List<BookingForDiagnosisDto>>> GetSessionPatientsAsync(int sessionId, string internDoctorId);
 
-        // Retrieves detailed information about a specific patient based on their intern ID.
-        Task<DiagnosisRecordDto> DiagnosePatientAsync(string internId, CreateDiagnosisDto dto);
+        // __ This method allows an intern doctor to diagnose a patient by providing the necessary details in the CreateDiagnosisDto. It returns the result of the diagnosis operation, including any relevant information about the diagnosis record. __ //
+        Task<Result<DiagnosisRecordDto>> DiagnosePatientAsync(string internDoctorId, CreateDiagnosisDto dto);
 
-        // Retrieves a list of available students for a specific clinic and term, which can be assigned to patients for diagnosis.
-        Task<List<StudentPriorityDto>> GetAvailableStudentsAsync(int clinicId, int termId);
+        // __ This method retrieves a list of available students for assignment to a case in a specific clinic and term. It returns the result containing a list of StudentPriorityDto, which may include information about the students' priorities for assignment. __ //
+        Task<Result<List<StudentPriorityDto>>> GetAvailableStudentsAsync(int clinicId, int termId);
 
-        // Assigns a student to a patient for diagnosis based on the intern ID and the provided assignment details.
-        Task<CaseAssignmentDto> AssignStudentAsync(string internId, AssignStudentDto dto);
+        // __ This method allows an intern doctor to assign a student to a case based on the provided AssignStudentDto. It returns the result of the assignment operation, including details about the assigned case and the student. __ //
+        Task<Result<CaseAssignmentDto>> AssignStudentAsync(string internDoctorId, AssignStudentDto dto);
     }
 }

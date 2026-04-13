@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using ZU_DCMS.APPLICATION.Background_Jobs.Events;
+using ZU_DCMS.APPLICATION.Background_Jobs.Features.Booking.Events;
 using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Contracts;
 using ZU_DCMS.APPLICATION.DTOs.Booking;
@@ -14,12 +16,9 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
         private readonly IUnitOfWork _uow;
         private readonly ISessionService _sessionService;
         private readonly IPatientService _patientService;
-        private readonly IPaymentGateway _paymentGateway;
         private readonly IPaymentService _paymentService;
-        private readonly INotificationService _notification;
+        private readonly IEventPublisher _eventPublisher;
         private readonly IUserCodeGenerator _codeGen;
-        private readonly ISignalRService _signalR;
-        private readonly ICacheService _cache;
         private readonly IMapper _mapper;
         private readonly IAppLogger<BookingService> _logger;
 
@@ -28,23 +27,17 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             ISessionService sessionService,
             IPatientService patientService,
             IPaymentService paymentService,
-            IPaymentGateway paymentGateway,
-            INotificationService notification,
+            IEventPublisher eventPublisher,
             IUserCodeGenerator codeGen,
-            ISignalRService signalR,
-            ICacheService cache,
             IMapper mapper,
             IAppLogger<BookingService> logger)
         {
             _uow = uow;
             _sessionService = sessionService;
             _patientService = patientService;
-            _paymentGateway = paymentGateway;
             _paymentService = paymentService;
-            _notification = notification;
+            _eventPublisher = eventPublisher;
             _codeGen = codeGen;
-            _signalR = signalR;
-            _cache = cache;
             _mapper = mapper;
             _logger = logger;
         }
@@ -198,44 +191,33 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
                 await _uow.Repository<Booking>().AddAsync(booking);
 
                 // __ Create payment record __ //
-                var payment = new Payment
-                {
-                    PatientId = patientId,
-                    Booking = booking,
-                    Amount = feeResult.Value,
-                    Type = PaymentType.Diagnosis,
-                    Status = PaymentStatus.Pending,
-                    CreatedAt = DateTime.UtcNow
-                };
+                var payment = _paymentService.CreateDiagnosisPaymentAsync(patientId, booking.Id, feeResult.Value).Result;
 
-                // __ Add payment to database __ //
-                await _uow.Repository<Payment>().AddAsync(payment);
+                // __ If failed to create payment record, rollback transaction and return failure __ //
+                if (payment.IsFailure)
+                {
+                    await _uow.RollbackTransactionAsync();
+                   
+                    _logger.LogError("Failed to create payment record for BookingId");
+
+                    return Result.Failure<BookingDto>(payment.Error);
+                }
 
                 // __ Save changes to get generated IDs for booking and payment __ //
                 await _uow.SaveChangesAsync();
 
-                // Generate Fawry payment code
-                var paymentResult = await _paymentGateway.GeneratePaymentCodeAsync(payment.Id, payment.Amount);
+                // __ Generate payment code __ //
+                var paymentCode = _paymentService.GeneratePaymentCodeAsync(payment.Value).Result;
 
                 // __ If failed to generate payment code, rollback transaction and return failure __ //
-                if (!paymentResult.IsSuccess)
+                if (paymentCode.IsFailure)
                 {
-
                     await _uow.RollbackTransactionAsync();
-                    
-                    _logger.LogError("Failed to generate payment code for PaymentId");
+                   
+                    _logger.LogError("Failed to generate payment code for BookingId");
 
-                    return Result.Failure<BookingDto>("حدث خطأ في توليد كود الدفع، حاول مرة أخرى");
+                    return Result.Failure<BookingDto>(paymentCode.Error);
                 }
-
-
-                // __ Update payment with gateway response __ //
-                payment.PaymentCode = paymentResult.PaymentCode;
-                payment.GatewayName = paymentResult.GatewayName;
-                payment.GatewayReference = paymentResult.GatewayReference;
-
-                // __ Update payment entity __ //
-                _uow.Repository<Payment>().Update(payment);
 
                 // __ Single SaveChanges via CommitTransaction __ //
                 await _uow.CommitTransactionAsync(patientId.ToString());
@@ -243,7 +225,10 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
                 _logger.LogInfo("Booking created {BookingId}", booking.Id);
 
                 // __ Handle post-booking side effects (cache invalidation, notifications, SignalR) __ //
-                await HandleBookingSideEffectsAsync(booking, () => _notification.SendBookingConfirmedAsync(booking.Id), SignalREvents.BookingCreated);
+                //await HandleBookingSideEffectsAsync(booking, () => _notification.SendBookingConfirmedAsync(booking.Id), SignalREvents.BookingCreated);
+
+                // __ Publish domain event for booking creation __ //
+                await _eventPublisher.PublishAsync(new BookingCreatedEvent(booking.Id, booking.SessionId));
 
                 // __ Load full booking details to return in response __ //
                 var full = await LoadFullBookingAsync(booking.Id);
@@ -322,7 +307,10 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
                 _logger.LogInfo("Booking cancelled {BookingId}", bookingId);
 
                 // __ Handle post-cancellation side effects (cache invalidation, notifications, SignalR) __ //
-                await HandleBookingSideEffectsAsync(booking, () => _notification.SendBookingCancelledAsync(booking.Id), SignalREvents.BookingCancelled);
+                //await HandleBookingSideEffectsAsync(booking, () => _notification.SendBookingCancelledAsync(booking.Id), SignalREvents.BookingCancelled);
+
+                // __ Publish domain event for booking cancellation __ //
+                await _eventPublisher.PublishAsync(new BookingCancelledEvent(booking.Id, booking.SessionId));
 
                 return Result.Success();
             }
@@ -415,7 +403,9 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
                 _logger.LogInfo("Booking postponed {BookingId}", bookingId);
 
                 // __ Handle post-postponement side effects (cache invalidation, notifications, SignalR) __ //
-                await HandleBookingSideEffectsAsync(booking, () => _notification.SendBookingPostponedAsync(booking.Id, reason), SignalREvents.BookingPostponed);
+                //await HandleBookingSideEffectsAsync(booking, () => _notification.SendBookingPostponedAsync(booking.Id, reason), SignalREvents.BookingPostponed);
+
+                await _eventPublisher.PublishAsync(new BookingPostponedEvent(booking.Id, booking.SessionId, reason));
 
                 return Result.Success();
             }
@@ -444,19 +434,6 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
                   b => b.Payment
             );
 
-        // __ Helper method to handle side effects after booking operations __ //
-        private async Task HandleBookingSideEffectsAsync(Booking booking, Func<Task> notificationAction, string signalREvent)
-        {
-            // 1. Cache
-            await _cache.RemoveAsync(CacheKeys.SessionStatus(booking.SessionId));
-
-            // 2. Notification
-            await TrySafe(notificationAction, $"Notification - BookingId: {booking.Id}");
-
-            // 3. SignalR
-            await TrySafe(async () => await _signalR.SendDashboardUpdateAsync(signalREvent, new { bookingId = booking.Id, sessionId = booking.SessionId }), $"SignalR - {signalREvent} - BookingId: {booking.Id}");
-        }
-
         // __ Helper method to get the diagnosis fee from system configuration __ //
         private async Task<Result<decimal>> GetDiagnosisFeeAsync()
         {
@@ -466,19 +443,6 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
                 return Result.Failure<decimal>("إعداد سعر الكشف غير موجود");
 
             return decimal.TryParse(config.Value, out var fee) ? Result.Success(fee) : Result.Failure<decimal>("إعداد سعر الكشف غير صحيح");
-        }
-
-        // __ Helper method to execute side effects safely without affecting main flow __ //
-        private async Task TrySafe(Func<Task> action, string context)
-        {
-            try
-            {
-                await action();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("Side effect failed: {Context}", ex, context);
-            }
         }
     }
 }

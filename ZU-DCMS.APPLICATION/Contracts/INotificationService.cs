@@ -22,10 +22,22 @@ namespace ZU_DCMS.APPLICATION.Contracts
          * These methods are responsible for sending specific notifications related to bookings and case assignments.
          * Each method takes relevant identifiers (like booking ID or case assignment ID) to retrieve necessary details for the notification.  
          */
+
+        // __ Booking-related notifications __ //
         Task SendBookingConfirmedAsync(int bookingId); // => This method sends a notification to the Intern Doctor and patient when a booking is confirmed, using the booking ID to retrieve necessary details
         Task SendBookingCancelledAsync(int bookingId); // => This method sends a notification to the Intern Doctor and patient when a booking is cancelled, using the booking ID to retrieve necessary details.
         Task SendBookingPostponedAsync(int bookingId, string reason); // => This method sends a notification to the all when a booking is postponed, using the booking ID and reason for postponement to retrieve necessary details.
+
+        // __ Payment-related notifications __ //
+        Task SendPaymentPaidAsync(int bookingId); // => This method sends a notification to the patient when a payment for a booking is completed, using the booking ID to retrieve necessary details.
+
+        // __ Diagnosis-related notifications __ //
+        Task SendDiagnosisCreatedAsync(int diagnosisId); // => This method sends a notification when a diagnosis is created, using the diagnosis ID to retrieve necessary details.
+
+        // __ Case assignment-related notifications __ //
         Task SendStudentAssignedAsync(int caseAssignmentId); // => This method sends a notification to the student and patient when they are assigned to a case, using the case assignment ID to retrieve necessary details.
+
+        // __ Case progress-related notifications __ //
         Task SendCasePartiallyCompletedAsync(int caseAssignmentId);
         Task SendCaseCompletedAsync(int caseAssignmentId); // => This method sends a notification to the Intern Doctor when a case they are assigned to is completed, using the case assignment ID to retrieve necessary details.
     }

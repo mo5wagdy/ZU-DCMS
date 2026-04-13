@@ -1,5 +1,6 @@
 using ZU_DCMS.INFRASTRUCTURE.Extentions;
 using ZU_DCMS.APPLICATION.Extentions;
+using Hangfire;
 
 namespace ZU_DCMS.API
 {
@@ -34,6 +35,7 @@ namespace ZU_DCMS.API
 
             app.UseAuthorization();
 
+            app.UseHangfireDashboard("/hangfire");
 
             app.MapControllers();
 

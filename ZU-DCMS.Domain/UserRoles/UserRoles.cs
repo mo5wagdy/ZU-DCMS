@@ -10,6 +10,8 @@ namespace ZU_DCMS.Domain.UserRoles
      * */
     public static class UserRoles
     {
+        // معيد - Assistant Lecturer
+        // يراجع الحاله بعد ما الطالب يتممها
         public const string Admin = "Admin";
         public const string InternDoctor = "InternDoctor";
         public const string Student = "Student";

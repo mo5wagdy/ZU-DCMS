@@ -26,7 +26,13 @@ namespace ZU_DCMS.APPLICATION.Services.Interfaces
          * returning a paged result containing booking data transfer objects
         */
         Task<Result<PagedResult<BookingDto>>> GetPatientBookingsAsync(int patientId, PagedRequest request);
-        
+
+        /* 
+         * Method to retrieve a paginated list of bookings for a specific session using the session ID and pagination request,
+         * returning a paged result containing booking data transfer objects
+        */
+        Task<Result<PagedResult<BookingDto>>> GetSessionBookingsAsync(int sessionId, PagedRequest request);
+
         // __ Method to cancel a booking for a specific booking ID and patient ID, performing the cancellation operation asynchronously __ //
         Task<Result> CancelBookingAsync(int bookingId, int patientId);
 

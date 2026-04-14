@@ -8,6 +8,7 @@ using ZU_DCMS.Domain.Interfaces;
 using ZU_DCMS.INFRASTRUCTURE.Cache;
 using ZU_DCMS.INFRASTRUCTURE.Identity;
 using ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation;
+using ZU_DCMS.INFRASTRUCTURE.Identity.Unique_Validations;
 using ZU_DCMS.INFRASTRUCTURE.Persistence;
 using ZU_DCMS.INFRASTRUCTURE.Persistence.ContractImplementation;
 using ZU_DCMS.INFRASTRUCTURE.Persistence.InterfacesImplementations;
@@ -49,6 +50,9 @@ namespace ZU_DCMS.INFRASTRUCTURE.Extentions
             })
             // __ Use our AppDbContext for Identity __ //
             .AddEntityFrameworkStores<AppDbContext>()
+
+            // __ Unique Password validator for staff accounts to ensure they don't use the national number as their password __ //
+            .AddPasswordValidator<UniquePasswordValidator<ApplicationUser>>()
 
             // __ Add default token providers for password reset, email confirmation, etc. __ //
             .AddDefaultTokenProviders();

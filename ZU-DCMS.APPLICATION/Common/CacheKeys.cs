@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace ZU_DCMS.APPLICATION.Common
 {
     // __ This class defines standardized cache keys for various types of data in the application. __ //
@@ -22,8 +19,7 @@ namespace ZU_DCMS.APPLICATION.Common
         public static string SessionStatus(int sessionId) => $"session_status_{sessionId}"; // => Changes every booking
 
         // ________ In every change in requirements ________ //
-        public static string StudentProgress(int studentId)
-            => $"student_progress_{studentId}";
+        public static string StudentProgress(int studentId) => $"student_progress_{studentId}";
     }
 }
 

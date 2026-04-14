@@ -34,6 +34,5 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.ContractImplementation
             return await _context.Database.ExecuteSqlRawAsync(sql, sqlParams);
         }
     }
-    
 }
 

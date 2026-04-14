@@ -44,6 +44,7 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
         // _________________________ Patient Registration _________________________ //
         public async Task<Result<AuthDto>> RegisterPatientAsync(RegisterPatientDto dto)
         {
+            // patients login with phone number and Nid
             _logger.LogInfo("Registering patient with Username: {Username}, IdentityNumber: {IdentityNumber}", dto.Username, dto.IdentityNumber);
 
             // __ Check username uniqueness __ //
@@ -102,7 +103,7 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
                 var tokens = await _token.GenerateAsync(userId);
 
                 // __ If token generation failed, return the error __ //
-                if (!tokens.IsSuccess) 
+                if (!tokens.IsSuccess)
                 {
                     await _uow.RollbackTransactionAsync();
 
@@ -148,6 +149,8 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             _logger.LogInfo("Patient login attempt with Username: {Username}, IdentityNumber: {IdentityNumber}", dto.Username, dto.IdentityNumber);
 
             // __ Find by username __ //
+
+            // update => Phone number instead of username
             var user = await _identity.FindByUsernameAsync(dto.Username);
 
             // __ Generic error for security — don't reveal which field is wrong __ //

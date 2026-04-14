@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace ZU_DCMS.APPLICATION.Contracts
 {
     /* 
@@ -38,7 +35,7 @@ namespace ZU_DCMS.APPLICATION.Contracts
         Task SendStudentAssignedAsync(int caseAssignmentId); // => This method sends a notification to the student and patient when they are assigned to a case, using the case assignment ID to retrieve necessary details.
 
         // __ Case progress-related notifications __ //
-        Task SendCasePartiallyCompletedAsync(int caseAssignmentId);
+        Task SendCasePartiallyCompletedAsync(int caseAssignmentId); // => This method sends a notification to the Intern Doctor when a case they are assigned to is partially completed, using the case assignment ID to retrieve necessary details. 
         Task SendCaseCompletedAsync(int caseAssignmentId); // => This method sends a notification to the Intern Doctor when a case they are assigned to is completed, using the case assignment ID to retrieve necessary details.
     }
 }

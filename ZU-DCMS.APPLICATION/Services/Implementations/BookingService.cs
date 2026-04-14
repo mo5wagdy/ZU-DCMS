@@ -70,6 +70,33 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             return Result.Success<PagedResult<BookingDto>>(pagedResult);
         }
 
+        // __ Get confirmed bookings for the session orderd by first booking created for the session, including patient details __ //
+        public async Task<Result<PagedResult<BookingDto>>> GetSessionBookingsAsync(int sessionId, PagedRequest request)
+        {
+            _logger.LogInfo("Fetching confirmed bookings for SessionId: {SessionId}", sessionId);
+
+            // __ Get confirmed bookings for the session, ordered by creation time, including patient details __ //
+            var (items, total) = await _uow.Repository<Booking>().GetPagedListAsync
+                (
+                    (request.Page - 1) * request.PageSize,
+                    request.PageSize,
+                    b => b.SessionId == sessionId && b.Status == BookingStatus.Confirmed,
+                    true,
+                    q => q.OrderBy(b => b.CreatedAt),
+                    b => b.Patient
+                );
+
+            // __ Map to DTOs __ //
+            var dtos = _mapper.Map<List<BookingDto>>(items);
+
+            // __ Return paged result __ //
+            var pagedResult = PagedResult<BookingDto>.Create(dtos, total, request);
+
+            _logger.LogInfo("Fetched {Count} confirmed bookings for SessionId: {SessionId}", dtos.Count, sessionId);
+            
+            return Result.Success(pagedResult);
+        }
+
         // __ Get booking by ID with full details __ //
         public async Task<Result<BookingDto>> GetByIdAsync(int bookingId)
         {
@@ -190,6 +217,8 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
                 // __ Add booking to database __ //
                 await _uow.Repository<Booking>().AddAsync(booking);
 
+
+                //__ Not now 
                 // __ Create payment record __ //
                 var payment = _paymentService.CreateDiagnosisPaymentAsync(patientId, booking.Id, feeResult.Value).Result;
 
@@ -224,14 +253,19 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
 
                 _logger.LogInfo("Booking created {BookingId}", booking.Id);
 
-                // __ Handle post-booking side effects (cache invalidation, notifications, SignalR) __ //
-                //await HandleBookingSideEffectsAsync(booking, () => _notification.SendBookingConfirmedAsync(booking.Id), SignalREvents.BookingCreated);
-
                 // __ Publish domain event for booking creation __ //
                 await _eventPublisher.PublishAsync(new BookingCreatedEvent(booking.Id, booking.SessionId));
 
                 // __ Load full booking details to return in response __ //
-                var full = await LoadFullBookingAsync(booking.Id);
+                var full = await _uow.Repository<Booking>().GetFirstOrDefaultAsync
+                 (  
+                    b => b.Id == booking.Id,
+                    false,
+                    b => b.Patient,
+                    b => b.Session,
+                    b => b.Payment
+                 );
+
                 return Result.Success(_mapper.Map<BookingDto>(full!));
             }
 
@@ -253,7 +287,14 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             _logger.LogInfo("Cancelling booking {BookingId} for PatientId: {PatientId}", bookingId, patientId);
 
             // __ Load booking with related entities __ //
-            var booking = await LoadFullBookingAsync(bookingId);
+            var booking = await _uow.Repository<Booking>().GetFirstOrDefaultAsync
+                 (  
+                    b => b.Id == bookingId,
+                    false,
+                    b => b.Patient,
+                    b => b.Session,
+                    b => b.Payment
+                 );
 
             // __ Check if booking exists __ //
             if (booking is null)
@@ -306,9 +347,6 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
 
                 _logger.LogInfo("Booking cancelled {BookingId}", bookingId);
 
-                // __ Handle post-cancellation side effects (cache invalidation, notifications, SignalR) __ //
-                //await HandleBookingSideEffectsAsync(booking, () => _notification.SendBookingCancelledAsync(booking.Id), SignalREvents.BookingCancelled);
-
                 // __ Publish domain event for booking cancellation __ //
                 await _eventPublisher.PublishAsync(new BookingCancelledEvent(booking.Id, booking.SessionId));
 
@@ -333,7 +371,14 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             _logger.LogInfo("Postponing booking {BookingId} by AdminId: {AdminId} with reason: {Reason}", bookingId, adminId, reason);
 
             // __ Load booking with related entities __ //
-            var booking = await LoadFullBookingAsync(bookingId);
+            var booking = await _uow.Repository<Booking>().GetFirstOrDefaultAsync
+                 (
+                    b => b.Id == bookingId,
+                    false,
+                    b => b.Patient,
+                    b => b.Session,
+                    b => b.Payment
+                 );
 
             // __ Check if booking exists __ //
             if (booking is null)
@@ -402,9 +447,6 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
 
                 _logger.LogInfo("Booking postponed {BookingId}", bookingId);
 
-                // __ Handle post-postponement side effects (cache invalidation, notifications, SignalR) __ //
-                //await HandleBookingSideEffectsAsync(booking, () => _notification.SendBookingPostponedAsync(booking.Id, reason), SignalREvents.BookingPostponed);
-
                 await _eventPublisher.PublishAsync(new BookingPostponedEvent(booking.Id, booking.SessionId, reason));
 
                 return Result.Success();
@@ -422,17 +464,6 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
         }
 
 
-        // __ Helper Methods __ //
-
-        // __ Helper method to load booking with related entities __ //
-        private async Task<Booking?> LoadFullBookingAsync(int id) => await _uow.Repository<Booking>()
-            .GetFirstOrDefaultAsync
-            (b => b.Id == id,
-                  false,
-                  b => b.Patient,
-                  b => b.Session,
-                  b => b.Payment
-            );
 
         // __ Helper method to get the diagnosis fee from system configuration __ //
         private async Task<Result<decimal>> GetDiagnosisFeeAsync()

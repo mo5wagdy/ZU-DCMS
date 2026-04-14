@@ -19,6 +19,7 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
     public class DiagnosisService : IDiagnosisService
     {
         private readonly IUnitOfWork _uow;
+        private readonly IBookingService _bookingService;
         private readonly IAiAgentService _aiAgent;
         private readonly IEventPublisher _eventPublisher;
         private readonly IMapper _mapper;
@@ -26,12 +27,14 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
 
         public DiagnosisService(
             IUnitOfWork uow,
+            IBookingService bookingService,
             IAiAgentService aiAgent,
             IEventPublisher eventPublisher,
             IMapper mapper,
             IAppLogger<DiagnosisService> logger)
         {
             _uow = uow;
+            _bookingService = bookingService;
             _aiAgent = aiAgent;
             _eventPublisher = eventPublisher;
             _mapper = mapper;
@@ -69,16 +72,18 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             }
 
             // __ Get confirmed bookings for the session, including patient details __ //
-            var bookings = await _uow.Repository<Booking>()
-                .GetListAsync
-                (
-                    b => b.SessionId == sessionId && b.Status == BookingStatus.Confirmed,
-                    true,
-                    b => b.Patient
-                );
+            var sessionBookingsResult = _bookingService.GetSessionBookingsAsync(sessionId, new PagedRequest { Page = 1, PageSize = int.MaxValue }).Result;
+            
+            // __ Check if fetching bookings was successful __ //
+            if (sessionBookingsResult.IsFailure)
+            {
+                _logger.LogWarning("Failed to fetch bookings for session {SessionId} by intern {InternDoctorId}", sessionId, internDoctorId);
+
+                return Result.Failure<List<BookingForDiagnosisDto>>(sessionBookingsResult.Error);
+            }
 
             // __ Map bookings to DTOs and return success __ //
-            var dtos = _mapper.Map<List<BookingForDiagnosisDto>>(bookings);
+            var dtos = _mapper.Map<List<BookingForDiagnosisDto>>(sessionBookingsResult.Value.Items);
 
             return Result.Success(dtos);
         }

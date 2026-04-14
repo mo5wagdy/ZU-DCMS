@@ -287,8 +287,7 @@ public class SessionService : ISessionService
         WHERE Id = @id
         AND {column} < {maxColumn}
         AND IsActive = 1
-        AND IsDeleted = 0
-        AND Date >= CAST(GETDATE() AS DATE)";
+        AND IsDeleted = 0";
 
         // __ Execute the SQL query and check how many rows were affected __ //
         var affected = await _sql.ExecuteAsync(sql, new { id = sessionId });

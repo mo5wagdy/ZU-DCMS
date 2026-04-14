@@ -30,7 +30,7 @@ public class PatientService : IPatientService
 
     // __ Since the patient is linked to the user, we can get the patient by user id or by patient id. __ // 
     
-    // ________________ Get By Id ________________ //
+    // ________________ Get By Patient Id ________________ //
     public async Task<Result<PatientDto>> GetByIdAsync(int id)
     {
         _logger.LogInfo("Fetching patient by ID: {Id}", id);
@@ -49,8 +49,7 @@ public class PatientService : IPatientService
         return Result.Success<PatientDto>(_mapper.Map<PatientDto>(patient));
     }
 
-    // ________________ Get By UserId ________________ //
-
+    // ________________ Get By Identity User Id ________________ //
     public async Task<Result<PatientDto>> GetByUserIdAsync(string userId)
     {
         _logger.LogInfo("Fetching patient by User ID: {UserId}", userId);
@@ -152,6 +151,7 @@ public class PatientService : IPatientService
 
             // __ Save Changes and Commit Transaction __ //
             await _uow.SaveChangesAsync();
+            
             await _uow.CommitTransactionAsync();
 
             _logger.LogInfo("Patient profile updated successfully, ID: {Id}", id);

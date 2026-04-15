@@ -1,11 +1,19 @@
 ﻿using ZU_DCMS.APPLICATION.Common;
+using ZU_DCMS.APPLICATION.Contracts;
 using ZU_DCMS.APPLICATION.DTOs.Student;
 using ZU_DCMS.APPLICATION.Services.Interfaces;
+using ZU_DCMS.Domain.Interfaces;
 
 namespace ZU_DCMS.APPLICATION.Services.Implementations
 {
     internal class StudentService : IStudentService
     {
+        private readonly IRawSqlExecutor _sql;
+
+        public StudentService(IRawSqlExecutor sql)
+        {
+            _sql = sql;   
+        }
         public async Task<StudentDto?> GetByIdAsync(int id)
         {
             /*
@@ -82,5 +90,18 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
 
             throw new NotImplementedException();
         }
+
+        public async Task IncrementRequirementAsync(int studentId, int clinicId, int termId)
+        {
+            var sql = @"
+            UPDATE TermRequirements
+            SET CompletedCount = CompletedCount + 1
+            WHERE StudentId = @studentId
+            AND ClinicId = @clinicId
+            AND TermId = @termId";
+
+            await _sql.ExecuteAsync(sql, new { studentId, clinicId, termId });
+        }
+
     }
 }

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿
 using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.DTOs.Student;
 
@@ -20,5 +18,8 @@ namespace ZU_DCMS.APPLICATION.Services.Interfaces
 
         // Retrieves a list of student requirements for a specific student and term, allowing them to view the requirements they need to fulfill for that term.
         Task<List<StudentRequirementDto>> GetRequirementsAsync(int studentId, int termId);
+
+        // Atomic Sql increament
+        Task IncrementRequirementAsync(int studentId, int clinicId, int termId);
     }
 }

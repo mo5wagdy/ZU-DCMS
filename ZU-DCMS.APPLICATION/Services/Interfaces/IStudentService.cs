@@ -8,18 +8,18 @@ namespace ZU_DCMS.APPLICATION.Services.Interfaces
     public interface IStudentService
     {
         // Retrieves detailed information about a specific student based on their ID, allowing them to view their profile and related information.
-        Task<StudentDto?> GetByIdAsync(int id);
+        Task<Result<StudentDto>> GetByIdAsync(int studentId);
 
         // Retrieves detailed information about a specific student based on their user ID, allowing them to view their profile and related information.
-        Task<StudentDto?> GetByUserIdAsync(string userId);
+        Task<Result<StudentDto>> GetByUserIdAsync(string userId);
 
         // Retrieves a paginated list of students based on the provided request parameters, allowing for efficient retrieval and display of student data in a paginated format.
-        Task<PagedResult<StudentDto>> GetAllAsync(PagedRequest request);
+        Task<Result<PagedResult<StudentDto>>> GetAllAsync(PagedRequest request);
 
         // Retrieves a list of student requirements for a specific student and term, allowing them to view the requirements they need to fulfill for that term.
-        Task<List<StudentRequirementDto>> GetRequirementsAsync(int studentId, int termId);
+        Task<Result<List<StudentRequirementDto>>> GetRequirementsAsync(int studentId, int termId);
 
         // Atomic Sql increament
-        Task IncrementRequirementAsync(int studentId, int clinicId, int termId);
+        Task<Result> IncrementRequirementAsync(int studentId, int clinicId, int termId);
     }
 }

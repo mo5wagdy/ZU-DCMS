@@ -63,9 +63,9 @@ namespace ZU_DCMS.APPLICATION.Extentions
             services.AddScoped<IBookingService, BookingService>();
             services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<IDiagnosisService, DiagnosisService>();
-            /* Services
             services.AddScoped<ICaseService, CaseService>();
             services.AddScoped<IStudentService, StudentService>();
+            /* Services
             services.AddScoped<IAdminService, AdminService>();
             services.AddScoped<IDashboardService, DashboardService>();
             */

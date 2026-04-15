@@ -1,20 +1,38 @@
-﻿using ZU_DCMS.APPLICATION.Common;
+﻿using AutoMapper;
+using System.Linq.Expressions;
+using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Contracts;
 using ZU_DCMS.APPLICATION.DTOs.Student;
 using ZU_DCMS.APPLICATION.Services.Interfaces;
+using ZU_DCMS.Domain.Entities;
 using ZU_DCMS.Domain.Interfaces;
 
 namespace ZU_DCMS.APPLICATION.Services.Implementations
 {
     internal class StudentService : IStudentService
     {
+        private readonly IUnitOfWork _uow;
         private readonly IRawSqlExecutor _sql;
+        private readonly ICacheService _cache;
+        private readonly IMapper _mapper;
+        private readonly IAppLogger<StudentService> _logger;
 
-        public StudentService(IRawSqlExecutor sql)
+        public StudentService
+        (
+            IRawSqlExecutor sql,
+            IUnitOfWork uow,
+            ICacheService cache, 
+            IMapper mapper, 
+            IAppLogger<StudentService> logger
+        )
         {
-            _sql = sql;   
+            _uow = uow;
+            _sql = sql;
+            _cache = cache;
+            _mapper = mapper;
+            _logger = logger;
         }
-        public async Task<StudentDto?> GetByIdAsync(int id)
+        public async Task<Result<StudentDto>> GetByIdAsync(int studentId)
         {
             /*
             1. Fetch student by Id
@@ -29,10 +47,32 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             5. Return result
             */
 
-            throw new NotImplementedException();
+            _logger.LogInfo("Fetching student with ID {StudentId}.", studentId);
+
+            // __ Fetch student with related data __ //
+            var student = await _uow.Repository<Student>().GetFirstOrDefaultAsync
+                (
+                    st => st.Id == studentId,
+                    true,
+                    s => s.TermRequirements.Where(tr => tr.Term.IsActive),
+                    s => s.CaseAssignments.Where(ca => ca.Clinic.IsActive)
+                );
+
+            // __ Handle not found __ //
+            if (student is null)
+            {
+                _logger.LogWarning("Student with ID {StudentId} not found.", studentId);
+              
+                return Result.Failure<StudentDto>("Student not found.");
+            }
+
+            _logger.LogInfo("Student with ID {StudentId} found. Mapping to DTO.", studentId);
+
+            // __ Map to DTO and return __ //
+            return Result.Success(_mapper.Map<StudentDto>(student));
         }
 
-        public async Task<StudentDto?> GetByUserIdAsync(string userId)
+        public async Task<Result<StudentDto>> GetByUserIdAsync(string userId)
         {
             /*
             1. Fetch student where Student.UserId == userId
@@ -42,10 +82,32 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             5. Return result
             */
 
-            throw new NotImplementedException();
+            _logger.LogInfo("Fetching student with User ID {UserId}.", userId);
+
+            // __ Fetch student with related data __ //
+            var student = await _uow.Repository<Student>().GetFirstOrDefaultAsync
+                (
+                    st => st.ApplicationUserId == userId,
+                    true,
+                    s => s.TermRequirements.Where(tr => tr.Term.IsActive),
+                    s => s.CaseAssignments.Where(ca => ca.Clinic.IsActive)
+                );
+
+            // __ Handle not found __ //
+            if (student is null)
+            {
+                _logger.LogWarning("Student with User ID {UserId} not found.", userId);
+               
+                return Result.Failure<StudentDto>("Student not found.");
+            }
+
+            _logger.LogInfo("Student with User ID {UserId} found. Mapping to DTO.", userId);
+
+            // __ Map to DTO and return __ //
+            return Result.Success(_mapper.Map<StudentDto>(student));
         }
 
-        public async Task<PagedResult<StudentDto>> GetAllAsync(PagedRequest request)
+        public async Task<Result<PagedResult<StudentDto>>> GetAllAsync(PagedRequest request)
         {
             /*
             1. Build base query from Students table
@@ -69,10 +131,63 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
                 - TotalCount
             */
 
-            throw new NotImplementedException();
+            _logger.LogInfo("Fetching students with pagination. Page: {Page}, PageSize: {PageSize}", request.Page, request.PageSize);
+
+            // __ Expression 
+            Expression<Func<Student, bool>> filter =  
+                p => p.FullName.Contains(request.SearchTerm ?? string.Empty) || p.StudentCode.Contains(request.SearchTerm ?? string.Empty);
+
+            // __ Func
+            Func<IQueryable<Student>, IOrderedQueryable<Student>> orderBy = q =>
+            {
+                    var sortBy = request.SortBy?.ToLower();
+
+                    // __ If Descending
+                    if (request.SortDescending)
+                    {
+                        return sortBy switch
+                        {
+                            "fullname" => q.OrderByDescending(s => s.FullName),
+                            "studentcode" => q.OrderByDescending(s => s.StudentCode),
+                            "academicyear" => q.OrderByDescending(s => s.AcademicYear),
+                            _ => q.OrderByDescending(s => s.Id)
+                        };
+
+                    }
+                    else // If Ascending
+                    {
+                        return sortBy switch
+                        {
+                            "fullname" => q.OrderBy(s => s.FullName),
+                            "studentcode" => q.OrderBy(s => s.StudentCode),
+                            "academicyear" => q.OrderBy(s => s.AcademicYear),
+                            _ => q.OrderBy(s => s.Id)
+                        };
+                    };
+             };
+
+            // __ Fetching according to the paginated request
+            var (item, totalCount) = await _uow.Repository<Student>().GetPagedListAsync
+                (
+                    skip: (request.Page - 1) * request.PageSize,
+                    take: (request.PageSize),
+                    predicate: filter,
+                    orderBy : orderBy,
+                    disabledTracking: true
+                );
+
+            // __ Mapping to DTO
+            var studentDtos = _mapper.Map<List<StudentDto>>(item);
+
+            // __ Creating the paged result
+            var pagedResult = PagedResult<StudentDto>.Create(studentDtos, totalCount, request);
+
+            _logger.LogInfo("Fetched {Count} students out of {TotalCount} total students.", studentDtos.Count, totalCount);
+
+            return Result.Success(pagedResult);
         }
 
-        public async Task<List<StudentRequirementDto>> GetRequirementsAsync(int studentId, int termId)
+        public async Task<Result<List<StudentRequirementDto>>> GetRequirementsAsync(int studentId, int termId)
         {
             /*
             1. Fetch student requirements where:
@@ -88,10 +203,50 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             4. Return list ordered by priority or creation date
             */
 
-            throw new NotImplementedException();
+            _logger.LogInfo("");
+
+            // __ Fetching From Cache If Available
+            var cacheKey = CacheKeys.StudentProgress(studentId);
+
+            var cached = await _cache.GetAsync<List<StudentRequirementDto>>(cacheKey);
+
+            if (cached != null)
+            {
+                _logger.LogInfo("");
+
+                return Result.Success(cached);
+            }
+
+            // __ If Not Found in Cache
+            var studentExist = _uow.Repository<Student>().ExistsAsync(s => s.Id == studentId);
+
+            // __ If Not Found
+            if (studentExist is null)
+            {
+                _logger.LogWarning("");
+
+                return Result.Failure<List<StudentRequirementDto>>("");
+            }
+
+            // fetching requirement for the student 
+            var requirements = _uow.Repository<TermRequirement>().GetListAsync
+                (
+                    r => r.StudentId == studentId && r.TermId == termId,
+                    true,
+                    r => r.Clinic
+                );
+
+            // mapping to DTO
+            var dtos = _mapper.Map<List<StudentRequirementDto>>(requirements);
+
+            // Refreshing the cache
+            await _cache.SetAsync(cacheKey, dtos, CacheDuration.Short);
+
+            return Result.Success(dtos);
         }
 
-        public async Task IncrementRequirementAsync(int studentId, int clinicId, int termId)
+        // __ Increamenting student requirement for the assigned case
+        public async Task<Result> IncrementRequirementAsync(int studentId, int clinicId, int termId)
         {
             var sql = @"
             UPDATE TermRequirements
@@ -101,7 +256,8 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             AND TermId = @termId";
 
             await _sql.ExecuteAsync(sql, new { studentId, clinicId, termId });
-        }
 
+            return Result.Success();
+        }
     }
 }

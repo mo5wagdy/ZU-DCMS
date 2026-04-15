@@ -1,5 +1,4 @@
 ﻿
-
 namespace ZU_DCMS.APPLICATION.Contracts
 {
     // __ This interface defines a contract for executing raw SQL queries and retrieving results. __ //

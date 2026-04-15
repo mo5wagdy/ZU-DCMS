@@ -175,11 +175,17 @@ public class PatientService : IPatientService
         _logger.LogInfo("Fetching patients with pagination. Page: {Page}, PageSize: {PageSize}, SortBy: {SortBy}, SortDescending: {SortDescending}, SearchTerm: {SearchTerm}");
 
         // ________________ Search ________________ //
-        Expression<Func<Patient, bool>> filter = p => 
-            string.IsNullOrWhiteSpace(request.SearchTerm) ||
-            p.FullName.Contains(request.SearchTerm) ||
-            p.PatientCode.Contains(request.SearchTerm) ||
-            p.PhoneNumber.Contains(request.SearchTerm);
+        Expression<Func<Patient, bool>>? filter = null;
+
+        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+        {
+            var term = request.SearchTerm.Trim().ToLower();
+
+            filter = p =>
+                     p.FullName.Contains(term) ||
+                     p.PatientCode.Contains(term) ||
+                     p.PhoneNumber.Contains(term);
+        }
         
         // ________________ Sorting ________________ //
         Func<IQueryable<Patient>, IOrderedQueryable<Patient>> orderBy = q =>

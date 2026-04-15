@@ -20,6 +20,7 @@ namespace ZU_DCMS.APPLICATION.Common
 
         // ________ In every change in requirements ________ //
         public static string StudentProgress(int studentId) => $"student_progress_{studentId}";
+        public static string StudentRequirements(int studentId, int termId) => $"student_requirement{studentId}_{termId}";
     }
 }
 

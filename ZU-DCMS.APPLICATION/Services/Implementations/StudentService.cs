@@ -133,16 +133,22 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
 
             _logger.LogInfo("Fetching students with pagination. Page: {Page}, PageSize: {PageSize}", request.Page, request.PageSize);
 
-            // __ Expression 
-            Expression<Func<Student, bool>> filter =  
-                p => p.FullName.Contains(request.SearchTerm ?? string.Empty) || p.StudentCode.Contains(request.SearchTerm ?? string.Empty);
+            // __ Expression for filtering __ //
+            Expression<Func<Student, bool>>? filter = null;
 
-            // __ Func
+            if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+            {
+                var term = request.SearchTerm.Trim().ToLower();
+
+                filter = s => s.FullName.ToLower().Contains(term) || s.StudentCode.ToLower().Contains(term);
+            }
+
+            // __ Func for ordering according to user choice __ // 
             Func<IQueryable<Student>, IOrderedQueryable<Student>> orderBy = q =>
             {
                     var sortBy = request.SortBy?.ToLower();
 
-                    // __ If Descending
+                    // __ If Descending __ //
                     if (request.SortDescending)
                     {
                         return sortBy switch
@@ -154,7 +160,7 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
                         };
 
                     }
-                    else // If Ascending
+                    else // __ If Ascending __ //
                     {
                         return sortBy switch
                         {
@@ -166,7 +172,7 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
                     };
              };
 
-            // __ Fetching according to the paginated request
+            // __ Fetching according to the paginated request using filtering & ordering settings __ //
             var (item, totalCount) = await _uow.Repository<Student>().GetPagedListAsync
                 (
                     skip: (request.Page - 1) * request.PageSize,
@@ -176,10 +182,10 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
                     disabledTracking: true
                 );
 
-            // __ Mapping to DTO
+            // __ Mapping to DTO __ //
             var studentDtos = _mapper.Map<List<StudentDto>>(item);
 
-            // __ Creating the paged result
+            // __ Creating the paged result __ //
             var pagedResult = PagedResult<StudentDto>.Create(studentDtos, totalCount, request);
 
             _logger.LogInfo("Fetched {Count} students out of {TotalCount} total students.", studentDtos.Count, totalCount);
@@ -203,51 +209,63 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             4. Return list ordered by priority or creation date
             */
 
-            _logger.LogInfo("");
+            _logger.LogInfo("Fetching Student Requirements");
 
-            // __ Fetching From Cache If Available
-            var cacheKey = CacheKeys.StudentProgress(studentId);
+            // __ Fetching From Cache If Available __ //
+            var cacheKey = CacheKeys.StudentRequirements(studentId, termId);
 
             var cached = await _cache.GetAsync<List<StudentRequirementDto>>(cacheKey);
 
             if (cached != null)
             {
-                _logger.LogInfo("");
+                _logger.LogInfo("Fetched from cache successfully");
 
                 return Result.Success(cached);
             }
 
-            // __ If Not Found in Cache
-            var studentExist = _uow.Repository<Student>().ExistsAsync(s => s.Id == studentId);
+            // __ If Not Found in Cache __ //
+            var studentExist = await _uow.Repository<Student>().ExistsAsync(s => s.Id == studentId);
 
-            // __ If Not Found
-            if (studentExist is null)
+            // __ If Not Found __ //
+            if (!studentExist)
             {
-                _logger.LogWarning("");
+                _logger.LogWarning("Error while fetcheing student data");
 
-                return Result.Failure<List<StudentRequirementDto>>("");
+                return Result.Failure<List<StudentRequirementDto>>("الطالب غير موجود");
             }
 
-            // fetching requirement for the student 
-            var requirements = _uow.Repository<TermRequirement>().GetListAsync
+            // __ Fetching requirement for the student __ //
+            var requirements = await _uow.Repository<TermRequirement>().GetListAsync
                 (
                     r => r.StudentId == studentId && r.TermId == termId,
                     true,
                     r => r.Clinic
                 );
 
-            // mapping to DTO
+            if (!requirements.Any())
+            {
+                _logger.LogWarning("Student Requirements Not Found");
+
+                return Result.Failure<List<StudentRequirementDto>>("لا يوجد متطلبات لهذا الطالب");
+            }
+
+
+            // __ Mapping to DTO __ //
             var dtos = _mapper.Map<List<StudentRequirementDto>>(requirements);
 
-            // Refreshing the cache
+            // __ Refreshing the cache __ //
             await _cache.SetAsync(cacheKey, dtos, CacheDuration.Short);
+
+            _logger.LogInfo("Student Requirement Fetched Successfully");
 
             return Result.Success(dtos);
         }
 
-        // __ Increamenting student requirement for the assigned case
+        // __ Atomically Increamenting student requirement for the assigned case __ //
         public async Task<Result> IncrementRequirementAsync(int studentId, int clinicId, int termId)
         {
+            _logger.LogInfo("Incrementing requirement for student {StudentId}", studentId);
+
             var sql = @"
             UPDATE TermRequirements
             SET CompletedCount = CompletedCount + 1
@@ -255,7 +273,14 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             AND ClinicId = @clinicId
             AND TermId = @termId";
 
-            await _sql.ExecuteAsync(sql, new { studentId, clinicId, termId });
+            var rows = await _sql.ExecuteAsync(sql, new { studentId, clinicId, termId });
+
+            if(rows == 0)
+            {
+                _logger.LogWarning("No Rows Affected");
+            }
+
+            _logger.LogInfo("Incremented requirement for student {StudentId}", studentId);
 
             return Result.Success();
         }

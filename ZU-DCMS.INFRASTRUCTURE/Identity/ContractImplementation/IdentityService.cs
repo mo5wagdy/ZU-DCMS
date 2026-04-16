@@ -98,7 +98,6 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
         }
 
         // _________________________ Role Management _________________________ //
-
         public async Task<bool> AssignRoleAsync(string userId, string role)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -117,7 +116,6 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
         }
 
         // _________________________ Lookup _________________________ //
-
         public async Task<ApplicationUserDto?> FindByUsernameAsync(string username)
         {
             var user = await _userManager.FindByNameAsync(username.Trim().ToLower());
@@ -153,7 +151,6 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
         }
 
         // _________________________ Update _________________________ //
-
         public async Task<bool> UpdateUsernameAsync(string userId, string newUsername)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -169,7 +166,6 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
         public async Task<bool> EmailExistsAsync(string email) => await _userManager.FindByEmailAsync(email.Trim().ToLower()) != null;
 
         // _________________________ Private Helpers _________________________ //
-
         private static ApplicationUserDto MapToDto(ApplicationUser user) => new()
         {
             Id = user.Id,

@@ -1,7 +1,4 @@
 ﻿using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using ZU_DCMS.APPLICATION.DTOs.Admin;
 using ZU_DCMS.Domain.UserRoles;
 
@@ -34,6 +31,11 @@ namespace ZU_DCMS.APPLICATION.Validators.Admin
                    .EmailAddress()
                    .WithMessage("الإيميل غير صحيح");
 
+            RuleFor(x => x.Password)
+                   .NotEmpty()
+                   .WithMessage("كلمة المرور مطلوبه")
+                   .Length(8);
+
             RuleFor(x => x.Role)
                    .NotEmpty()
                    .WithMessage("الدور مطلوب")
@@ -41,8 +43,8 @@ namespace ZU_DCMS.APPLICATION.Validators.Admin
                    .WithMessage("الدور غير صحيح");
 
             RuleFor(x => x.AcademicYear)
-                   .InclusiveBetween(1, 6)
-                   .WithMessage("السنة الدراسية لازم تكون بين 1 و 6")
+                   .InclusiveBetween(1, 5)
+                   .WithMessage("السنة الدراسية لازم تكون بين 1 و 5")
                    .When(x => x.Role == UserRoles.Student);
 
         }

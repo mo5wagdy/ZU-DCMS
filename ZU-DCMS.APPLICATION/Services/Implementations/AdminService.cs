@@ -5,7 +5,9 @@ using ZU_DCMS.APPLICATION.Contracts;
 using ZU_DCMS.APPLICATION.DTOs.Admin;
 using ZU_DCMS.APPLICATION.DTOs.Student;
 using ZU_DCMS.APPLICATION.Services.Interfaces;
+using ZU_DCMS.Domain.Entities;
 using ZU_DCMS.Domain.Interfaces;
+using ZU_DCMS.Domain.UserRoles;
 
 namespace ZU_DCMS.APPLICATION.Services.Implementations
 {
@@ -15,6 +17,7 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
         private readonly IUnitOfWork _uow;
         private readonly IIdentityService _identity;
         private readonly ICacheService _cache;
+        private readonly IUserCodeGenerator _codeGen;
         private readonly IMapper _mapper;
         private readonly ILogger<AdminService> _logger;
 
@@ -22,12 +25,14 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             IUnitOfWork uow,
             IIdentityService identity,
             ICacheService cache,
+            IUserCodeGenerator codeGen,
             IMapper mapper,
             ILogger<AdminService> logger)
         {
             _uow = uow;
             _identity = identity;
             _cache = cache;
+            _codeGen = codeGen;
             _mapper = mapper;
             _logger = logger;
         }
@@ -58,20 +63,26 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             return Result.Success<PagedResult<StaffUsersDto>>(appUsers.Result);
         }
 
-        public async Task<StaffUsersDto?> GetUserByIdAsync(string userId)
+        public async Task<Result<StaffUsersDto>> GetUserByIdAsync(string userId)
         {
             /*
             1. Fetch user by Id
             2. If null → return null
-            3. Include roles + permissions + status
-            4. Map to StaffUsersDto
-            5. Return DTO
+            3. Map to StaffUsersDto
+            4. Return DTO
             */
 
-            throw new NotImplementedException();
+            var user = _identity.FindByIdAsync(userId);
+
+            if (user is null)
+            {
+                return Result.Failure<StaffUsersDto>("المستخدم غير موجود");
+            }
+
+            return Result.Success<StaffUsersDto>(_mapper.Map<StaffUsersDto>(user));
         }
 
-        public async Task<StaffUsersDto> CreateUserAsync(CreateUserDto dto)
+        public async Task<Result<StaffUsersDto>> CreateUserAsync(CreateUserDto dto)
         {
             /*
             1. Validate DTO (email, password, role)
@@ -90,7 +101,105 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             8. Return result
             */
 
-            throw new NotImplementedException();
+            // Check email uniqueness
+            if (await _identity.EmailExistsAsync(dto.Email))
+            {
+                return Result.Failure<StaffUsersDto>("الإيميل موجود بالفعل");
+            }
+
+            // Check username uniqueness
+            if (await _identity.UsernameExistsAsync(dto.Username))
+            {
+                return Result.Failure<StaffUsersDto>("اسم المستخدم موجود بالفعل");
+            }
+
+            // Check Roles
+            var roles = await _identity.GetRolesAsync(dto.Role);
+
+            if (roles.Contains(UserRoles.Patient))
+            {
+                return Result.Failure<StaffUsersDto>("لا يمكن إضافه عيان إلى الأعضاء المسؤولين");
+            }
+
+            await _uow.BeginTransactionAsync();
+
+            try
+            {
+                // Create Identity user
+                var (success, userId, error) = await _identity.CreateUserAsync
+                    (
+                        dto.Username,
+                        dto.Email,
+                        dto.FullName,
+                        dto.Password
+                    );
+
+                if (!success)
+                {
+                    await _uow.RollbackTransactionAsync();
+
+                    return Result.Failure<StaffUsersDto>(error);
+                }
+
+                await _identity.AssignRoleAsync(userId, dto.Role);
+
+                if (dto.Role == UserRoles.Student)
+                {
+                    var student = new Student
+                    {
+                        ApplicationUserId = userId,
+                        StudentCode = await _codeGen.GenerateAsync("STU", "StudentCodeSeq"),
+                        FullName = dto.FullName.Trim(),
+                        AcademicYear = dto.AcademicYear ?? 1,
+                        IsActive = true,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    await _uow.Repository<Student>().AddAsync(student);
+                }
+
+                else if (dto.Role == UserRoles.InternDoctor)
+                {
+                    var intern = new InternDoctor
+                    {
+                        ApplicationUserId = userId,
+                        DoctorCode = await _codeGen.GenerateAsync("IND", "InternDoctorCodeSeq"),
+                        FullName = dto.FullName.Trim(),
+                        IsActive = true,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    await _uow.Repository<InternDoctor>().AddAsync(intern);
+                }
+
+                await _uow.CommitTransactionAsync(userId);
+
+                var user = await _identity.FindByIdAsync(userId);
+
+                var result = new StaffUsersDto
+                {
+                    Id = userId,
+                    FullName = dto.FullName,
+                    Username = dto.Username,
+                    Email = dto.Email,
+                    Role = roles.FirstOrDefault() ?? string.Empty,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                //email
+
+                return Result.Success(result);
+            }
+
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating user {Username}", dto.Username);
+
+                await _uow.RollbackTransactionAsync();
+                
+                return Result.Failure<StaffUsersDto>("حدث خطأ أثناء إنشاء المستخدم");
+            }
         }
 
         public async Task ToggleUserActiveAsync(string userId)

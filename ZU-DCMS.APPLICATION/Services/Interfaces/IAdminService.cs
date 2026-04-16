@@ -13,8 +13,8 @@ namespace ZU_DCMS.APPLICATION.Services.Interfaces
         // Users 
         // Retrieves a list of all users in the system, allowing administrators to view and manage user accounts.
         Task<Result<PagedResult<StaffUsersDto>>> GetAllUsersAsync(PagedRequest request, string role);
-        Task<StaffUsersDto?> GetUserByIdAsync(string userId);
-        Task<StaffUsersDto> CreateUserAsync(CreateUserDto dto);
+        Task<Result<StaffUsersDto>> GetUserByIdAsync(string userId);
+        Task<Result<StaffUsersDto>> CreateUserAsync(CreateUserDto dto);
         Task ToggleUserActiveAsync(string userId);
 
         // System Config 

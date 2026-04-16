@@ -1,17 +1,42 @@
-﻿using ZU_DCMS.APPLICATION.Common;
+﻿using AutoMapper;
+using Microsoft.Extensions.Logging;
+using ZU_DCMS.APPLICATION.Common;
+using ZU_DCMS.APPLICATION.Contracts;
 using ZU_DCMS.APPLICATION.DTOs.Admin;
 using ZU_DCMS.APPLICATION.DTOs.Student;
 using ZU_DCMS.APPLICATION.Services.Interfaces;
+using ZU_DCMS.Domain.Interfaces;
 
 namespace ZU_DCMS.APPLICATION.Services.Implementations
 {
     internal class AdminService : IAdminService
     {
+
+        private readonly IUnitOfWork _uow;
+        private readonly IIdentityService _identity;
+        private readonly ICacheService _cache;
+        private readonly IMapper _mapper;
+        private readonly ILogger<AdminService> _logger;
+
+        public AdminService(
+            IUnitOfWork uow,
+            IIdentityService identity,
+            ICacheService cache,
+            IMapper mapper,
+            ILogger<AdminService> logger)
+        {
+            _uow = uow;
+            _identity = identity;
+            _cache = cache;
+            _mapper = mapper;
+            _logger = logger;
+        }
+
         // =========================
         // USERS
         // =========================
 
-        public async Task<PagedResult<AdminUserDto>> GetAllUsersAsync(PagedRequest request, string? role = null)
+        public async Task<Result<PagedResult<StaffUsersDto>>> GetAllUsersAsync(PagedRequest request, string role)
         {
             /*
             1. Build base query from Users table
@@ -19,27 +44,34 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             3. Apply search (if request.Search exists)
             4. Apply pagination (Skip / Take)
             5. Include roles + status
-            6. Map to AdminUserDto
+            6. Map to StaffUsersDto
             7. Return PagedResult (Items + TotalCount)
             */
 
-            throw new NotImplementedException();
+            var appUsers = _identity.GetAllUsersAsync(request, role);
+
+            if(appUsers is null)
+            {
+                return Result.Failure<PagedResult<StaffUsersDto>>("خطأ في تحميل المستخدمين");
+            }
+
+            return Result.Success<PagedResult<StaffUsersDto>>(appUsers.Result);
         }
 
-        public async Task<AdminUserDto?> GetUserByIdAsync(string userId)
+        public async Task<StaffUsersDto?> GetUserByIdAsync(string userId)
         {
             /*
             1. Fetch user by Id
             2. If null → return null
             3. Include roles + permissions + status
-            4. Map to AdminUserDto
+            4. Map to StaffUsersDto
             5. Return DTO
             */
 
             throw new NotImplementedException();
         }
 
-        public async Task<AdminUserDto> CreateUserAsync(CreateUserDto dto)
+        public async Task<StaffUsersDto> CreateUserAsync(CreateUserDto dto)
         {
             /*
             1. Validate DTO (email, password, role)
@@ -54,7 +86,7 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
                 - Send welcome email
                 - Log admin action
 
-            7. Map to AdminUserDto
+            7. Map to StaffUsersDto
             8. Return result
             */
 

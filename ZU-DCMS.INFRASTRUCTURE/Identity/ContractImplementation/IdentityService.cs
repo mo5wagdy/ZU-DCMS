@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Contracts;
+using ZU_DCMS.APPLICATION.DTOs.Admin;
 using ZU_DCMS.APPLICATION.DTOs.Auth;
 
 namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
@@ -10,11 +11,69 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
     public class IdentityService : IIdentityService
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IMapper _mapper;
 
-        public IdentityService(UserManager<ApplicationUser> userManager) => _userManager = userManager;
+        public IdentityService(UserManager<ApplicationUser> userManager, IMapper mapper) {_userManager = userManager; _mapper = mapper;} 
+
+        // ________________________ Get ________________________ // 
+        public async Task<PagedResult<StaffUsersDto>> GetAllUsersAsync(PagedRequest request, string? role = null)
+        {
+            var users =  _userManager.Users.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(role))
+            {
+                var usersInRole = await _userManager.GetUsersInRoleAsync(role);
+
+                users = usersInRole.AsQueryable();
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+            {
+                var searchTerm = (request.SearchTerm ?? "").Trim().ToLower();
+
+                users = users.Where
+                    (
+                        u => u.UserName != null && u.UserName.ToLower().Contains(searchTerm) ||
+                        u.FullName != null && u.FullName.ToLower().Contains(searchTerm) ||
+                        u.Email != null && u.Email.ToLower().Contains(searchTerm)
+                    );
+            }
+
+            var sortBy = request.SortBy?.Trim().ToLower() ?? "fullname";
+
+            if (request.SortDescending)
+            {
+                users = sortBy switch
+                {
+                    "fullname" => users.OrderByDescending(u => u.FullName),
+                    "email" => users.OrderByDescending(u => u.Email),
+                    _ => users.OrderByDescending(u => u.Id)
+                };
+            }
+            else
+            {
+                users = sortBy switch
+                {
+                    "fullname" => users.OrderBy(u => u.FullName),
+                    "email" => users.OrderBy(u => u.Email),
+                    _ => users.OrderBy(u => u.Id)
+                };
+            }
+
+            var totalCount = await users.CountAsync();
+
+            var items = users
+                        .Skip((request.Page - 1) * request.PageSize)
+                        .Take(request.PageSize).ToListAsync();
+
+            var usersDtos = _mapper.Map<List<StaffUsersDto>>(items);
+
+            var result = PagedResult<StaffUsersDto>.Create(usersDtos, totalCount, request);
+
+            return result;
+        }
 
         // _________________________ Create _________________________ //
-
         public async Task<(bool Success, string UserId, string Error)> CreateUserAsync
         (
             string username,

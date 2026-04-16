@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿
 using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.DTOs.Admin;
 using ZU_DCMS.APPLICATION.DTOs.Student;
@@ -14,9 +12,9 @@ namespace ZU_DCMS.APPLICATION.Services.Interfaces
     {
         // Users 
         // Retrieves a list of all users in the system, allowing administrators to view and manage user accounts.
-        Task<PagedResult<AdminUserDto>> GetAllUsersAsync(PagedRequest request, string? role = null);
-        Task<AdminUserDto?> GetUserByIdAsync(string userId);
-        Task<AdminUserDto> CreateUserAsync(CreateUserDto dto);
+        Task<Result<PagedResult<StaffUsersDto>>> GetAllUsersAsync(PagedRequest request, string role);
+        Task<StaffUsersDto?> GetUserByIdAsync(string userId);
+        Task<StaffUsersDto> CreateUserAsync(CreateUserDto dto);
         Task ToggleUserActiveAsync(string userId);
 
         // System Config 

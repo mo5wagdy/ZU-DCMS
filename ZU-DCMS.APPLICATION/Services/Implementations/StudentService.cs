@@ -278,6 +278,8 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             if(rows == 0)
             {
                 _logger.LogWarning("No Rows Affected");
+
+                return Result.Failure("لم تتم زيادة المتطلبات");
             }
 
             _logger.LogInfo("Incremented requirement for student {StudentId}", studentId);

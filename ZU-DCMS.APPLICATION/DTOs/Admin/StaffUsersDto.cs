@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace ZU_DCMS.APPLICATION.DTOs.Admin
 {
     // __ DTO for Admin User information __ //
-    public class AdminUserDto
+    public class StaffUsersDto
     {
         public string Id { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;

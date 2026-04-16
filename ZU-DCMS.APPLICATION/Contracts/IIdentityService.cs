@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿
+using ZU_DCMS.APPLICATION.Common;
+using ZU_DCMS.APPLICATION.DTOs.Admin;
 using ZU_DCMS.APPLICATION.DTOs.Auth;
 
 namespace ZU_DCMS.APPLICATION.Contracts
@@ -9,12 +9,17 @@ namespace ZU_DCMS.APPLICATION.Contracts
     // __ This interface defines the contract for user identity management, including user creation, role assignment, lookup, validation, and updates. __ //
     public interface IIdentityService
     {
+        // ________________________ Get ________________________ // 
+        Task<PagedResult<StaffUsersDto>> GetAllUsersAsync(PagedRequest request, string? role = null); 
+
         // _________________________ Create _________________________ //
-        Task<(bool Success, string UserId, string Error)> CreateUserAsync(
-            string username,
-            string? email,
-            string fullName,
-            string password);
+        Task<(bool Success, string UserId, string Error)> CreateUserAsync
+            (
+                string username,
+                string? email,
+                string fullName,
+                string password
+            );
 
         // _________________________ Role Management _________________________ //
         Task<bool> AssignRoleAsync(string userId, string role);

@@ -28,15 +28,6 @@ namespace ZU_DCMS.APPLICATION.Extentions
             // __________ AutoMapper __________ //
             services.AddAutoMapper(cfg => { }, typeof(ApplicationServiceExtensions));
 
-            // __________ Hangfire __________ //
-            services.AddHangfire(config =>
-            {
-                config.UseSqlServerStorage(services.BuildServiceProvider().GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection"));
-            });
-
-            // __________ Hangfire Server __________ //
-            services.AddHangfireServer();
-
             // __________ Event Handlers __________ //
             services.AddScoped<IEventPublisher, HangfireEventPublisher>();
             services.AddScoped<EventDispatcher>();
@@ -61,13 +52,13 @@ namespace ZU_DCMS.APPLICATION.Extentions
             services.AddScoped<IPatientService, PatientService>();
             services.AddScoped<ISessionService, SessionService>();
             services.AddScoped<IBookingService, BookingService>();
-            services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<IDiagnosisService, DiagnosisService>();
             services.AddScoped<ICaseService, CaseService>();
             services.AddScoped<IStudentService, StudentService>();
-            /* Services
             services.AddScoped<IAdminService, AdminService>();
+            /* Services
             services.AddScoped<IDashboardService, DashboardService>();
+            services.AddScoped<IPaymentService, PaymentService>();
             */
             return services;
         }

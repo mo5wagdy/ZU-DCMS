@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Hangfire;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,6 +26,14 @@ namespace ZU_DCMS.INFRASTRUCTURE.Extentions
 
             // _________________ Specify the assembly for migrations _________________ //
             b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)));
+
+            // __________ Hangfire __________ //
+            services.AddHangfire(config =>
+            {
+                config.UseSqlServerStorage(configuration.GetConnectionString("DefaultConnection"));
+            });
+            // __________ Hangfire Server __________ //
+            services.AddHangfireServer();
 
             // _____________________ Identity _____________________ //
             services.AddIdentity<ApplicationUser, IdentityRole>(options =>

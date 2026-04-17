@@ -1,7 +1,4 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Contracts;
 
@@ -21,6 +18,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Cache
         public Task<T?> GetAsync<T>(string key)
         {
             _cache.TryGetValue(key, out T? value);
+           
             return Task.FromResult(value);
         }
 
@@ -41,6 +39,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Cache
         public Task RemoveAsync(string key)
         {
             _cache.Remove(key);
+            
             return Task.CompletedTask;
         }
 
@@ -48,6 +47,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Cache
         public Task RemoveByPrefixAsync(string prefix)
         {
             _cache.Remove(prefix);
+           
             return Task.CompletedTask;
         }
     }

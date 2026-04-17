@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace ZU_DCMS.APPLICATION.DTOs.Admin
 {
     // __ DTO for updating an existing Term __ //

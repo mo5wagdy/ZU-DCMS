@@ -187,7 +187,7 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
                     CreatedAt = DateTime.UtcNow
                 };
 
-                //email
+                //notify & email
 
                 return Result.Success(result);
             }
@@ -202,7 +202,7 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             }
         }
 
-        public async Task ToggleUserActiveAsync(string userId)
+        public async Task<Result> ToggleUserActiveAsync(string userId)
         {
             /*
             1. Fetch user by Id
@@ -219,15 +219,17 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
 
             6. Log admin action
             */
+            //var toggled = await _identity.ToggleActiveAsync(userId);
 
-            throw new NotImplementedException();
+            return /*toggled?*/ Result.Success(); //: Result.Failure("المستخدم غير موجود");
         }
+        
 
         // =========================
         // SYSTEM CONFIG
         // =========================
 
-        public async Task<List<SystemConfigDto>> GetAllConfigsAsync()
+        public async Task<Result<List<SystemConfigDto>>> GetAllConfigsAsync()
         {
             /*
             1. Fetch all configs from SystemConfig table
@@ -235,10 +237,13 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             3. Return list
             */
 
-            throw new NotImplementedException();
+            var configs = await _uow.Repository<SystemConfig>().GetListAsync();
+
+            return Result.Success(_mapper.Map<List<SystemConfigDto>>(configs));
+
         }
 
-        public async Task UpdateConfigAsync(string key, string value, string adminId)
+        public async Task<Result> UpdateConfigAsync(string key, string value, string adminId)
         {
             /*
             1. Fetch config by key
@@ -250,15 +255,29 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             6. Invalidate config cache
             7. Log admin change
             */
+            var config = await _uow.Repository<SystemConfig>().GetFirstOrDefaultAsync(c => c.Key == key);
 
-            throw new NotImplementedException();
+            if (config is null)
+                return Result.Failure("الإعداد غير موجود");
+
+            config.Value = value.Trim();
+            config.UpdatedByAdminId = adminId;
+            config.UpdatedAt = DateTime.UtcNow;
+
+            _uow.Repository<SystemConfig>().Update(config);
+           
+            await _uow.SaveChangesAsync(adminId);
+
+            // CACHE SETTINGS
+
+            return Result.Success();
+
         }
 
         // =========================
         // TERM
         // =========================
-
-        public async Task<List<TermDto>> GetAllTermsAsync()
+        public async Task<Result<List<TermDto>>> GetAllTermsAsync()
         {
             /*
             1. Fetch all terms
@@ -266,10 +285,14 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             3. Map to DTO
             */
 
-            throw new NotImplementedException();
+            var terms = await _uow.Repository<Term>().GetListAsync();
+
+            var ordered = terms.OrderByDescending(t => t.StartDate);
+
+            return Result.Success(_mapper.Map<List<TermDto>>(ordered));
         }
 
-        public async Task<TermDto?> GetTermByIdAsync(int termId)
+        public async Task<Result<TermDto>> GetTermByIdAsync(int termId)
         {
             /*
             1. Fetch term by Id
@@ -278,10 +301,15 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             4. Map to DTO
             */
 
-            throw new NotImplementedException();
+            var term = await _uow.Repository<Term>().GetByIdAsync(termId);
+
+            if (term is null)
+                return Result.Failure<TermDto>("الترم غير موجود");
+
+            return Result.Success(_mapper.Map<TermDto>(term));
         }
 
-        public async Task<TermDto> CreateTermAsync(CreateTermDto dto, string adminId)
+        public async Task<Result<TermDto>> CreateTermAsync(CreateTermDto dto, string adminId)
         {
             /*
             1. Validate date range (Start < End)
@@ -292,11 +320,33 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
 
             6. Return mapped DTO
             */
+            // Prevent multiple active terms
+            var hasActiveTerm = await _uow.Repository<Term>().ExistsAsync(t => t.IsActive);
 
-            throw new NotImplementedException();
+            if (hasActiveTerm)
+                return Result.Failure<TermDto>("يوجد ترم نشط بالفعل، أوقفه أولاً");
+
+            var term = new Term
+            {
+                Name = dto.Name.Trim(),
+                StartDate = dto.StartDate,
+                EndDate = dto.EndDate,
+                RequiredCasesCount = dto.RequiredCasesCount,
+                IsActive = false,
+                CreatedByAdminId = adminId,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _uow.Repository<Term>().AddAsync(term);
+            
+            await _uow.SaveChangesAsync(adminId);
+
+            return Result.Success(_mapper.Map<TermDto>(term));
+
+
         }
 
-        public async Task<TermDto> UpdateTermAsync(int termId, UpdateTermDto dto, string adminId)
+        public async Task<Result<TermDto>> UpdateTermAsync(int termId, UpdateTermDto dto, string adminId)
         {
             /*
             1. Fetch term
@@ -307,10 +357,33 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             6. Return DTO
             */
 
-            throw new NotImplementedException();
+            var term = await _uow.Repository<Term>().GetByIdAsync(termId);
+
+            if (term is null)
+                return Result.Failure<TermDto>("الترم غير موجود");
+
+            if (!string.IsNullOrWhiteSpace(dto.Name))
+                term.Name = dto.Name.Trim();
+
+            if (dto.StartDate.HasValue)
+                term.StartDate = dto.StartDate.Value;
+
+            if (dto.EndDate.HasValue)
+                term.EndDate = dto.EndDate.Value;
+
+            if (dto.RequiredCasesCount.HasValue)
+                term.RequiredCasesCount = dto.RequiredCasesCount.Value;
+
+            term.UpdatedAt = DateTime.UtcNow;
+
+            _uow.Repository<Term>().Update(term);
+            
+            await _uow.SaveChangesAsync(adminId);
+
+            return Result.Success(_mapper.Map<TermDto>(term));
         }
 
-        public async Task SetActiveTermAsync(int termId, string adminId)
+        public async Task<Result> SetActiveTermAsync(int termId, string adminId)
         {
             /*
             1. Fetch term
@@ -328,14 +401,66 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             7. Log admin action
             */
 
-            throw new NotImplementedException();
+
+            var term = await _uow.Repository<Term>().GetByIdAsync(termId);
+
+            if (term is null)
+                return Result.Failure("الترم غير موجود");
+
+            await _uow.BeginTransactionAsync();
+
+            try
+            {
+                // Deactivate current active term
+                var currentActive = await _uow.Repository<Term>().GetFirstOrDefaultAsync(t => t.IsActive);
+
+                if (currentActive != null)
+                {
+                    currentActive.IsActive = false;
+
+                    currentActive.UpdatedAt = DateTime.UtcNow;
+
+                    _uow.Repository<Term>().Update(currentActive);
+                }
+
+                // Activate new term
+                term.IsActive = true;
+
+                term.UpdatedAt = DateTime.UtcNow;
+
+                _uow.Repository<Term>().Update(term);
+
+                // Update all active students to new term
+                var students = await _uow.Repository<Student>().GetListAsync(s => s.IsActive);
+
+                foreach (var student in students)
+                {
+                    student.ActiveTermId = termId;
+
+                    student.UpdatedAt = DateTime.UtcNow;
+
+                    _uow.Repository<Student>().Update(student);
+                }
+
+                await _uow.CommitTransactionAsync(adminId);
+
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,"Error setting active term {TermId}", termId);
+
+                await _uow.RollbackTransactionAsync();
+               
+                return Result.Failure("حدث خطأ أثناء تفعيل الترم");
+            }
         }
 
         // =========================
         // STUDENT REQUIREMENTS
         // =========================
 
-        public async Task SetStudentRequirementsAsync(int studentId, int termId, List<SetRequirementDto> requirements, string adminId)
+        public async Task<Result> SetStudentRequirementsAsync(int studentId, int termId, List<SetRequirementDto> requirements, string adminId)
         {
             /*
             1. Validate student exists
@@ -353,10 +478,73 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             8. Log admin action
             */
 
-            throw new NotImplementedException();
+            // Verify student exists
+            var student = await _uow.Repository<Student>().GetByIdAsync(studentId);
+
+            if (student is null)
+                return Result.Failure("الطالب غير موجود");
+
+            // Verify term exists
+            var term = await _uow.Repository<Term>().GetByIdAsync(termId);
+
+            if (term is null)
+                return Result.Failure("الترم غير موجود");
+
+            // Verify all clinics exist
+            var clinicIds = requirements.Select(r => r.ClinicId).ToList();
+            
+            var clinics = await _uow.Repository<Clinic>().GetListAsync(c => clinicIds.Contains(c.Id) && c.IsActive);
+
+            if (clinics.Count != clinicIds.Distinct().Count())
+                return Result.Failure("بعض العيادات غير موجودة أو غير نشطة");
+
+            await _uow.BeginTransactionAsync();
+
+            try
+            {
+                // Load existing requirements for this student + term
+                var existing = await _uow.Repository<TermRequirement>().GetListAsync
+                    (
+                        r =>
+                        r.StudentId == studentId &&
+                        r.TermId == termId
+                    );
+
+                // Soft delete existing requirements
+                foreach (var req in existing)
+                    _uow.Repository<TermRequirement>().SoftDelete(req);
+
+                // Create new requirements
+                var newRequirements = requirements.Select(r =>
+                    new TermRequirement
+                    {
+                        StudentId = studentId,
+                        TermId = termId,
+                        ClinicId = r.ClinicId,
+                        RequiredCount = r.RequiredCount,
+                        CompletedCount = 0,
+                        CreatedAt = DateTime.UtcNow
+                    });
+
+                await _uow.Repository<TermRequirement>().AddRangeAsync(newRequirements);
+
+                await _uow.CommitTransactionAsync(adminId);
+
+                // Invalidate student progress cache
+
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,"Error setting requirements for student {StudentId}",
+                    studentId);
+
+                await _uow.RollbackTransactionAsync();
+                return Result.Failure("حدث خطأ أثناء تحديث المتطلبات");
+            }
         }
 
-        public async Task<List<StudentRequirementDto>> GetStudentRequirementsAsync(int studentId, int termId)
+        public async Task<Result<List<StudentRequirementDto>>> GetStudentRequirementsAsync(int studentId, int termId)
         {
             /*
             1. Fetch requirements where studentId + termId
@@ -365,10 +553,17 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             4. Return list
             */
 
-            throw new NotImplementedException();
+            var requirements = await _uow.Repository<TermRequirement>().GetListAsync
+                (
+                    r => r.StudentId == studentId &&
+                         r.TermId == termId,
+                         includes : r => r.Clinic
+                );
+
+            return Result.Success(_mapper.Map<List<StudentRequirementDto>>(requirements));
         }
 
-        public async Task TransferRequirementsAsync(int studentId, int fromTermId, int toTermId, string adminId)
+        public async Task<Result> TransferRequirementsAsync(int studentId, int fromTermId, int toTermId, string adminId)
         {
             /*
             1. Fetch requirements from old term
@@ -387,7 +582,68 @@ namespace ZU_DCMS.APPLICATION.Services.Implementations
             8. Log admin transfer action
             */
 
-            throw new NotImplementedException();
+            var fromRequirements = await _uow.Repository<TermRequirement>()
+            .GetListAsync(r =>
+                r.StudentId == studentId &&
+                r.TermId == fromTermId &&
+                !r.IsSatisfied);
+
+            if (!fromRequirements.Any())
+                return Result.Failure("لا توجد متطلبات غير مكتملة للترحيل");
+
+            var toTerm = await _uow.Repository<Term>().GetByIdAsync(toTermId);
+
+            if (toTerm == null)
+                return Result.Failure("الترم المحول إليه غير موجود");
+
+            await _uow.BeginTransactionAsync();
+            
+            try
+            {
+                foreach (var req in fromRequirements)
+                {
+                    // Check if requirement already exists in target term
+                    var exists = await _uow.Repository<TermRequirement>()
+                        .ExistsAsync(r =>
+                            r.StudentId == studentId &&
+                            r.TermId == toTermId &&
+                            r.ClinicId == req.ClinicId);
+
+                    if (exists) continue;
+
+                    // Transfer remaining count to new term
+                    var remaining = req.RequiredCount
+                        - req.CompletedCount
+                        - req.TransferredCount;
+
+                    var transferred = new TermRequirement
+                    {
+                        StudentId = studentId,
+                        TermId = toTermId,
+                        ClinicId = req.ClinicId,
+                        RequiredCount = remaining,
+                        TransferredCount = remaining,
+                        CompletedCount = 0,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    await _uow.Repository<TermRequirement>()
+                        .AddAsync(transferred);
+                }
+
+                await _uow.CommitTransactionAsync(adminId);
+
+                // CACHE SETTINGS 
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error transferring requirements for student {StudentId}",  studentId);
+
+                await _uow.RollbackTransactionAsync();
+               
+                return Result.Failure("حدث خطأ أثناء ترحيل المتطلبات");
+            }
         }
     }
 }

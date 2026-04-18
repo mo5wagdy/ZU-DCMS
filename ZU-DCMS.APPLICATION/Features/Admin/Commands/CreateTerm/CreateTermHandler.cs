@@ -1,0 +1,48 @@
+using AutoMapper;
+using ZU_DCMS.APPLICATION.Common;
+using ZU_DCMS.APPLICATION.DTOs.Admin;
+using ZU_DCMS.Domain.Entities;
+using ZU_DCMS.Domain.Interfaces;
+
+namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateTerm
+{
+    public class CreateTermHandler
+    {
+        private readonly IUnitOfWork _uow;
+        private readonly IMapper _mapper;
+
+        public CreateTermHandler(IUnitOfWork uow, IMapper mapper)
+        {
+            _uow = uow;
+            _mapper = mapper;
+        }
+
+        public async Task<Result<TermDto>> Handle(CreateTermCommand command)
+        {
+            var dto = command.Dto;
+
+            // Prevent multiple active terms
+            var hasActiveTerm = await _uow.Repository<Term>().ExistsAsync(t => t.IsActive);
+
+            if (hasActiveTerm)
+                return Result.Failure<TermDto>("يوجد ترم نشط بالفعل، أوقفه أولاً");
+
+            var term = new Term
+            {
+                Name = dto.Name.Trim(),
+                StartDate = dto.StartDate,
+                EndDate = dto.EndDate,
+                RequiredCasesCount = dto.RequiredCasesCount,
+                IsActive = false,
+                CreatedByAdminId = command.AdminId,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _uow.Repository<Term>().AddAsync(term);
+            
+            await _uow.SaveChangesAsync(command.AdminId);
+
+            return Result.Success(_mapper.Map<TermDto>(term));
+        }
+    }
+}

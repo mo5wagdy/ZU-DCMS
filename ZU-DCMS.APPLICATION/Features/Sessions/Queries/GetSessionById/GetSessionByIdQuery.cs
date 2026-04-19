@@ -1,7 +1,8 @@
-namespace ZU_DCMS.APPLICATION.Features.Session.Queries.GetSessionById
+using MediatR;
+using ZU_DCMS.APPLICATION.Common;
+using ZU_DCMS.APPLICATION.DTOs.Session;
+
+namespace ZU_DCMS.APPLICATION.Features.Sessions.Queries.GetSessionById
 {
-    public class GetSessionByIdQuery
-    {
-        public int SessionId { get; set; }
-    }
+    public record GetSessionByIdQuery(int SessionId) : IRequest<Result<SessionDto>>;
 }

@@ -1,9 +1,8 @@
+using MediatR;
 using ZU_DCMS.APPLICATION.Common;
+using ZU_DCMS.APPLICATION.DTOs.Patient;
 
 namespace ZU_DCMS.APPLICATION.Features.Patients.Queries.GetAllPatients
 {
-    public class GetAllPatientsQuery
-    {
-        public PagedRequest Request { get; set; } = null!;
-    }
+    public record GetAllPatientsQuery(PagedRequest Request) : IRequest<Result<PagedResult<PatientDto>>>;
 }

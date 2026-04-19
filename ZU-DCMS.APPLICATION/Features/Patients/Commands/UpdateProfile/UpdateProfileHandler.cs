@@ -1,13 +1,14 @@
 using AutoMapper;
+using MediatR;
 using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Contracts;
 using ZU_DCMS.APPLICATION.DTOs.Patient;
-using ZU_DCMS.APPLICATION.Services.Interfaces;
+using ZU_DCMS.Domain.Entities;
 using ZU_DCMS.Domain.Interfaces;
 
 namespace ZU_DCMS.APPLICATION.Features.Patients.Commands.UpdateProfile
 {
-    public class UpdateProfileHandler
+    public class UpdateProfileHandler : IRequestHandler<UpdateProfileCommand, Result<UpdatePatientDto>>
     {
         private readonly IUnitOfWork _uow;
         private readonly IIdentityService _identity;
@@ -26,21 +27,26 @@ namespace ZU_DCMS.APPLICATION.Features.Patients.Commands.UpdateProfile
             _logger = logger;
         }
 
-        public async Task<Result<UpdatePatientDto>> Handle(UpdateProfileCommand command)
+        // ________________ Update Profile ________________ //
+        public async Task<Result<UpdatePatientDto>> Handle(UpdateProfileCommand command, CancellationToken cancellationToken)
         {
             var id = command.Id;
+           
             var dto = command.Dto;
 
             _logger.LogInfo("Fetching patient profile for update, ID: {Id}", id);
             
-            var patient = await _uow.Repository<Domain.Entities.Patient>().GetByIdAsync(id);  
+            // __ Checking Patient Availability __ //
+            var patient = await _uow.Repository<Patient>().GetByIdAsync(id);  
             
             if(patient is null)
             {
                 _logger.LogWarning("Patient not found for update, ID: {Id}", id);
+                
                 return Result.Failure<UpdatePatientDto>("المريض غير موجود");
             }
 
+            // __ We use transaction here because we might need to update the username in the identity service, and if that fails, we don't want to update the patient data. __ //
             await _uow.BeginTransactionAsync();
 
             try
@@ -49,10 +55,11 @@ namespace ZU_DCMS.APPLICATION.Features.Patients.Commands.UpdateProfile
 
                 if (!string.IsNullOrWhiteSpace(dto.Username))
                 {
-                    var newUsername = dto.Username.Trim();
+                    var newUsername = dto.Username.Trim().ToLower();
 
                     var user = await _identity.FindByIdAsync(patient.ApplicationUserId);
 
+                    // __ Checking if username already exists 
                     var isSame = user?.Username.Equals(newUsername, StringComparison.OrdinalIgnoreCase) ?? false;
 
                     if (!isSame)
@@ -60,18 +67,23 @@ namespace ZU_DCMS.APPLICATION.Features.Patients.Commands.UpdateProfile
                         if (await _identity.UsernameExistsAsync(newUsername))
                         {
                             await _uow.RollbackTransactionAsync();
+                            
                             _logger.LogWarning("Username already exists: {Username}", newUsername);
+                            
                             return Result.Failure<UpdatePatientDto>("اسم المستخدم موجود بالفعل");
                         }
 
                         _logger.LogInfo("Updating username for patient ID: {Id}, New Username: {Username}", id, newUsername);
 
+                        // __ Updating username __ //
                         var updated = await _identity.UpdateUsernameAsync(patient.ApplicationUserId,newUsername);
 
                         if (!updated)
                         {
                             await _uow.RollbackTransactionAsync();
+                        
                             _logger.LogWarning("Failed to update username: {Username}", newUsername);
+                            
                             return Result.Failure<UpdatePatientDto>("فشل تحديث اسم المستخدم");
                         }
                     }
@@ -98,7 +110,7 @@ namespace ZU_DCMS.APPLICATION.Features.Patients.Commands.UpdateProfile
                 
                 _logger.LogInfo("Updating patient entity in repository for patient ID: {Id}", id);
 
-                _uow.Repository<Domain.Entities.Patient>().Update(patient);
+                _uow.Repository<Patient>().Update(patient);
 
                 await _uow.SaveChangesAsync();
                 
@@ -108,10 +120,13 @@ namespace ZU_DCMS.APPLICATION.Features.Patients.Commands.UpdateProfile
 
                 return Result.Success<UpdatePatientDto>(_mapper.Map<UpdatePatientDto>(patient));
             }
+
             catch
             {
                 await _uow.RollbackTransactionAsync();
+                
                 _logger.LogError("An error occurred while updating patient profile");
+                
                 return Result.Failure<UpdatePatientDto>("حدث خطأ ، حاول مرة أخرى");
             }
         }

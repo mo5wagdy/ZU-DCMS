@@ -1,8 +1,8 @@
-namespace ZU_DCMS.APPLICATION.Features.Session.Queries.FindSession
+using MediatR;
+using ZU_DCMS.APPLICATION.Common;
+using ZU_DCMS.Domain.Entities;
+
+namespace ZU_DCMS.APPLICATION.Features.Sessions.Queries.FindSession
 {
-    public class FindSessionQuery
-    {
-        public DateTime Date { get; set; }
-        public string TimeSlot { get; set; } = null!;
-    }
+    public record FindSessionQuery(DateTime Date, string TimeSlot) : IRequest<Result<Session>>;
 }

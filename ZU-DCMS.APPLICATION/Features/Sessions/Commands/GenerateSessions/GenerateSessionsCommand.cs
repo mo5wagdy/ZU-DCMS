@@ -1,7 +1,8 @@
-namespace ZU_DCMS.APPLICATION.Features.Session.Commands.GenerateSessions
+using MediatR;
+using ZU_DCMS.APPLICATION.Common;
+using ZU_DCMS.APPLICATION.DTOs.Session;
+
+namespace ZU_DCMS.APPLICATION.Features.Sessions.Commands.GenerateSessions
 {
-    public class GenerateSessionsCommand
-    {
-        public DateTime Date { get; set; }
-    }
+    public record GenerateSessionsCommand(DateTime Date) : IRequest<Result<List<SessionDto>>>;
 }

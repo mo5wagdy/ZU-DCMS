@@ -1,13 +1,15 @@
 using AutoMapper;
+using MediatR;
 using System.Linq.Expressions;
 using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Contracts;
 using ZU_DCMS.APPLICATION.DTOs.Patient;
+using ZU_DCMS.Domain.Entities;
 using ZU_DCMS.Domain.Interfaces;
 
 namespace ZU_DCMS.APPLICATION.Features.Patients.Queries.GetAllPatients
 {
-    public class GetAllPatientsHandler
+    public class GetAllPatientsHandler : IRequestHandler<GetAllPatientsQuery, Result<PagedResult<PatientDto>>>
     {
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
@@ -23,14 +25,15 @@ namespace ZU_DCMS.APPLICATION.Features.Patients.Queries.GetAllPatients
             _logger = logger;
         }
 
-        public async Task<Result<PagedResult<PatientDto>>> Handle(GetAllPatientsQuery query)
+        // ________________ Get All (Intern Doctor) ________________ //
+        public async Task<Result<PagedResult<PatientDto>>> Handle(GetAllPatientsQuery query, CancellationToken cancellationToken)
         {
             var request = query.Request;
 
-            _logger.LogInfo("Fetching patients with pagination. Page: {Page}, PageSize: {PageSize}, SortBy: {SortBy}, SortDescending: {SortDescending}, SearchTerm: {SearchTerm}", 
-                            request.Page, request.PageSize, request.SortBy, request.SortDescending, request.SearchTerm);
+            _logger.LogInfo("Fetching patients with pagination. Page: {Page}, PageSize: {PageSize}, SortBy: {SortBy}, SortDescending: {SortDescending}, SearchTerm: {SearchTerm}", request.Page, request.PageSize, request.SortBy!, request.SortDescending, request.SearchTerm!);
 
-            Expression<Func<Domain.Entities.Patient, bool>>? filter = null;
+            // ________________ Search ________________ //
+            Expression<Func<Patient, bool>>? filter = null;
 
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
             {
@@ -41,8 +44,9 @@ namespace ZU_DCMS.APPLICATION.Features.Patients.Queries.GetAllPatients
                          p.PatientCode.Contains(term) ||
                          p.PhoneNumber.Contains(term);
             }
-            
-            Func<IQueryable<Domain.Entities.Patient>, IOrderedQueryable<Domain.Entities.Patient>> orderBy = q =>
+
+            // ________________ Sorting ________________ //
+            Func<IQueryable<Patient>, IOrderedQueryable<Patient>> orderBy = q =>
             {
                 var sortBy = request.SortBy?.ToLower();
                 if (request.SortDescending)
@@ -62,7 +66,8 @@ namespace ZU_DCMS.APPLICATION.Features.Patients.Queries.GetAllPatients
                 };
             };
 
-            var (items, totalCount) = await _uow.Repository<Domain.Entities.Patient>().GetPagedListAsync(
+            // ________________ Pagination ________________ //
+            var (items, totalCount) = await _uow.Repository<Patient>().GetPagedListAsync(
                 skip: (request.Page - 1) * request.PageSize,
                 take: request.PageSize,
                 predicate: filter,
@@ -70,6 +75,7 @@ namespace ZU_DCMS.APPLICATION.Features.Patients.Queries.GetAllPatients
                 disabledTracking: true 
             );
 
+            // __ Mapping and return __ //
             var dtos = _mapper.Map<List<PatientDto>>(items);
 
             var pagedResult = PagedResult<PatientDto>.Create(dtos, totalCount, request);

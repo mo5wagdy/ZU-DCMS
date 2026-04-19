@@ -1,8 +1,8 @@
+using MediatR;
+using ZU_DCMS.APPLICATION.Common;
+using ZU_DCMS.APPLICATION.DTOs.Student;
+
 namespace ZU_DCMS.APPLICATION.Features.Cases.Queries.GetStudentProgress
 {
-    public class GetStudentProgressQuery
-    {
-        public int StudentId { get; set; }
-        public int TermId { get; set; }
-    }
+    public record GetStudentProgressQuery(int StudentId, int TermId) : IRequest<Result<StudentProgressDto>>;
 }

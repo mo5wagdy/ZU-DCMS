@@ -1,3 +1,4 @@
+using MediatR;
 using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Contracts;
 using ZU_DCMS.APPLICATION.DTOs.Auth;
@@ -7,7 +8,7 @@ using ZU_DCMS.Domain.UserRoles;
 
 namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.Login
 {
-    public class LoginHandler
+    public class LoginHandler : IRequestHandler<LoginCommand, Result<AuthDto>>
     {
         private readonly IIdentityService _identity;
         private readonly IUnitOfWork _uow;
@@ -26,37 +27,46 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.Login
             _logger = logger;
         }
 
-        public async Task<Result<AuthDto>> Handle(LoginCommand command)
+        // _________________________ Patient Login _________________________ //
+        public async Task<Result<AuthDto>> Handle(LoginCommand command, CancellationToken cancellationToken)
         {
             var dto = command.Dto;
 
             _logger.LogInfo("Patient login attempt with Username: {Username}, IdentityNumber: {IdentityNumber}", dto.Username, dto.IdentityNumber);
 
+            // __ Find by username __ //
             var user = await _identity.FindByUsernameAsync(dto.Username);
 
+            // __ Generic error for security — don't reveal which field is wrong __ //
             if (user is null)
             {
                 _logger.LogWarning("Login failed: User not found for Username: {Username}", dto.Username);
+                
                 return Result.Failure<AuthDto>("بيانات الدخول غير صحيحة");
             }
 
             if (!user.IsActive)
             {
                 _logger.LogWarning("Login failed: Account is inactive for Username: {Username}", dto.Username);
+                
                 return Result.Failure<AuthDto>("الحساب موقوف، تواصل مع الإدارة");
             }
 
+            // __ For patients — password is their identity number __ //
             if (!await _identity.CheckPasswordAsync(user.Id, dto.IdentityNumber))
             {
                 _logger.LogWarning("Login failed: Incorrect password for Username: {Username}", dto.Username);
+                
                 return Result.Failure<AuthDto>("بيانات الدخول غير صحيحة");
             }
 
+            // __ Ensure this account is a Patient __ //
             var roles = await _identity.GetRolesAsync(user.Id);
 
             if (!roles.Contains(UserRoles.Patient))
             {
                 _logger.LogWarning("Login failed: User is not a patient for Username: {Username}", dto.Username);
+                
                 return Result.Failure<AuthDto>("بيانات الدخول غير صحيحة");
             }
 
@@ -66,8 +76,10 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.Login
             {
                 _logger.LogInfo("Generating tokens for patient: {Username}", dto.Username);
 
+                // __ Generate tokens __ //
                 var tokens = await _token.GenerateAsync(user.Id);
 
+                // __ If token generation failed, return the error __ //
                 if (!tokens.IsSuccess)
                 {
                     await _uow.RollbackTransactionAsync();
@@ -75,7 +87,9 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.Login
                     return Result.Failure<AuthDto>(tokens.Error);
                 }
 
+                // __ Single SaveChanges for everything __ //
                 await _uow.SaveChangesAsync();
+                
                 await _uow.CommitTransactionAsync();
 
                 _logger.LogInfo("Patient login successful: {Username}", dto.Username);
@@ -91,7 +105,9 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.Login
             catch
             {
                 await _uow.RollbackTransactionAsync();
+                
                 _logger.LogError("An error occurred during patient login");
+                
                 return Result.Failure<AuthDto>("حدث خطأ أثناء تسجيل الدخول، حاول مرة أخرى");
             }
         }

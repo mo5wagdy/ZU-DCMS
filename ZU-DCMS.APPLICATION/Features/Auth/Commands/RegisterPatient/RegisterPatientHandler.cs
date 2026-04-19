@@ -1,4 +1,5 @@
 using AutoMapper;
+using MediatR;
 using Microsoft.Extensions.Options;
 using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Contracts;
@@ -10,7 +11,7 @@ using ZU_DCMS.Domain.UserRoles;
 
 namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient
 {
-    public class RegisterPatientHandler
+    public class RegisterPatientHandler : IRequestHandler<RegisterPatientCommand, Result<AuthDto>>
     {
         private readonly IIdentityService _identity;
         private readonly IUnitOfWork _uow;
@@ -38,29 +39,36 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient
             _logger = logger;
         }
 
-        public async Task<Result<AuthDto>> Handle(RegisterPatientCommand command)
+        public async Task<Result<AuthDto>> Handle(RegisterPatientCommand command, CancellationToken cancellationToken)
         {
             var dto = command.Dto;
 
             _logger.LogInfo("Registering patient with Username: {Username}, IdentityNumber: {IdentityNumber}", dto.Username, dto.IdentityNumber);
 
+            // __ Check username uniqueness __ //
             if (await _identity.UsernameExistsAsync(dto.Username))
             {
                 _logger.LogWarning("Username already exists: {Username}", dto.Username);
+                
                 return Result.Failure<AuthDto>("اسم المستخدم موجود بالفعل");
             }
 
+            // __ Check identity number uniqueness __ //
             if (await _uow.Repository<Patient>().ExistsAsync(p => p.IdentityNumber == dto.IdentityNumber))
             {
                 _logger.LogWarning("Identity number already exists: {IdentityNumber}", dto.IdentityNumber);
+                
                 return Result.Failure<AuthDto>("رقم الهوية مسجل بالفعل");
             }
 
+            // __ Begin transaction — Identity + Patient must both succeed __ //
             await _uow.BeginTransactionAsync();
+           
             try
             {
                 _logger.LogInfo("Creating Identity user for patient: {Username}", dto.Username);
 
+                // __ Create Identity user — password is the identity number __ //
                 var (success, userId, error) = await _identity.CreateUserAsync
                 (
                     dto.Username,
@@ -72,12 +80,16 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient
                 if (!success)
                 {
                     await _uow.RollbackTransactionAsync();
+                    
                     _logger.LogError("Failed to create Identity user for patient");
+                    
                     return Result.Failure<AuthDto>(error);
                 }
 
+                // __ Assign Patient role __ //
                 await _identity.AssignRoleAsync(userId, UserRoles.Patient);
 
+                // Map DTO → Entity then fill system-generated fields
                 var patient = _mapper.Map<Patient>(dto);
                 patient.ApplicationUserId = userId;
                 patient.PatientCode = await _codeGen.GenerateAsync("PAT", "PatientCodeSeq");
@@ -85,12 +97,16 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient
 
                 await _uow.Repository<Patient>().AddAsync(patient);
 
+                // __ Prepare tokens (AddAsync only — no SaveChanges yet) __ //
                 var tokens = await _token.GenerateAsync(userId);
 
+                // __ If token generation failed, return the error __ //
                 if (!tokens.IsSuccess)
                 {
                     await _uow.RollbackTransactionAsync();
+                   
                     _logger.LogError("Failed to generate tokens for patient");
+                    
                     return Result.Failure<AuthDto>(tokens.Error);
                 }
 
@@ -102,6 +118,7 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient
                 });
 
                 await _uow.SaveChangesAsync();
+                
                 await _uow.CommitTransactionAsync();
 
                 _logger.LogInfo("Patient registration successful: {Username}", dto.Username);
@@ -117,7 +134,9 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient
             catch
             {
                 await _uow.RollbackTransactionAsync();
+               
                 _logger.LogError("An error occurred during patient registration");
+                
                 return Result.Failure<AuthDto>("حدث خطأ أثناء التسجيل، حاول مرة أخرى");
             }
         }

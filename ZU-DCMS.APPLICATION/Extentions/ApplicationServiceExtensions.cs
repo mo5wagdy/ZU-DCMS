@@ -1,6 +1,4 @@
 ﻿using FluentValidation;
-using Hangfire;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ZU_DCMS.Application.Services.Implementations;
 using ZU_DCMS.APPLICATION.Background_Jobs.Events;
@@ -12,6 +10,7 @@ using ZU_DCMS.APPLICATION.Background_Jobs.Features.Diagnosis.Events;
 using ZU_DCMS.APPLICATION.Background_Jobs.Features.Diagnosis.Handlers;
 using ZU_DCMS.APPLICATION.Background_Jobs.Features.Payment.Events;
 using ZU_DCMS.APPLICATION.Background_Jobs.Features.Payment.Handlers;
+using ZU_DCMS.APPLICATION.Features.Auth.Commands.Login;
 using ZU_DCMS.APPLICATION.Services.Implementations;
 using ZU_DCMS.APPLICATION.Services.Interfaces;
 
@@ -45,6 +44,12 @@ namespace ZU_DCMS.APPLICATION.Extentions
 
             // _________ Diagnosis Events __________ //
             services.AddScoped<IEventHandler<DiagnosisCreatedEvent>, DiagnosisCreatedHandler>();
+
+            // _________ MediatR _________ //
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(LoginHandler).Assembly));
+
+
+
 
             // __________ Service Registrations __________ //
             services.AddScoped<IAuthService, AuthService>();

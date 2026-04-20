@@ -1,4 +1,5 @@
 using AutoMapper;
+using MediatR;
 using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.DTOs.Admin;
 using ZU_DCMS.Domain.Entities;
@@ -6,7 +7,7 @@ using ZU_DCMS.Domain.Interfaces;
 
 namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.UpdateTerm
 {
-    public class UpdateTermHandler
+    public class UpdateTermHandler : IRequestHandler<UpdateTermCommand, Result<TermDto>>
     {
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
@@ -17,15 +18,18 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.UpdateTerm
             _mapper = mapper;
         }
 
-        public async Task<Result<TermDto>> Handle(UpdateTermCommand command)
+        public async Task<Result<TermDto>> Handle(UpdateTermCommand command, CancellationToken cancellationToken)
         {
             var dto = command.Dto;
 
+            // __ Fetch term __ //
             var term = await _uow.Repository<Term>().GetByIdAsync(command.TermId);
 
+            // __ If null → NotFound __ //
             if (term is null)
                 return Result.Failure<TermDto>("الترم غير موجود");
 
+            // __ Update allowed fields only __ //
             if (!string.IsNullOrWhiteSpace(dto.Name))
                 term.Name = dto.Name.Trim();
 
@@ -38,12 +42,17 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.UpdateTerm
             if (dto.RequiredCasesCount.HasValue)
                 term.RequiredCasesCount = dto.RequiredCasesCount.Value;
 
+            // __ Set UpdatedBy = adminId __ //
+            term.UpdatedByUserId = command.AdminId;
+
             term.UpdatedAt = DateTime.UtcNow;
 
             _uow.Repository<Term>().Update(term);
-            
+
+            // __ SaveChanges __ //
             await _uow.SaveChangesAsync(command.AdminId);
 
+            // __ Return DTO __ //
             return Result.Success(_mapper.Map<TermDto>(term));
         }
     }

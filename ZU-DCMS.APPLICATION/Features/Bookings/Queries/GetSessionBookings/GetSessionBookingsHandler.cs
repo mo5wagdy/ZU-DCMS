@@ -1,8 +1,10 @@
 using AutoMapper;
 using MediatR;
 using ZU_DCMS.APPLICATION.Common;
-using ZU_DCMS.APPLICATION.Contracts;
+using ZU_DCMS.APPLICATION.Common.Pagination;
+using ZU_DCMS.APPLICATION.Contracts.Logger;
 using ZU_DCMS.APPLICATION.DTOs.Booking;
+using ZU_DCMS.Domain.Entities;
 using ZU_DCMS.Domain.Enums;
 using ZU_DCMS.Domain.Interfaces;
 
@@ -27,7 +29,7 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Queries.GetSessionBookings
             _logger.LogInfo("Fetching confirmed bookings for SessionId: {SessionId}", query.SessionId);
 
             // __ Get confirmed bookings for the session, ordered by creation time, including patient details __ //
-            var (items, total) = await _uow.Repository<Domain.Entities.Booking>().GetPagedListAsync
+            var (items, total) = await _uow.Repository<Booking>().GetPagedListAsync
                 (
                     (query.Request.Page - 1) * query.Request.PageSize,
                     query.Request.PageSize,

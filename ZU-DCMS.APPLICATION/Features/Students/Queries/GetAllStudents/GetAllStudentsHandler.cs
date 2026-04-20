@@ -1,13 +1,16 @@
 using AutoMapper;
+using MediatR;
 using System.Linq.Expressions;
 using ZU_DCMS.APPLICATION.Common;
-using ZU_DCMS.APPLICATION.Contracts;
+using ZU_DCMS.APPLICATION.Common.Pagination;
+using ZU_DCMS.APPLICATION.Contracts.Logger;
 using ZU_DCMS.APPLICATION.DTOs.Student;
+using ZU_DCMS.Domain.Entities;
 using ZU_DCMS.Domain.Interfaces;
 
-namespace ZU_DCMS.APPLICATION.Features.Student.Queries.GetAllStudents
+namespace ZU_DCMS.APPLICATION.Features.Students.Queries.GetAllStudents
 {
-    public class GetAllStudentsHandler
+    public class GetAllStudentsHandler : IRequestHandler<GetAllStudentsQuery, Result<PagedResult<StudentDto>>>
     {
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
@@ -20,24 +23,28 @@ namespace ZU_DCMS.APPLICATION.Features.Student.Queries.GetAllStudents
             _logger = logger;
         }
 
-        public async Task<Result<PagedResult<StudentDto>>> Handle(GetAllStudentsQuery query)
+        public async Task<Result<PagedResult<StudentDto>>> Handle(GetAllStudentsQuery query, CancellationToken cancellationToken)
         {
             var request = query.Request;
 
             _logger.LogInfo("Fetching students with pagination. Page: {Page}, PageSize: {PageSize}", request.Page, request.PageSize);
 
-            Expression<Func<Domain.Entities.Student, bool>>? filter = null;
+            // __ Expression for filtering __ //
+            Expression<Func<Student, bool>>? filter = null;
 
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
             {
                 var term = request.SearchTerm.Trim().ToLower();
+                
                 filter = s => s.FullName.ToLower().Contains(term) || s.StudentCode.ToLower().Contains(term);
             }
 
+            // __ Func for ordering according to user choice __ // 
             Func<IQueryable<Domain.Entities.Student>, IOrderedQueryable<Domain.Entities.Student>> orderBy = q =>
             {
                 var sortBy = request.SortBy?.ToLower();
 
+                // __ If Descending __ //
                 if (request.SortDescending)
                 {
                     return sortBy switch
@@ -48,7 +55,7 @@ namespace ZU_DCMS.APPLICATION.Features.Student.Queries.GetAllStudents
                         _ => q.OrderByDescending(s => s.Id)
                     };
                 }
-                else
+                else // __ If Ascending __ //
                 {
                     return sortBy switch
                     {
@@ -60,7 +67,8 @@ namespace ZU_DCMS.APPLICATION.Features.Student.Queries.GetAllStudents
                 };
             };
 
-            var (item, totalCount) = await _uow.Repository<Domain.Entities.Student>().GetPagedListAsync
+            // __ Fetching according to the paginated request using filtering & ordering settings __ //
+            var (item, totalCount) = await _uow.Repository<Student>().GetPagedListAsync
                 (
                     skip: (request.Page - 1) * request.PageSize,
                     take: (request.PageSize),
@@ -69,7 +77,10 @@ namespace ZU_DCMS.APPLICATION.Features.Student.Queries.GetAllStudents
                     disabledTracking: true
                 );
 
+            // __ Mapping to DTO __ //
             var studentDtos = _mapper.Map<List<StudentDto>>(item);
+
+            // __ Creating the paged result __ //
             var pagedResult = PagedResult<StudentDto>.Create(studentDtos, totalCount, request);
 
             _logger.LogInfo("Fetched {Count} students out of {TotalCount} total students.", studentDtos.Count, totalCount);

@@ -28,6 +28,5 @@ namespace ZU_DCMS.Domain.Entities
 
         // _____________ Navigation _____________ //
         public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
-        public ICollection<Payment> Payments { get; set; } = new List<Payment>();
     }
 }

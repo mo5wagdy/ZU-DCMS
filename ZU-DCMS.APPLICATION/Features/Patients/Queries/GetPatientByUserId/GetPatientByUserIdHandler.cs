@@ -1,8 +1,9 @@
 using AutoMapper;
 using MediatR;
 using ZU_DCMS.APPLICATION.Common;
-using ZU_DCMS.APPLICATION.Contracts;
+using ZU_DCMS.APPLICATION.Contracts.Logger;
 using ZU_DCMS.APPLICATION.DTOs.Patient;
+using ZU_DCMS.Domain.Entities;
 using ZU_DCMS.Domain.Interfaces;
 
 namespace ZU_DCMS.APPLICATION.Features.Patients.Queries.GetPatientByUserId
@@ -31,7 +32,7 @@ namespace ZU_DCMS.APPLICATION.Features.Patients.Queries.GetPatientByUserId
             _logger.LogInfo("Fetching patient by User ID: {UserId}", userId);
 
             // __ Fetching by app user id using provided id __ //
-            var patient = await _uow.Repository<Domain.Entities.Patient>().GetFirstOrDefaultAsync(p => p.ApplicationUserId == userId);
+            var patient = await _uow.Repository<Patient>().GetFirstOrDefaultAsync(p => p.ApplicationUserId == userId);
 
             // __ If null return failure __ //
             if (patient is null)

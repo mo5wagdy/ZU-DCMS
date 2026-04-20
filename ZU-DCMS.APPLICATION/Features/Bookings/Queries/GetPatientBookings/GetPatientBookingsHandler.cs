@@ -1,8 +1,10 @@
 using AutoMapper;
 using MediatR;
 using ZU_DCMS.APPLICATION.Common;
-using ZU_DCMS.APPLICATION.Contracts;
+using ZU_DCMS.APPLICATION.Common.Pagination;
+using ZU_DCMS.APPLICATION.Contracts.Logger;
 using ZU_DCMS.APPLICATION.DTOs.Booking;
+using ZU_DCMS.Domain.Entities;
 using ZU_DCMS.Domain.Interfaces;
 
 namespace ZU_DCMS.APPLICATION.Features.Bookings.Queries.GetPatientBookings
@@ -26,15 +28,14 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Queries.GetPatientBookings
             _logger.LogInfo("Fetching bookings for patient {PatientId} - Page: {Page}, PageSize: {PageSize}", query.PatientId, query.Request.Page, query.Request.PageSize);
 
             // __ Get total count and paged items in one query __ //
-            var (items, total) = await _uow.Repository<Domain.Entities.Booking>().GetPagedListAsync
+            var (items, total) = await _uow.Repository<Booking>().GetPagedListAsync
                 (
                     (query.Request.Page - 1) * query.Request.PageSize,
                     query.Request.PageSize,
                     b => b.PatientId == query.PatientId,
                     true,
                     q => q.OrderByDescending(b => b.CreatedAt),
-                    b => b.Session,
-                    b => b.Payment
+                    b => b.Session
                 );
 
             // __ Map to DTOs __ //

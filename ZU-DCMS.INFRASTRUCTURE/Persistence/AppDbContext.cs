@@ -39,8 +39,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence
         public DbSet<Term> Terms => Set<Term>();
         public DbSet<TermRequirement> TermRequirements => Set<TermRequirement>();
 
-        // __ Payment and notification entities to handle financial transactions and user notifications __ //
-        public DbSet<Payment> Payments => Set<Payment>();
+        // __ Notification entity to handle user notifications __ //
         public DbSet<Notification> Notifications => Set<Notification>();
 
         // __ System configuration entity to store application settings __ //

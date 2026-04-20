@@ -1,7 +1,8 @@
-namespace ZU_DCMS.APPLICATION.Features.Student.Queries.GetStudentByUserId
+using MediatR;
+using ZU_DCMS.APPLICATION.Common;
+using ZU_DCMS.APPLICATION.DTOs.Student;
+
+namespace ZU_DCMS.APPLICATION.Features.Students.Queries.GetStudentByUserId
 {
-    public class GetStudentByUserIdQuery
-    {
-        public string UserId { get; set; } = null!;
-    }
+    public record GetStudentByUserIdQuery(string UserId) : IRequest<Result<StudentDto>>;
 }

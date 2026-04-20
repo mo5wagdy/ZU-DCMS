@@ -1,7 +1,7 @@
 using AutoMapper;
 using MediatR;
 using ZU_DCMS.APPLICATION.Common;
-using ZU_DCMS.APPLICATION.Contracts;
+using ZU_DCMS.APPLICATION.Contracts.Logger;
 using ZU_DCMS.APPLICATION.DTOs.Session;
 using ZU_DCMS.APPLICATION.Features.Sessions.Commands.GenerateSessions;
 using ZU_DCMS.Domain.Entities;

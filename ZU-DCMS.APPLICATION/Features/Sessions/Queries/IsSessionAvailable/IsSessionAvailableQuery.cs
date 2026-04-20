@@ -4,5 +4,5 @@ using ZU_DCMS.Domain.Enums;
 
 namespace ZU_DCMS.APPLICATION.Features.Sessions.Queries.IsSessionAvailable
 {
-    public record IsSessionAvailableQuery(int SessionId, BookingType BookingType) : IRequest<Result<bool>>
+    public record IsSessionAvailableQuery(int SessionId, BookingType BookingType) : IRequest<Result<bool>>;
 }

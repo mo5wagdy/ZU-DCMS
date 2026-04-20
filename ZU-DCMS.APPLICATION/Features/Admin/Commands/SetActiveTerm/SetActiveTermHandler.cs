@@ -1,3 +1,4 @@
+using MediatR;
 using Microsoft.Extensions.Logging;
 using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.Domain.Entities;
@@ -5,7 +6,7 @@ using ZU_DCMS.Domain.Interfaces;
 
 namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.SetActiveTerm
 {
-    public class SetActiveTermHandler
+    public class SetActiveTermHandler : IRequestHandler<SetActiveTermCommand, Result>
     {
         private readonly IUnitOfWork _uow;
         private readonly ILogger<SetActiveTermHandler> _logger;
@@ -16,7 +17,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.SetActiveTerm
             _logger = logger;
         }
 
-        public async Task<Result> Handle(SetActiveTermCommand command)
+        public async Task<Result> Handle(SetActiveTermCommand command, CancellationToken cancellationToken)
         {
             var term = await _uow.Repository<Term>().GetByIdAsync(command.TermId);
 
@@ -27,7 +28,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.SetActiveTerm
 
             try
             {
-                // Deactivate current active term
+                // __ Deactivate current active term __ //
                 var currentActive = await _uow.Repository<Term>().GetFirstOrDefaultAsync(t => t.IsActive);
 
                 if (currentActive != null)
@@ -39,14 +40,14 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.SetActiveTerm
                     _uow.Repository<Term>().Update(currentActive);
                 }
 
-                // Activate new term
+                // __ Activate new term __ //
                 term.IsActive = true;
 
                 term.UpdatedAt = DateTime.UtcNow;
 
                 _uow.Repository<Term>().Update(term);
 
-                // Update all active students to new term
+                // __ Update all active students to new term __ //
                 var students = await _uow.Repository<Student>().GetListAsync(s => s.IsActive);
 
                 foreach (var student in students)
@@ -62,6 +63,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.SetActiveTerm
 
                 return Result.Success();
             }
+
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error setting active term {TermId}", command.TermId);

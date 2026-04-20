@@ -1,8 +1,11 @@
 ﻿
 using ZU_DCMS.APPLICATION.Background_Jobs.Events;
 using ZU_DCMS.APPLICATION.Background_Jobs.Features.Booking.Events;
-using ZU_DCMS.APPLICATION.Common;
+using ZU_DCMS.APPLICATION.Common.Cache;
+using ZU_DCMS.APPLICATION.Common.SignalR;
 using ZU_DCMS.APPLICATION.Contracts;
+using ZU_DCMS.APPLICATION.Contracts.Cache;
+using ZU_DCMS.APPLICATION.Contracts.SignalR;
 
 namespace ZU_DCMS.APPLICATION.Background_Jobs.Features.Booking.Handlers
 {

@@ -3,7 +3,7 @@ using MediatR;
 using ZU_DCMS.APPLICATION.Background_Jobs.Events;
 using ZU_DCMS.APPLICATION.Background_Jobs.Features.Diagnosis.Events;
 using ZU_DCMS.APPLICATION.Common;
-using ZU_DCMS.APPLICATION.Contracts;
+using ZU_DCMS.APPLICATION.Contracts.Logger;
 using ZU_DCMS.APPLICATION.DTOs.Diagnosis;
 using ZU_DCMS.Domain.Entities;
 using ZU_DCMS.Domain.Interfaces;
@@ -46,8 +46,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.DiagnosePatient
                 (
                     b => b.Id == dto.BookingId,
                     true,
-                    b => b.Patient,
-                    b => b.Payment
+                    b => b.Patient
                 );
 
             // __ Log and return failure if booking not found __ //

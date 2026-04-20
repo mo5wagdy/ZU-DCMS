@@ -1,8 +1,8 @@
-namespace ZU_DCMS.APPLICATION.Features.Student.Queries.GetRequirements
+using MediatR;
+using ZU_DCMS.APPLICATION.Common;
+using ZU_DCMS.APPLICATION.DTOs.Student;
+
+namespace ZU_DCMS.APPLICATION.Features.Students.Queries.GetRequirements
 {
-    public class GetRequirementsQuery
-    {
-        public int StudentId { get; set; }
-        public int TermId { get; set; }
-    }
+    public record GetRequirementsQuery(int StudentId, int TermId) : IRequest<Result<List<StudentRequirementDto>>>;
 }

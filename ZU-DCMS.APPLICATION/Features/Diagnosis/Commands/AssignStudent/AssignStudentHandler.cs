@@ -3,7 +3,7 @@ using MediatR;
 using ZU_DCMS.APPLICATION.Background_Jobs.Events;
 using ZU_DCMS.APPLICATION.Background_Jobs.Features.Case;
 using ZU_DCMS.APPLICATION.Common;
-using ZU_DCMS.APPLICATION.Contracts;
+using ZU_DCMS.APPLICATION.Contracts.Logger;
 using ZU_DCMS.APPLICATION.DTOs.Case;
 using ZU_DCMS.Domain.Entities;
 using ZU_DCMS.Domain.Enums;
@@ -81,7 +81,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
             }
 
             // __ Validate student existence and active status __ //
-            var student = await _uow.Repository<Domain.Entities.Student>().GetByIdAsync(dto.StudentId);
+            var student = await _uow.Repository<Student>().GetByIdAsync(dto.StudentId);
 
             // __ Log and return failure if student not found or inactive __ //
             if (student is null || !student.IsActive)

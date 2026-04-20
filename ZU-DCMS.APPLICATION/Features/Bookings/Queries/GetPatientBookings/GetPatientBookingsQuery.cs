@@ -1,5 +1,6 @@
 using MediatR;
 using ZU_DCMS.APPLICATION.Common;
+using ZU_DCMS.APPLICATION.Common.Pagination;
 using ZU_DCMS.APPLICATION.DTOs.Booking;
 
 namespace ZU_DCMS.APPLICATION.Features.Bookings.Queries.GetPatientBookings

@@ -17,7 +17,6 @@ namespace ZU_DCMS.APPLICATION.DTOs.Booking
         public DateTime SessionDate { get; set; }
         public string SessionTime { get; set; } = string.Empty;
         public string? PaymentCode { get; set; }
-        public PaymentStatus PaymentStatus { get; set; }
         public decimal Amount { get; set; }
     }
 }

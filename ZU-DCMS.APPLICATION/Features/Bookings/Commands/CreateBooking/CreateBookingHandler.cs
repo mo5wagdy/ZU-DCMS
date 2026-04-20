@@ -4,8 +4,8 @@ using ZU_DCMS.APPLICATION.Background_Jobs.Events;
 using ZU_DCMS.APPLICATION.Background_Jobs.Features.Booking.Events;
 using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Contracts;
+using ZU_DCMS.APPLICATION.Contracts.Logger;
 using ZU_DCMS.APPLICATION.DTOs.Booking;
-using ZU_DCMS.APPLICATION.Services.Interfaces;
 using ZU_DCMS.Domain.Entities;
 using ZU_DCMS.Domain.Enums;
 using ZU_DCMS.Domain.Interfaces;
@@ -87,15 +87,15 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
                 );
 
             // __ If no session found for the preferred date and time slot, return failure __ //
-            if (sessionResult.IsFailure)
+            if (sessionResult is null)
             {
                 _logger.LogWarning("Session not found for PreferredDate: {PreferredDate} and TimeSlot: {TimeSlot}", dto.PreferredDate, dto.PreferredTimeSlot);
                 
-                return Result.Failure<BookingDto>(sessionResult.Error);
+                return Result.Failure<BookingDto>("الميعاد غير متاح");
             }
 
             // __ Session found, proceed with booking creation __ //
-            var session = sessionResult.Value;
+            var session = sessionResult;
 
             // __ Begin transaction for booking creation __ //
             await _uow.BeginTransactionAsync();
@@ -166,8 +166,7 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
                     b => b.Id == booking.Id,
                     false,
                     b => b.Patient,
-                    b => b.Session,
-                    b => b.Payment
+                    b => b.Session
                  );
 
                 return Result.Success(_mapper.Map<BookingDto>(full!));

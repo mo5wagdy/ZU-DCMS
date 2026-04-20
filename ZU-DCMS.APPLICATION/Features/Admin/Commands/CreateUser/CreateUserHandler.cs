@@ -1,6 +1,8 @@
+using MediatR;
 using Microsoft.Extensions.Logging;
 using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Contracts;
+using ZU_DCMS.APPLICATION.Contracts.Auth;
 using ZU_DCMS.APPLICATION.DTOs.Admin;
 using ZU_DCMS.Domain.Entities;
 using ZU_DCMS.Domain.Interfaces;
@@ -8,7 +10,7 @@ using ZU_DCMS.Domain.UserRoles;
 
 namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
 {
-    public class CreateUserHandler
+    public class CreateUserHandler : IRequestHandler<CreateUserCommand, Result<StaffUsersDto>>
     {
         private readonly IUnitOfWork _uow;
         private readonly IIdentityService _identity;
@@ -27,23 +29,23 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
             _logger = logger;
         }
 
-        public async Task<Result<StaffUsersDto>> Handle(CreateUserCommand command)
+        public async Task<Result<StaffUsersDto>> Handle(CreateUserCommand command, CancellationToken cancellationToken)
         {
             var dto = command.Dto;
 
-            // Check email uniqueness
+            // __ Check user email uniqueness __ //
             if (await _identity.EmailExistsAsync(dto.Email))
             {
                 return Result.Failure<StaffUsersDto>("الإيميل موجود بالفعل");
             }
 
-            // Check username uniqueness
+            // __ Check username uniqueness __ //
             if (await _identity.UsernameExistsAsync(dto.Username))
             {
                 return Result.Failure<StaffUsersDto>("اسم المستخدم موجود بالفعل");
             }
 
-            // Check Roles
+            // __ Check Roles must not be patient __ //
             var roles = await _identity.GetRolesAsync(dto.Role);
 
             if (roles.Contains(UserRoles.Patient))
@@ -55,7 +57,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
 
             try
             {
-                // Create Identity user
+                // __ Create Identity user __ //
                 var (success, userId, error) = await _identity.CreateUserAsync
                     (
                         dto.Username,
@@ -64,6 +66,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
                         dto.Password
                     );
 
+                // __ If failed to create
                 if (!success)
                 {
                     await _uow.RollbackTransactionAsync();
@@ -71,8 +74,10 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
                     return Result.Failure<StaffUsersDto>(error);
                 }
 
+                // __ Adding to the selected role __ //
                 await _identity.AssignRoleAsync(userId, dto.Role);
 
+                // __ If the user is student __ //
                 if (dto.Role == UserRoles.Student)
                 {
                     var student = new Student
@@ -88,6 +93,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
                     await _uow.Repository<Student>().AddAsync(student);
                 }
 
+                // __ If the user is intern doctor __ //
                 else if (dto.Role == UserRoles.InternDoctor)
                 {
                     var intern = new InternDoctor
@@ -117,14 +123,17 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
                     CreatedAt = DateTime.UtcNow
                 };
 
+                //notify & email
+
                 return Result.Success(result);
             }
 
+            // __ If the transaction failed __ //
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating user {Username}", dto.Username);
-
                 await _uow.RollbackTransactionAsync();
+
+                _logger.LogError(ex, "Error creating user {Username}", dto.Username);
                 
                 return Result.Failure<StaffUsersDto>("حدث خطأ أثناء إنشاء المستخدم");
             }

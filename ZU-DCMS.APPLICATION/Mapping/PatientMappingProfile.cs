@@ -27,8 +27,7 @@ namespace ZU_DCMS.APPLICATION.Mapping
                      .ForMember(d => d.IsDeleted, o => o.Ignore())
                      .ForMember(d => d.CreatedByUserId, o => o.Ignore())
                      .ForMember(d => d.UpdatedByUserId, o => o.Ignore())
-                     .ForMember(d => d.Bookings, o => o.Ignore())
-                     .ForMember(d => d.Payments, o => o.Ignore());
+                     .ForMember(d => d.Bookings, o => o.Ignore());
         }
     }
 }

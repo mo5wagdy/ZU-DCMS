@@ -13,10 +13,7 @@ namespace ZU_DCMS.APPLICATION.Mapping
             CreateMap<Booking, BookingDto>()
                      .ForMember(d => d.PatientName, o => o.MapFrom(s => s.Patient.FullName))
                      .ForMember(d => d.SessionDate, o => o.MapFrom(s => s.Session.Date))
-                     .ForMember(d => d.SessionTime, o => o.MapFrom(s => $"{s.Session.StartTime:hh\\:mm} - {s.Session.EndTime:hh\\:mm}"))
-                     .ForMember(d => d.PaymentCode, o => o.MapFrom(s => s.Payment != null ? s.Payment.PaymentCode : null))
-                     .ForMember(d => d.PaymentStatus, o => o.MapFrom(s => s.Payment != null ? s.Payment.Status : Domain.Enums.PaymentStatus.Pending))
-                     .ForMember(d => d.Amount, o => o.MapFrom(s => s.Payment != null ? s.Payment.Amount : 0));
+                     .ForMember(d => d.SessionTime, o => o.MapFrom(s => $"{s.Session.StartTime:hh\\:mm} - {s.Session.EndTime:hh\\:mm}"));
         }
     }
 }

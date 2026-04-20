@@ -18,19 +18,19 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.SetStudentRequirements
 
         public async Task<Result> Handle(SetStudentRequirementsCommand command)
         {
-            // Verify student exists
+            // __ Verify student exists __ //
             var student = await _uow.Repository<Student>().GetByIdAsync(command.StudentId);
 
             if (student is null)
                 return Result.Failure("الطالب غير موجود");
 
-            // Verify term exists
+            // __ Verify term exists __ //
             var term = await _uow.Repository<Term>().GetByIdAsync(command.TermId);
 
             if (term is null)
                 return Result.Failure("الترم غير موجود");
 
-            // Verify all clinics exist
+            // __ Verify all clinics exist __ //
             var clinicIds = command.Requirements.Select(r => r.ClinicId).ToList();
             
             var clinics = await _uow.Repository<Clinic>().GetListAsync(c => clinicIds.Contains(c.Id) && c.IsActive);
@@ -42,7 +42,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.SetStudentRequirements
 
             try
             {
-                // Load existing requirements for this student + term
+                // __ Load existing requirements for this student + term __ //
                 var existing = await _uow.Repository<TermRequirement>().GetListAsync
                     (
                         r =>
@@ -50,11 +50,11 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.SetStudentRequirements
                         r.TermId == command.TermId
                     );
 
-                // Soft delete existing requirements
+                // __ Soft delete existing requirements __ //
                 foreach (var req in existing)
                     _uow.Repository<TermRequirement>().SoftDelete(req);
 
-                // Create new requirements
+                // __ Create new requirements __ //
                 var newRequirements = command.Requirements.Select(r =>
                     new TermRequirement
                     {
@@ -72,12 +72,13 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.SetStudentRequirements
 
                 return Result.Success();
             }
+
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error setting requirements for student {StudentId}",
-                    command.StudentId);
-
                 await _uow.RollbackTransactionAsync();
+
+                _logger.LogError(ex, "Error setting requirements for student {StudentId}", command.StudentId);
+                
                 return Result.Failure("حدث خطأ أثناء تحديث المتطلبات");
             }
         }

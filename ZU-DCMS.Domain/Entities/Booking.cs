@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿
 using ZU_DCMS.Domain.Common;
 using ZU_DCMS.Domain.Enums;
-using static System.Collections.Specialized.BitVector32;
 
 namespace ZU_DCMS.Domain.Entities
 {
@@ -20,12 +17,10 @@ namespace ZU_DCMS.Domain.Entities
         // _____________ Foreign Keys _____________ //
         public int PatientId { get; set; }
         public int SessionId { get; set; }
-        public int? PaymentId { get; set; }
 
         // _____________ Navigation _____________ //
         public Patient Patient { get; set; } = null!;
         public Session Session { get; set; } = null!;
-        public Payment Payment { get; set; } = null!;
         public DiagnosisRecord? DiagnosisRecord { get; set; }
     }
 }

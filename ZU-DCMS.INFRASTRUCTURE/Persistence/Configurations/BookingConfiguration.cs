@@ -48,11 +48,6 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                    .HasForeignKey(b => b.SessionId)
                    .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasOne(b => b.Payment)
-                   .WithOne(p => p.Booking)
-                   .HasForeignKey<Payment>(p => p.BookingId)
-                   .OnDelete(DeleteBehavior.Restrict);
-
             builder.HasOne(b => b.DiagnosisRecord)
                    .WithOne(d => d.Booking)
                    .HasForeignKey<DiagnosisRecord>(d => d.BookingId)

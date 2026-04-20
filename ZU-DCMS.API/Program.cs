@@ -1,6 +1,6 @@
-using ZU_DCMS.INFRASTRUCTURE.Extentions;
-using ZU_DCMS.APPLICATION.Extentions;
 using Hangfire;
+using ZU_DCMS.APPLICATION;
+using ZU_DCMS.INFRASTRUCTURE;
 
 namespace ZU_DCMS.API
 {

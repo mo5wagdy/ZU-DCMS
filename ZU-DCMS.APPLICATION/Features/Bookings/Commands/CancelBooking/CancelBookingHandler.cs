@@ -3,6 +3,7 @@ using ZU_DCMS.APPLICATION.Background_Jobs.Events;
 using ZU_DCMS.APPLICATION.Background_Jobs.Features.Booking.Events;
 using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Contracts;
+using ZU_DCMS.APPLICATION.Contracts.Logger;
 using ZU_DCMS.Domain.Entities;
 using ZU_DCMS.Domain.Enums;
 using ZU_DCMS.Domain.Interfaces;
@@ -39,8 +40,7 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CancelBooking
                     b => b.Id == command.BookingId,
                     false,
                     b => b.Patient,
-                    b => b.Session,
-                    b => b.Payment
+                    b => b.Session
                  );
 
             // __ Check if booking exists __ //
@@ -70,7 +70,7 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CancelBooking
                 _uow.Repository<Booking>().Update(booking);
 
                 // __ Release the reserved slot in the session __ //
-                _logger.LogInfo("Releasing slot for SessionId: {SessionId}, Type: {Type}", Session.Id, booking.BookingType);
+                _logger.LogInfo("Releasing slot for Session Type: {Type}", booking.BookingType);
 
                 // __ We will use a raw SQL update to decrement the count atomically and ensure we do not go below zero __ //
 
@@ -87,14 +87,14 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CancelBooking
                 AND IsDeleted = 0";
 
                 // __ Execute the SQL query and check how many rows were affected __ //
-                var affected = await _sql.ExecuteAsync(sql, new { id = Session.Id });
+                var affected = await _sql.ExecuteAsync(sql, new { id = booking.SessionId }); 
 
                 // __ If no rows were affected, it means the session was either inactive, deleted, does not exist, or the count was already at zero __ //
                 if (affected == 0)
                 {
                     await _uow.RollbackTransactionAsync();
 
-                    _logger.LogWarning("Failed to release slot for SessionId: {SessionId}, Type: {Type}", Session.Id, booking.BookingType);
+                    _logger.LogWarning("Failed to release slot for SessionId: {SessionId}, Type: {Type}", booking.SessionId, booking.BookingType);
 
                     return Result.Failure("فشل تحرير مكان الحجز");
                 }

@@ -1,8 +1,10 @@
 using MediatR;
 using ZU_DCMS.APPLICATION.Common;
-using ZU_DCMS.APPLICATION.Contracts;
+using ZU_DCMS.APPLICATION.Common.Auth;
+using ZU_DCMS.APPLICATION.Common.Token;
+using ZU_DCMS.APPLICATION.Contracts.Auth;
+using ZU_DCMS.APPLICATION.Contracts.Logger;
 using ZU_DCMS.APPLICATION.DTOs.Auth;
-using ZU_DCMS.APPLICATION.Services.Interfaces;
 using ZU_DCMS.Domain.Interfaces;
 using ZU_DCMS.Domain.UserRoles;
 

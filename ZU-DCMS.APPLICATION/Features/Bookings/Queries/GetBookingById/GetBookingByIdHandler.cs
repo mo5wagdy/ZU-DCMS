@@ -1,8 +1,9 @@
 using AutoMapper;
 using MediatR;
 using ZU_DCMS.APPLICATION.Common;
-using ZU_DCMS.APPLICATION.Contracts;
+using ZU_DCMS.APPLICATION.Contracts.Logger;
 using ZU_DCMS.APPLICATION.DTOs.Booking;
+using ZU_DCMS.Domain.Entities;
 using ZU_DCMS.Domain.Interfaces;
 
 namespace ZU_DCMS.APPLICATION.Features.Bookings.Queries.GetBookingById
@@ -26,13 +27,12 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Queries.GetBookingById
             _logger.LogInfo("Fetching booking details for BookingId: {BookingId}", query.BookingId);
 
             // __ Load booking with related entities __ //
-            var booking = await _uow.Repository<Domain.Entities.Booking>().GetFirstOrDefaultAsync
+            var booking = await _uow.Repository<Booking>().GetFirstOrDefaultAsync
             (
                 b => b.Id == query.BookingId,
                 false,
                 b => b.Patient,
-                b => b.Session,
-                b => b.Payment
+                b => b.Session
             );
 
             // __ Check if booking exists __ //

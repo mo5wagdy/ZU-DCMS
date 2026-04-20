@@ -120,7 +120,7 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient
                     ExpiresAt = DateTime.UtcNow.AddDays(_settings.RefreshTokenExpiryDays)
                 });
 
-                await _uow.SaveChangesAsync();
+                await _uow.SaveChangesAsync(cancellationToken: cancellationToken);
                 
                 await _uow.CommitTransactionAsync();
 

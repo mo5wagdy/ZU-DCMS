@@ -50,7 +50,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.UpdateTerm
             _uow.Repository<Term>().Update(term);
 
             // __ SaveChanges __ //
-            await _uow.SaveChangesAsync(command.AdminId);
+            await _uow.SaveChangesAsync(command.AdminId, cancellationToken);
 
             // __ Return DTO __ //
             return Result.Success(_mapper.Map<TermDto>(term));

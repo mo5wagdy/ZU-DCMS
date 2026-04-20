@@ -128,7 +128,7 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
                 // __ Save the new session to the database __ //
                 await _uow.Repository<CaseSession>().AddAsync(session);
                 
-                await _uow.SaveChangesAsync();
+                await _uow.SaveChangesAsync(cancellationToken: cancellationToken);
 
                 // __ Create associations between the session and the selected procedures __ //
                 var sessionProcedures = dto.ProcedureIds.Select
@@ -144,7 +144,7 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
                 // __ Save the session procedures to the database __ //
                 await _uow.Repository<CaseSessionProcedure>().AddRangeAsync(sessionProcedures);
                 
-                await _uow.SaveChangesAsync();
+                await _uow.SaveChangesAsync(cancellationToken: cancellationToken);
 
                 // __ If the session is marked as completed, update the case assignment status and increment the student's requirement count for the clinic __ //
                 if (dto.IsCompleted)

@@ -80,7 +80,7 @@ namespace ZU_DCMS.APPLICATION.Features.Sessions.Commands.GenerateSessions
             // __ Save sessions to database __ //
             await _uow.Repository<Session>().AddRangeAsync(sessions);
             
-            await _uow.SaveChangesAsync();
+            await _uow.SaveChangesAsync(cancellationToken: cancellationToken);
 
             _logger.LogInfo("Sessions created successfully for {Date} Count: {Count}", date, sessions.Count);
             

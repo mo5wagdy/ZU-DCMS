@@ -45,7 +45,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateTerm
             await _uow.Repository<Term>().AddAsync(term);
             
             // __ Saving Changes with admin id for audit trail __ //
-            await _uow.SaveChangesAsync(command.AdminId);
+            await _uow.SaveChangesAsync(command.AdminId, cancellationToken);
 
             return Result.Success(_mapper.Map<TermDto>(term));
         }

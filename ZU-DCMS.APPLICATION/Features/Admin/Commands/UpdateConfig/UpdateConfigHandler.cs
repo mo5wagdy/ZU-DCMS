@@ -34,7 +34,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.UpdateConfig
             // __ SaveChanges __ //
             _uow.Repository<SystemConfig>().Update(config);
            
-            await _uow.SaveChangesAsync(command.AdminId);
+            await _uow.SaveChangesAsync(command.AdminId, cancellationToken);
 
             return Result.Success();
         }

@@ -113,7 +113,7 @@ namespace ZU_DCMS.APPLICATION.Features.Patients.Commands.UpdateProfile
 
                 _uow.Repository<Patient>().Update(patient);
 
-                await _uow.SaveChangesAsync();
+                await _uow.SaveChangesAsync(cancellationToken: cancellationToken);
                 
                 await _uow.CommitTransactionAsync();
 

@@ -89,7 +89,7 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.StaffLogin
                     return Result.Failure<AuthDto>(tokens.Error);
                 }
 
-                await _uow.SaveChangesAsync();
+                await _uow.SaveChangesAsync(cancellationToken: cancellationToken);
                 
                 await _uow.CommitTransactionAsync();
 

@@ -125,7 +125,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.DiagnosePatient
             await _uow.Repository<DiagnosisRecord>().AddAsync(diagnosis);
 
             // __ Save diagnosis record to database __ //
-            await _uow.SaveChangesAsync();
+            await _uow.SaveChangesAsync(cancellationToken: cancellationToken);
 
             // __ Emit Event for background processing (e.g., updating patient history, notifying supervisors, etc.) __ //
             await _eventPublisher.PublishAsync(new DiagnosisCreatedEvent(diagnosis.Id, diagnosis.BookingId));

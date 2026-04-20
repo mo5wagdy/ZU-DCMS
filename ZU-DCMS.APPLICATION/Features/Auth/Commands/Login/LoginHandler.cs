@@ -90,7 +90,7 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.Login
                 }
 
                 // __ Single SaveChanges for everything __ //
-                await _uow.SaveChangesAsync();
+                await _uow.SaveChangesAsync(cancellationToken: cancellationToken);
                 
                 await _uow.CommitTransactionAsync();
 

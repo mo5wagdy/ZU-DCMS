@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using ZiggyCreatures.Caching.Fusion;
@@ -13,6 +14,7 @@ using ZU_DCMS.APPLICATION.Background_Jobs.Features.Diagnosis.Handlers;
 using ZU_DCMS.APPLICATION.Background_Jobs.Features.Payment.Events;
 using ZU_DCMS.APPLICATION.Background_Jobs.Features.Payment.Handlers;
 using ZU_DCMS.APPLICATION.Common.Cache;
+using ZU_DCMS.APPLICATION.Common.MediatR_Behaviors;
 using ZU_DCMS.APPLICATION.Common.Token;
 using ZU_DCMS.APPLICATION.Features.Auth.Commands.Login;
 
@@ -25,6 +27,13 @@ namespace ZU_DCMS.APPLICATION
         {
             // __________ Validators __________ //
             services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
+
+            // __________ MediatR __________ //
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(LoginHandler).Assembly));
+
+            // __________ MediatR behaviors __________ //
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
 
             // __________ AutoMapper __________ //
             services.AddAutoMapper(cfg => { }, typeof(DependencyInjection));
@@ -47,8 +56,6 @@ namespace ZU_DCMS.APPLICATION
             // __________ Diagnosis Events ___________ //
             services.AddScoped<IEventHandler<DiagnosisCreatedEvent>, DiagnosisCreatedHandler>();
 
-            // __________ MediatR __________ //
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(LoginHandler).Assembly));
 
             // __________ Caching Registerations __________ // 
             services.AddFusionCacheStackExchangeRedisBackplane(o =>

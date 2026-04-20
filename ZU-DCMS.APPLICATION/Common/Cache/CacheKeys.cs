@@ -5,13 +5,14 @@
     {
         // __ Long Term __ //
         public const string Clinics = "clinics";
-        public const string SystemConfigs = "system_configs";
-        public const string SessionConfig = "session_config";
+        public const string SystemConfigs = "system:configs";
+        public const string SessionConfig = "session:config";
+        public const string StaffUsers = "staff:users";
 
         // __ Student Related __ //
         public static string StudentById(int studentId) => $"student:{studentId}"; 
-        public static string StudentByUserId(int userId) => $"student:user:{userId}"; 
-        public static string StudentPage(int page, int size, string? search, string? sort) => $"student:page:{page}:{size}:{search}:{sort}"; 
+        public static string StudentByUserId(string userId) => $"student:user:{userId}"; 
+        public static string StudentsPage(int page, int size, string? search, string? sort, int version) => $"student:page:{page}:{size}:{search}:{sort}"; 
         
         // __ Student Progress Related __ //
         public static string StudentProgress(int studentId, int termId) => $"student:progress:{studentId}:{termId}"; 
@@ -26,5 +27,8 @@
        
         // __ Booking Related __ //
         public static string PatientBookings(int patientId) => $"patient:bookings:{patientId}";
+
+        // __ Staff Related __ //
+        public static string StaffUserByUserId(string userId) => $"staff:user:{userId}";
     }
 }

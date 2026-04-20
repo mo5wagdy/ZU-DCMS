@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Logging;
+using ZiggyCreatures.Caching.Fusion;
 using ZU_DCMS.APPLICATION.Common;
+using ZU_DCMS.APPLICATION.Common.Cache;
 using ZU_DCMS.Domain.Entities;
 using ZU_DCMS.Domain.Interfaces;
 
@@ -8,11 +10,18 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.SetStudentRequirements
     public class SetStudentRequirementsHandler
     {
         private readonly IUnitOfWork _uow;
+        private readonly IFusionCache _cache;
         private readonly ILogger<SetStudentRequirementsHandler> _logger;
 
-        public SetStudentRequirementsHandler(IUnitOfWork uow, ILogger<SetStudentRequirementsHandler> logger)
+        public SetStudentRequirementsHandler
+        (
+            IUnitOfWork uow,
+            IFusionCache cache,
+            ILogger<SetStudentRequirementsHandler> logger
+        )
         {
             _uow = uow;
+            _cache = cache;
             _logger = logger;
         }
 
@@ -69,6 +78,10 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.SetStudentRequirements
                 await _uow.Repository<TermRequirement>().AddRangeAsync(newRequirements);
 
                 await _uow.CommitTransactionAsync(command.AdminId);
+
+                // __ Cache Invalidation __ //
+                await _cache.RemoveAsync(CacheKeys.StudentRequirements(command.StudentId, command.TermId));
+                await _cache.RemoveAsync(CacheKeys.StudentProgress(command.StudentId, command.TermId));
 
                 return Result.Success();
             }

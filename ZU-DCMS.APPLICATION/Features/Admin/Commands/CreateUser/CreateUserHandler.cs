@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
+using ZiggyCreatures.Caching.Fusion;
 using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Contracts;
 using ZU_DCMS.APPLICATION.Contracts.Auth;
@@ -14,17 +15,22 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
     {
         private readonly IUnitOfWork _uow;
         private readonly IIdentityService _identity;
+        private readonly IFusionCache _cache;
         private readonly IUserCodeGenerator _codeGen;
         private readonly ILogger<CreateUserHandler> _logger;
 
-        public CreateUserHandler(
+        public CreateUserHandler
+        (
             IUnitOfWork uow,
             IIdentityService identity,
+            IFusionCache cache,
             IUserCodeGenerator codeGen,
-            ILogger<CreateUserHandler> logger)
+            ILogger<CreateUserHandler> logger
+        )
         {
             _uow = uow;
             _identity = identity;
+            _cache = cache;
             _codeGen = codeGen;
             _logger = logger;
         }
@@ -124,6 +130,13 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
                 };
 
                 //notify & email
+
+
+                // __ Cache version __ //
+                var version = await _cache.GetOrSetAsync("students:version", _ => Task.FromResult(1));
+
+                // __ Update Cache Version __ //
+                await _cache.SetAsync("students:version", version + 1);
 
                 return Result.Success(result);
             }

@@ -1,8 +1,10 @@
 using AutoMapper;
 using MediatR;
+using ZiggyCreatures.Caching.Fusion;
 using ZU_DCMS.APPLICATION.Background_Jobs.Events;
 using ZU_DCMS.APPLICATION.Background_Jobs.Features.Case.Events;
 using ZU_DCMS.APPLICATION.Common;
+using ZU_DCMS.APPLICATION.Common.Cache;
 using ZU_DCMS.APPLICATION.Contracts;
 using ZU_DCMS.APPLICATION.Contracts.Logger;
 using ZU_DCMS.APPLICATION.DTOs.Case;
@@ -17,19 +19,24 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
         private readonly IUnitOfWork _uow;
         private readonly IRawSqlExecutor _sql;
         private readonly IEventPublisher _eventPublisher;
+        private readonly IFusionCache _cache;
         private readonly IMapper _mapper;
         private readonly IAppLogger<AddSessionProgressHandler> _logger;
 
-        public AddSessionProgressHandler(
+        public AddSessionProgressHandler
+        (
             IUnitOfWork uow,
             IRawSqlExecutor sql,
             IEventPublisher eventPublisher,
+            IFusionCache cache,
             IMapper mapper,
-            IAppLogger<AddSessionProgressHandler> logger)
+            IAppLogger<AddSessionProgressHandler> logger
+        )
         {
             _uow = uow;
             _sql = sql;
             _eventPublisher = eventPublisher;
+            _cache = cache;
             _mapper = mapper;
             _logger = logger;
         }
@@ -37,7 +44,7 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
         public async Task<Result<CaseSessionDto>> Handle(AddSessionProgressCommand command, CancellationToken cancellationToken)
         {
             var studentId = command.StudentId;
-            
+            var termId = command.termId;
             var dto = command.Dto;
 
             _logger.LogInfo("Adding session progress for student ID: {StudentId} on case assignment ID: {CaseAssignmentId}", studentId, dto.CaseAssignmentId);
@@ -162,10 +169,8 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
                     WHERE StudentId = @studentId
                     AND ClinicId = @ClinicId
                     AND TermId = @TermId";
-
-                    var termRequirement = new TermRequirement();
                     
-                    var rows = await _sql.ExecuteAsync(sql, new { studentId, termRequirement.ClinicId, termRequirement.TermId });
+                    var rows = await _sql.ExecuteAsync(sql, new { studentId, assignment.ClinicId, termId});
 
                     // __ If no changes rollback and return failure __ //
                     if (rows == 0)
@@ -193,6 +198,13 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
                 {
                     await _eventPublisher.PublishAsync(new CasePartiallyCompletedEvent(studentId, assignment.Id, assignment.ClinicId));
                 }
+
+                // __ Cache Invalidation For Data Consistency __ //
+                await _cache.RemoveAsync(CacheKeys.StudentProgress(studentId, termId));
+                await _cache.RemoveAsync(CacheKeys.StudentCases(studentId));
+                await _cache.RemoveAsync(CacheKeys.StudentRequirements(studentId, termId));
+                await _cache.RemoveAsync(CacheKeys.CaseById(assignment.Id));
+                await _cache.RemoveAsync(CacheKeys.AvailableStudents(assignment.ClinicId));
 
                 _logger.LogInfo("Successfully added session progress for student ID: {StudentId} on case assignment ID: {CaseAssignmentId}", studentId, dto.CaseAssignmentId);
 

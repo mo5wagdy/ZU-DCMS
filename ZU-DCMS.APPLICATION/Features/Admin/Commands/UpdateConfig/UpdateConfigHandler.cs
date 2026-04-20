@@ -1,5 +1,7 @@
 using MediatR;
+using ZiggyCreatures.Caching.Fusion;
 using ZU_DCMS.APPLICATION.Common;
+using ZU_DCMS.APPLICATION.Common.Cache;
 using ZU_DCMS.Domain.Entities;
 using ZU_DCMS.Domain.Interfaces;
 
@@ -8,10 +10,12 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.UpdateConfig
     public class UpdateConfigHandler : IRequestHandler<UpdateConfigCommand, Result>
     {
         private readonly IUnitOfWork _uow;
+        private readonly IFusionCache _cache;
 
-        public UpdateConfigHandler(IUnitOfWork uow)
+        public UpdateConfigHandler(IUnitOfWork uow, IFusionCache cache)
         {
             _uow = uow;
+            _cache = cache;
         }
 
         public async Task<Result> Handle(UpdateConfigCommand command, CancellationToken cancellationToken)
@@ -35,6 +39,9 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.UpdateConfig
             _uow.Repository<SystemConfig>().Update(config);
            
             await _uow.SaveChangesAsync(command.AdminId, cancellationToken);
+
+            // __ Cache Invalidation __ //
+            await _cache.RemoveAsync(CacheKeys.SystemConfigs);
 
             return Result.Success();
         }

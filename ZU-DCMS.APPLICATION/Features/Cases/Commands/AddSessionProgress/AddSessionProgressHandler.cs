@@ -44,7 +44,7 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
         public async Task<Result<CaseSessionDto>> Handle(AddSessionProgressCommand command, CancellationToken cancellationToken)
         {
             var studentId = command.StudentId;
-            var termId = command.termId;
+            var termId = command.TermId;
             var dto = command.Dto;
 
             _logger.LogInfo("Adding session progress for student ID: {StudentId} on case assignment ID: {CaseAssignmentId}", studentId, dto.CaseAssignmentId);
@@ -91,12 +91,12 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
                 return Result.Failure<CaseSessionDto>("ليس لديك صلاحية");
             }
 
-            // __ Verify that the case assignment is active and can be updated __ //
-            if (assignment.Status != CaseStatus.Active)
+            // __ Only allow progress while case is being worked on __ //
+            if (assignment.Status != CaseStatus.InProgress)
             {
                 _logger.LogWarning("Case assignment with ID: {CaseAssignmentId} is not active", dto.CaseAssignmentId);
              
-                return Result.Failure<CaseSessionDto>("الحالة غير نشطة");
+                return Result.Failure<CaseSessionDto>("الحالة ليست قيد العمل");
             }
 
             // __ Validates that all selected procedures are valid and belong to the clinic associated with the case assignment __ //
@@ -156,33 +156,11 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
                 // __ If the session is marked as completed, update the case assignment status and increment the student's requirement count for the clinic __ //
                 if (dto.IsCompleted)
                 {
-                    assignment.Status = CaseStatus.Completed;
+                    assignment.Status = CaseStatus.PendingReview;
                     
                     _uow.Repository<CaseAssignment>().Update(assignment);
 
-                    _logger.LogInfo("Incrementing requirement for student {StudentId}", studentId);
-
-                    // __ Atomically Increamenting student requirement for the assigned case __ //
-                    var sql = @"
-                    UPDATE TermRequirements
-                    SET CompletedCount = CompletedCount + 1
-                    WHERE StudentId = @studentId
-                    AND ClinicId = @ClinicId
-                    AND TermId = @TermId";
-                    
-                    var rows = await _sql.ExecuteAsync(sql, new { studentId, assignment.ClinicId, termId});
-
-                    // __ If no changes rollback and return failure __ //
-                    if (rows == 0)
-                    {
-                        _logger.LogWarning("No Rows Affected");
-
-                        await _uow.RollbackTransactionAsync();
-
-                        return Result.Failure<CaseSessionDto>("حدث خطأ أثناء إتمام الحاله");
-                    }
-
-                    _logger.LogInfo("Incremented requirement for student {StudentId}", studentId);
+                    _logger.LogInfo("Case moved to PendingReview - waiting TA approval for student {StudentId}", studentId);
                 }
 
                 // __ Commit The Transaction If Successful __ //
@@ -200,9 +178,7 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
                 }
 
                 // __ Cache Invalidation For Data Consistency __ //
-                await _cache.RemoveAsync(CacheKeys.StudentProgress(studentId, termId));
                 await _cache.RemoveAsync(CacheKeys.StudentCases(studentId));
-                await _cache.RemoveAsync(CacheKeys.StudentRequirements(studentId, termId));
                 await _cache.RemoveAsync(CacheKeys.CaseById(assignment.Id));
                 await _cache.RemoveAsync(CacheKeys.AvailableStudents(assignment.ClinicId));
 

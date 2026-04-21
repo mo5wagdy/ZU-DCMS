@@ -15,6 +15,7 @@ namespace ZU_DCMS.Domain.Entities
         public int AssignedByInternId { get; set; }
         public int DiagnosisRecordId { get; set; }
         public int StudentId { get; set; }
+        public int TermId { get; set; }
         public int ClinicId { get; set; }
 
         // _____________ Navigation _____________ //
@@ -22,6 +23,7 @@ namespace ZU_DCMS.Domain.Entities
         public DiagnosisRecord DiagnosisRecord { get; set; } = null!;
         public Student Student { get; set; } = null!;
         public Clinic Clinic { get; set; } = null!;
+        public Term Term { get; set; } = null!
         public ICollection<CaseSession> Sessions { get; set; } = new List<CaseSession>();
     }
 }

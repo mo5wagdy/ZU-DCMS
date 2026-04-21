@@ -29,6 +29,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence
         public DbSet<DiagnosisRecord> DiagnosisRecords => Set<DiagnosisRecord>();
         public DbSet<CaseAssignment> CaseAssignments => Set<CaseAssignment>();
         public DbSet<CaseSession> CaseSessions => Set<CaseSession>();
+        public DbSet<CaseReview> CaseReviews => Set <CaseReview>();
 
         // __ Entities for managing diagnoses and procedures __ //
         public DbSet<DiagnosisType> DiagnosisTypes => Set<DiagnosisType>();

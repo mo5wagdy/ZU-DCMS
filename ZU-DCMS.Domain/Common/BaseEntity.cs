@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace ZU_DCMS.Domain.Common
 {
     /* __ BaseEntity class to be inherited by all entities in the application, 

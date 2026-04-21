@@ -6,6 +6,9 @@ namespace ZU_DCMS.Domain.Enums
     {
         Active = 1,
         Completed = 2,
-        PendingReview = 3
+        InProgress = 3, 
+        PendingReview = 4,
+        Approved = 5,
+        Rejected = 6
     }
 }

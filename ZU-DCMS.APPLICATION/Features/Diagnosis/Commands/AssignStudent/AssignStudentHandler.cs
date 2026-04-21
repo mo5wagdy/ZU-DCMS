@@ -111,7 +111,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
                     StudentId = dto.StudentId,
                     ClinicId = dto.ClinicId,
                     AssignedByInternId = intern.Id,
-                    Status = CaseStatus.Active,
+                    Status = CaseStatus.InProgress,
                     Notes = dto.Notes?.Trim(),
                     AssignedAt = DateTime.UtcNow,
                     CreatedAt = DateTime.UtcNow

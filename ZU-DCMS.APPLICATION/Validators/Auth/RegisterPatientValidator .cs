@@ -1,7 +1,4 @@
 ﻿using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using ZU_DCMS.APPLICATION.DTOs.Auth;
 using ZU_DCMS.APPLICATION.Validators.Shared;
 using ZU_DCMS.Domain.Enums;
@@ -68,6 +65,7 @@ namespace ZU_DCMS.APPLICATION.Validators.Auth
         }
 
         // _____________ Custom Validation Methods _____________ //
+
 
         // __ Validates the identity number based on the selected identity type __ //
         private bool BeValidIdentityNumber(string number, IdentityType type)

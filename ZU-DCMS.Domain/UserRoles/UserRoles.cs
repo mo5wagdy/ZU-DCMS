@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace ZU_DCMS.Domain.UserRoles
 {
     /* 
@@ -10,9 +7,11 @@ namespace ZU_DCMS.Domain.UserRoles
      * */
     public static class UserRoles
     {
-        // معيد - Assistant Lecturer
-        // يراجع الحاله بعد ما الطالب يتممها
         public const string Admin = "Admin";
+        public const string Dean = "Dean";
+        public const string ViceDean = "ViceDean";
+        public const string Professor = "Professor";
+        public const string TeachingAssistant = "TeachingAssistant";
         public const string InternDoctor = "InternDoctor";
         public const string Student = "Student";
         public const string Patient = "Patient";

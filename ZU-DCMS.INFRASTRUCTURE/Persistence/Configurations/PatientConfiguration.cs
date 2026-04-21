@@ -15,10 +15,12 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
 
             builder.Property(p => p.PatientCode)
                    .IsRequired()
-                   .HasDefaultValueSql("'PAT-' + CAST(YEAR(GETDATE()) AS VARCHAR) + '-' + RIGHT('0000' + CAST(NEXT VALUE FOR PatientCodeSeq AS VARCHAR), 4)") // => This sets a default value for PatientCode using a SQL expression that generates a unique code based on the current year and a sequence.
                    .HasMaxLength(20);
 
             builder.HasIndex(p => p.PatientCode)
+                   .IsUnique();
+            
+            builder.HasIndex(p => p.PhoneNumber)
                    .IsUnique();
 
             builder.Property(p => p.FullName)
@@ -45,6 +47,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
             builder.Property(p => p.PhoneNumber)
                    .IsRequired()
                    .HasMaxLength(15);
+
 
             builder.Property(p => p.Email)
                    .HasMaxLength(100);

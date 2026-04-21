@@ -34,22 +34,24 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.Login
         {
             var dto = command.Dto;
 
-            _logger.LogInfo("Patient login attempt with Username: {Username}, IdentityNumber: {IdentityNumber}", dto.Username, dto.IdentityNumber);
+            _logger.LogInfo("Patient login attempt with PhoneNumber: {PhoneNumber}, IdentityNumber: {IdentityNumber}", dto.PhoneNumber, dto.IdentityNumber);
 
-            // __ Find by username __ //
-            var user = await _identity.FindByUsernameAsync(dto.Username);
+            // __ Find by phone __ //
+            var phone = dto.PhoneNumber.Trim();
+                
+            var user = await _identity.FindByPhoneAsync(phone);
 
             // __ Generic error for security — don't reveal which field is wrong __ //
             if (user is null)
             {
-                _logger.LogWarning("Login failed: User not found for Username: {Username}", dto.Username);
+                _logger.LogWarning("Login failed: User not found for PhoneNumber: {PhoneNumber}", dto.PhoneNumber);
                 
                 return Result.Failure<AuthDto>("بيانات الدخول غير صحيحة");
             }
 
             if (!user.IsActive)
             {
-                _logger.LogWarning("Login failed: Account is inactive for Username: {Username}", dto.Username);
+                _logger.LogWarning("Login failed: Account is inactive for PhoneNumber: {PhoneNumber}", dto.PhoneNumber);
                 
                 return Result.Failure<AuthDto>("الحساب موقوف، تواصل مع الإدارة");
             }
@@ -57,7 +59,7 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.Login
             // __ For patients — password is their identity number __ //
             if (!await _identity.CheckPasswordAsync(user.Id, dto.IdentityNumber))
             {
-                _logger.LogWarning("Login failed: Incorrect password for Username: {Username}", dto.Username);
+                _logger.LogWarning("Login failed: Incorrect password for PhoneNumber: {PhoneNumber}", dto.PhoneNumber);
                 
                 return Result.Failure<AuthDto>("بيانات الدخول غير صحيحة");
             }
@@ -67,7 +69,7 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.Login
 
             if (!roles.Contains(UserRoles.Patient))
             {
-                _logger.LogWarning("Login failed: User is not a patient for Username: {Username}", dto.Username);
+                _logger.LogWarning("Login failed: User is not a patient for PhoneNumber: {PhoneNumber}", dto.PhoneNumber);
                 
                 return Result.Failure<AuthDto>("بيانات الدخول غير صحيحة");
             }
@@ -76,7 +78,7 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.Login
 
             try
             {
-                _logger.LogInfo("Generating tokens for patient: {Username}", dto.Username);
+                _logger.LogInfo("Generating tokens for patient: {PhoneNumber}", dto.PhoneNumber);
 
                 // __ Generate tokens __ //
                 var tokens = await _token.GenerateAsync(user.Id);
@@ -94,7 +96,7 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.Login
                 
                 await _uow.CommitTransactionAsync();
 
-                _logger.LogInfo("Patient login successful: {Username}", dto.Username);
+                _logger.LogInfo("Patient login successful: {PhoneNumber}", dto.PhoneNumber);
 
                 return Result.Success<AuthDto>(new AuthDto
                 {

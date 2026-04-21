@@ -28,7 +28,7 @@ namespace ZU_DCMS.APPLICATION.Background_Jobs.Features.Case.Handlers
 
         public async Task HandleAsync(CaseCompletedEvent e)
         {
-            await _cache.RemoveAsync(CacheKeys.StudentProgress(e.studentId));
+            await _cache.RemoveAsync(CacheKeys.StudentProgress(e.studentId,e.clinicId));
 
             await _cache.RemoveAsync(CacheKeys.AvailableStudents(e.clinicId));
 

@@ -51,6 +51,13 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
                 return Result.Failure<StaffUsersDto>("اسم المستخدم موجود بالفعل");
             }
 
+            var phone = _identity.FindByPhoneAsync(dto.PhoneNumber);
+            
+            if(phone != null)
+            {
+                return Result.Failure<StaffUsersDto>("رقم الهاتف موجود بالفعل");
+            }
+
             // __ Check Roles must not be patient __ //
             var roles = await _identity.GetRolesAsync(dto.Role);
 
@@ -68,6 +75,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
                     (
                         dto.Username,
                         dto.Email,
+                        dto.PhoneNumber,
                         dto.FullName,
                         dto.Password
                     );
@@ -146,7 +154,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
             {
                 await _uow.RollbackTransactionAsync();
 
-                _logger.LogError(ex, "Error creating user {Username}", dto.Username);
+                _logger.LogError(ex, "Error creating user {PhoneNumber}", dto.Username);
                 
                 return Result.Failure<StaffUsersDto>("حدث خطأ أثناء إنشاء المستخدم");
             }

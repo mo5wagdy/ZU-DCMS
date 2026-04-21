@@ -51,7 +51,7 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient
             // __ Check username uniqueness __ //
             if (await _identity.UsernameExistsAsync(dto.Username))
             {
-                _logger.LogWarning("Username already exists: {Username}", dto.Username);
+                _logger.LogWarning("Username exists: {PhoneNumber}", dto.Username);
                 
                 return Result.Failure<AuthDto>("اسم المستخدم موجود بالفعل");
             }
@@ -64,18 +64,26 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient
                 return Result.Failure<AuthDto>("رقم الهوية مسجل بالفعل");
             }
 
+            if (await _uow.Repository<Patient>().ExistsAsync(p => p.PhoneNumber == dto.PhoneNumber))
+            {
+                _logger.LogWarning("Phone number already exists: {PhoneNumber}", dto.PhoneNumber);
+
+                return Result.Failure<AuthDto>("رقم الهاتف مسجل بالفعل");
+            }
+
             // __ Begin transaction — Identity + Patient must both succeed __ //
             await _uow.BeginTransactionAsync();
            
             try
             {
-                _logger.LogInfo("Creating Identity user for patient: {Username}", dto.Username);
+                _logger.LogInfo("Creating Identity user for patient: {PhoneNumber}", dto.Username);
 
                 // __ Create Identity user — password is the identity number __ //
                 var (success, userId, error) = await _identity.CreateUserAsync
                 (
                     dto.Username,
                     dto.Email,
+                    dto.PhoneNumber,
                     dto.FullName,
                     dto.IdentityNumber
                 );
@@ -124,7 +132,7 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient
                 
                 await _uow.CommitTransactionAsync();
 
-                _logger.LogInfo("Patient registration successful: {Username}", dto.Username);
+                _logger.LogInfo("Patient registration successful: {PhoneNumber}", dto.Username);
 
                 return Result.Success<AuthDto>(new AuthDto
                 {

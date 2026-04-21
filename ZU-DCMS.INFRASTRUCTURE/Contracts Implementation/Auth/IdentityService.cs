@@ -5,6 +5,7 @@ using ZU_DCMS.APPLICATION.DTOs.Admin;
 using ZU_DCMS.APPLICATION.DTOs.Auth;
 using ZU_DCMS.APPLICATION.Common.Pagination;
 using ZU_DCMS.APPLICATION.Contracts.Auth;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
 {
@@ -77,6 +78,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
         public async Task<(bool Success, string UserId, string Error)> CreateUserAsync
         (
             string username,
+            string? phoneNumber,
             string? email,
             string fullName,
             string password
@@ -86,6 +88,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
             {
                 UserName = username.Trim().ToLower(),
                 Email = email?.Trim().ToLower(),
+                PhoneNumber = phoneNumber?.Trim(),
                 FullName = fullName.Trim(),
                 EmailConfirmed = email != null,
                 IsActive = true,
@@ -120,6 +123,12 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
         {
             var user = await _userManager.FindByNameAsync(username.Trim().ToLower());
             return user == null ? null : MapToDto(user);
+        }
+
+        public async Task<ApplicationUserDto?> FindByPhoneAsync(string phone)
+        {
+            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == phone);
+            return user == null ? null : MapToDto(user); 
         }
 
         public async Task<ApplicationUserDto?> FindByEmailAsync(string email)

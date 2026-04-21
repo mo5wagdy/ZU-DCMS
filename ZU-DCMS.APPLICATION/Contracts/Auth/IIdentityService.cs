@@ -16,6 +16,7 @@ namespace ZU_DCMS.APPLICATION.Contracts.Auth
             (
                 string username,
                 string? email,
+                string phoneNumber,
                 string fullName,
                 string password
             );
@@ -26,6 +27,7 @@ namespace ZU_DCMS.APPLICATION.Contracts.Auth
 
         // _________________________ Lookup _________________________ //
         Task<ApplicationUserDto?> FindByUsernameAsync(string username);
+        Task<ApplicationUserDto?> FindByPhoneAsync(string phone);
         Task<ApplicationUserDto?> FindByEmailAsync(string email);
         Task<ApplicationUserDto?> FindByIdAsync(string userId);
 

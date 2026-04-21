@@ -27,7 +27,7 @@ namespace ZU_DCMS.APPLICATION.Background_Jobs.Features.Booking.Handlers
 
         public async Task HandleAsync(BookingPostponedEvent e)
         {
-            await _cache.RemoveAsync(CacheKeys.SessionStatus(e.SessionId));
+         //   await _cache.RemoveAsync(CacheKeys.SessionStatus(e.SessionId));
 
             await _notification.SendBookingPostponedAsync(e.BookingId, e.Reason);
 

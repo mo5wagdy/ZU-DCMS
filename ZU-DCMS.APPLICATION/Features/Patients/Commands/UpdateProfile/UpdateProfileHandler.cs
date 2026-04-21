@@ -69,7 +69,7 @@ namespace ZU_DCMS.APPLICATION.Features.Patients.Commands.UpdateProfile
                         {
                             await _uow.RollbackTransactionAsync();
                             
-                            _logger.LogWarning("Username already exists: {Username}", newUsername);
+                            _logger.LogWarning("Username already exists: {PhoneNumber}", newUsername);
                             
                             return Result.Failure<UpdatePatientDto>("اسم المستخدم موجود بالفعل");
                         }

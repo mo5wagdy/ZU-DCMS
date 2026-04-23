@@ -19,10 +19,6 @@ namespace ZU_DCMS.APPLICATION.Validators.Diagnosis
                    .GreaterThan(0)
                    .WithMessage("الطالب مطلوب");
 
-            RuleFor(x => x.ClinicId)
-                   .GreaterThan(0)
-                   .WithMessage("العيادة مطلوبة");
-
             RuleFor(x => x.Notes)
                    .MaximumLength(500)
                    .WithMessage("الملاحظات لازم تكون أقل من 500 حرف")

@@ -1,7 +1,6 @@
 using AutoMapper;
 using MediatR;
 using ZU_DCMS.APPLICATION.Background_Jobs.Events;
-using ZU_DCMS.APPLICATION.Background_Jobs.Features.Case;
 using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Contracts.Logger;
 using ZU_DCMS.APPLICATION.DTOs.Case;
@@ -300,12 +299,12 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
                 /// - Update dashboards in real-time (via SignalR if available)
                 /// - Trigger any async workflows (e.g., email notifications)
                 /// </summary>
-                await _eventPublisher.PublishAsync(new CaseAssignedEvent
-                (
-                    assignment.Id,
-                    dto.StudentId,
-                    clinicId
-                ));
+               // await _eventPublisher.PublishAsync(new CaseAssignedEvent
+                //(
+                //    assignment.Id,
+                //    dto.StudentId,
+                //    clinicId
+                //));
 
                 // _____________ LOAD FULL RECORD FOR RESPONSE _____________ //
                 /// <summary>

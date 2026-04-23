@@ -1,21 +1,52 @@
-﻿namespace ZU_DCMS.API.Common
+namespace ZU_DCMS.API.Common
 {
-    // __ API response wrapper to standardize the structure of responses sent to clients. __ //
+    /// <summary>
+    /// A standardized generic response wrapper for all API endpoints.
+    /// Ensures every response shape is consistent across the application.
+    /// </summary>
+    /// <typeparam name="T">The type of the data returned in the response.</typeparam>
     public class ApiResponse<T>
     {
-        public bool IsSuccess { get; set; } // => Indicates whether the API call was successful or not.
-        public string Message { get; set; } = string.Empty; // => A message providing additional information about the response, such as success confirmation or error details.
-        public T? Data { get; set; } // => The actual data being returned in the response, which can be of any type specified by the generic parameter T.
+        // Indicates whether the request was processed successfully.
+        public bool IsSuccess { get; set; }
+        
+        // Additional information about the response (e.g., a success confirmation or an error summary).
+        public string Message { get; set; } = string.Empty;
+        
+        // The payload/data of the response to be sent back.
+        public T? Data { get; set; }
 
-        // __ A collection of error messages that can be populated when the API call fails, allowing for multiple errors to be returned in a structured way. __ //
-        public IEnumerable<string> Errors { get; set; } = Enumerable.Empty<string>();
+        // A list of error messages, populated when the request fails.
+        public List<string> Errors { get; set; } = new List<string>();
 
-        // __ Static factory methods to create standardized success and failure responses. __ //
-        public static ApiResponse<T> Ok(T data, string message = "") => new() { IsSuccess = true, Data = data, Message = message };
+        /// <summary>
+        /// Creates a successful response containing data and an optional message.
+        /// </summary>
+        public static ApiResponse<T> Success(T data, string message = "") => new() 
+        { 
+            IsSuccess = true, 
+            Data = data, 
+            Message = message 
+        };
 
-        public static ApiResponse<T> Fail(string error) => new() {IsSuccess = false, Errors = new[] { error }};
+        /// <summary>
+        /// Creates a failure response containing a list of error messages and a descriptive message.
+        /// </summary>
+        public static ApiResponse<T> Failure(List<string> errors, string message) => new() 
+        { 
+            IsSuccess = false, 
+            Errors = errors ?? new List<string>(),
+            Message = message
+        };
 
-        // __ Overloaded method to handle multiple errors in case of failure. __ //
-        public static ApiResponse<T> Fail(IEnumerable<string> errors) => new() { IsSuccess = false, Errors = errors };
+        /// <summary>
+        /// Helper to create a failure response containing a single error message and a descriptive message.
+        /// </summary>
+        public static ApiResponse<T> Failure(string error, string message) => new() 
+        { 
+            IsSuccess = false, 
+            Errors = new List<string> { error },
+            Message = message
+        };
     }
 }

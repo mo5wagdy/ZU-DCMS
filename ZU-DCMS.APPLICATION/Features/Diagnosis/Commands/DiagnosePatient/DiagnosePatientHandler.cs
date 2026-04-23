@@ -1,7 +1,6 @@
 using AutoMapper;
 using MediatR;
 using ZU_DCMS.APPLICATION.Background_Jobs.Events;
-using ZU_DCMS.APPLICATION.Background_Jobs.Features.Diagnosis.Events;
 using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Contracts.Logger;
 using ZU_DCMS.APPLICATION.DTOs.Diagnosis;
@@ -128,7 +127,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.DiagnosePatient
             await _uow.SaveChangesAsync(cancellationToken: cancellationToken);
 
             // __ Emit Event for background processing (e.g., updating patient history, notifying supervisors, etc.) __ //
-            await _eventPublisher.PublishAsync(new DiagnosisCreatedEvent(diagnosis.Id, diagnosis.BookingId));
+            //await _eventPublisher.PublishAsync(new DiagnosisCreatedEvent(diagnosis.Id, diagnosis.BookingId));
 
             // __ Retrieve the full diagnosis record with related data for returning to client __ //
             var full = await _uow.Repository<DiagnosisRecord>()

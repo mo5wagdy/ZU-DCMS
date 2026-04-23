@@ -1,6 +1,5 @@
 using MediatR;
 using ZU_DCMS.APPLICATION.Background_Jobs.Events;
-using ZU_DCMS.APPLICATION.Background_Jobs.Features.Booking.Events;
 using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Contracts;
 using ZU_DCMS.APPLICATION.Contracts.Logger;
@@ -105,7 +104,7 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CancelBooking
                 _logger.LogInfo("Booking cancelled {BookingId}", command.BookingId);
 
                 // __ Publish domain event for booking cancellation __ //
-                await _eventPublisher.PublishAsync(new BookingCancelledEvent(booking.Id, booking.SessionId));
+               // await _eventPublisher.PublishAsync(new BookingCancelledEvent(booking.Id, booking.SessionId));
 
                 return Result.Success();
             }

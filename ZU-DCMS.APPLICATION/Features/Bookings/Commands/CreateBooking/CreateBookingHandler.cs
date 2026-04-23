@@ -1,7 +1,6 @@
 using AutoMapper;
 using MediatR;
 using ZU_DCMS.APPLICATION.Background_Jobs.Events;
-using ZU_DCMS.APPLICATION.Background_Jobs.Features.Booking.Events;
 using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Contracts;
 using ZU_DCMS.APPLICATION.Contracts.Logger;
@@ -158,7 +157,7 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
                 _logger.LogInfo("Booking created {BookingId}", booking.Id);
 
                 // __ Publish domain event for booking creation __ //
-                await _eventPublisher.PublishAsync(new BookingCreatedEvent(booking.Id, booking.SessionId));
+                //await _eventPublisher.PublishAsync(new BookingCreatedEvent(booking.Id, booking.SessionId));
 
                 // __ Load full booking details to return in response __ //
                 var full = await _uow.Repository<Booking>().GetFirstOrDefaultAsync

@@ -5,14 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using ZiggyCreatures.Caching.Fusion;
 using ZiggyCreatures.Caching.Fusion.Serialization.SystemTextJson;
 using ZU_DCMS.APPLICATION.Background_Jobs.Events;
-using ZU_DCMS.APPLICATION.Background_Jobs.Features.Booking.Events;
-using ZU_DCMS.APPLICATION.Background_Jobs.Features.Booking.Handlers;
-using ZU_DCMS.APPLICATION.Background_Jobs.Features.Case;
-using ZU_DCMS.APPLICATION.Background_Jobs.Features.Case.Handlers;
-using ZU_DCMS.APPLICATION.Background_Jobs.Features.Diagnosis.Events;
-using ZU_DCMS.APPLICATION.Background_Jobs.Features.Diagnosis.Handlers;
-using ZU_DCMS.APPLICATION.Background_Jobs.Features.Payment.Events;
-using ZU_DCMS.APPLICATION.Background_Jobs.Features.Payment.Handlers;
 using ZU_DCMS.APPLICATION.Common.Cache;
 using ZU_DCMS.APPLICATION.Common.MediatR_Behaviors;
 using ZU_DCMS.APPLICATION.Common.Token;
@@ -42,19 +34,19 @@ namespace ZU_DCMS.APPLICATION
             services.AddScoped<IEventPublisher, HangfireEventPublisher>();
             services.AddScoped<EventDispatcher>();
 
-            // __________ Booking Events __________ //
-            services.AddScoped<IEventHandler<BookingCreatedEvent>, BookingCreatedHandler>();
-            services.AddScoped<IEventHandler<BookingCancelledEvent>, BookingCancelledHandler>();
-            services.AddScoped<IEventHandler<BookingPostponedEvent>, BookingPostponedHandler>();
+            //// __________ Booking Events __________ //
+            //services.AddScoped<IEventHandler<BookingCreatedEvent>, BookingCreatedHandler>();
+            //services.AddScoped<IEventHandler<BookingCancelledEvent>, BookingCancelledHandler>();
+            //services.AddScoped<IEventHandler<BookingPostponedEvent>, BookingPostponedHandler>();
 
-            // __________ Payment Events __________ //
-            services.AddScoped<IEventHandler<PaymentCompletedEvent>, PaymentCompletedHandler>();
+            //// __________ Payment Events __________ //
+            //services.AddScoped<IEventHandler<PaymentCompletedEvent>, PaymentCompletedHandler>();
 
-            // __________ Case Events __________ //
-            services.AddScoped<IEventHandler<CaseAssignedEvent>, CaseAssignedHandler>();
+            //// __________ Case Events __________ //
+            //services.AddScoped<IEventHandler<CaseAssignedEvent>, CaseAssignedHandler>();
 
-            // __________ Diagnosis Events ___________ //
-            services.AddScoped<IEventHandler<DiagnosisCreatedEvent>, DiagnosisCreatedHandler>();
+            //// __________ Diagnosis Events ___________ //
+            //services.AddScoped<IEventHandler<DiagnosisCreatedEvent>, DiagnosisCreatedHandler>();
 
 
             // __________ Caching Registerations __________ // 

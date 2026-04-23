@@ -2,7 +2,6 @@ using AutoMapper;
 using MediatR;
 using ZiggyCreatures.Caching.Fusion;
 using ZU_DCMS.APPLICATION.Background_Jobs.Events;
-using ZU_DCMS.APPLICATION.Background_Jobs.Features.Case.Events;
 using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Common.Cache;
 using ZU_DCMS.APPLICATION.Contracts;
@@ -169,12 +168,12 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
                 // __ Handle post-session business rules and notifications __ //
                 if (dto.IsCompleted)
                 {
-                    await _eventPublisher.PublishAsync(new CaseCompletedEvent(studentId, assignment.Id, assignment.ClinicId));
+                    //await _eventPublisher.PublishAsync(new CaseCompletedEvent(studentId, assignment.Id, assignment.ClinicId));
                 }
 
                 if (dto.HasFollowUp)
                 {
-                    await _eventPublisher.PublishAsync(new CasePartiallyCompletedEvent(studentId, assignment.Id, assignment.ClinicId));
+                   // await _eventPublisher.PublishAsync(new CasePartiallyCompletedEvent(studentId, assignment.Id, assignment.ClinicId));
                 }
 
                 // __ Cache Invalidation For Data Consistency __ //

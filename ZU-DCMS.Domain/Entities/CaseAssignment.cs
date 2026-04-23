@@ -33,7 +33,7 @@ namespace ZU_DCMS.Domain.Entities
         /// - Transferred: Case transferred to another student or clinic
         /// - Cancelled: Assignment was cancelled
         /// </summary>
-        public CaseStatus Status { get; set; } = CaseStatus.Active;
+        public CaseStatus Status { get; set; } = CaseStatus.InProgress;
 
         /// <summary>
         /// Timestamp when this case was assigned to the student.

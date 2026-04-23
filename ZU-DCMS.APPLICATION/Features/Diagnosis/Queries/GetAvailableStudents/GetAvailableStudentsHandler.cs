@@ -33,20 +33,20 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetAvailableStudents
     {
         private readonly IUnitOfWork _uow;
         private readonly IFusionCache _cache;
-        private readonly IAiAgentService _aiAgent;
+        //private readonly IAiAgentService _aiAgent;
         private readonly IAppLogger<GetAvailableStudentsHandler> _logger;
 
         public GetAvailableStudentsHandler
         (
             IUnitOfWork uow,
             IFusionCache cache,
-            IAiAgentService aiAgent,
+            //IAiAgentService aiAgent,
             IAppLogger<GetAvailableStudentsHandler> logger
         )
         {
             _uow = uow;
             _cache = cache;
-            _aiAgent = aiAgent;
+           // _aiAgent = aiAgent;
             _logger = logger;
         }
 
@@ -228,23 +228,30 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetAvailableStudents
                     /// </summary>
                     IEnumerable<int> prioritizedIds;
 
-                    try
-                    {
-                        // Call AI agent for intelligent prioritization
-                        prioritizedIds = await _aiAgent.GetStudentPriorityListAsync(clinicId, termId);
+                    //try
+                    //{
+                    //    // Call AI agent for intelligent prioritization
+                    //    prioritizedIds = await _aiAgent.GetStudentPriorityListAsync(clinicId, termId);
                         
-                        _logger.LogInfo($"AI prioritization returned {prioritizedIds.Count()} students for clinic {clinicId}");
-                    }
-                    catch (Exception ex)
-                    {
-                        // Fallback to simple priority sort if AI fails
-                        _logger.LogWarning($"AI agent failed for clinic {clinicId}, using fallback prioritization", ex);
+                    //    _logger.LogInfo($"AI prioritization returned {prioritizedIds.Count()} students for clinic {clinicId}");
+                    //}
+                    //catch (Exception ex)
+                    //{
+                    //    // Fallback to simple priority sort if AI fails
+                    //    _logger.LogWarning($"AI agent failed for clinic {clinicId}, using fallback prioritization", ex);
 
-                        prioritizedIds = workloadFilteredRequirements
-                            .OrderBy(r => r.Priority)  // Lower priority number = higher need
-                            .ThenBy(r => r.CompletedCount)  // If same priority, fewer completed = higher priority
-                            .Select(r => r.StudentId);
-                    }
+                    //    prioritizedIds = workloadFilteredRequirements
+                    //        .OrderBy(r => r.Priority)  // Lower priority number = higher need
+                    //        .ThenBy(r => r.CompletedCount)  // If same priority, fewer completed = higher priority
+                    //        .Select(r => r.StudentId);
+                    //}
+
+
+                    prioritizedIds = workloadFilteredRequirements
+                        .OrderBy(r => r.Priority)  // Lower priority number = higher need
+                        .ThenBy(r => r.CompletedCount)  // If same priority, fewer completed = higher priority
+                        .Select(r => r.StudentId);
+
 
                     // _____________ STEP 8: Build Response DTOs _____________ //
                     /// <summary>

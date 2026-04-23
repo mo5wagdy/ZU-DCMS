@@ -7,6 +7,8 @@ using ZU_DCMS.APPLICATION.Features.Cases.Commands.SubmitCaseForReview;
 using ZU_DCMS.APPLICATION.Features.Cases.Queries.GetCaseById;
 using ZU_DCMS.APPLICATION.Features.Cases.Queries.GetStudentProgress;
 using ZU_DCMS.APPLICATION.Features.Cases.Queries.GetCasesForReview;
+using ZU_DCMS.APPLICATION.DTOs.Case;
+using ZU_DCMS.APPLICATION.DTOs.Student;
 
 namespace ZU_DCMS.API.Endpoints.Cases
 {
@@ -27,31 +29,43 @@ namespace ZU_DCMS.API.Endpoints.Cases
             group.MapPost("/progress", async (ISender sender, AddSessionProgressCommand command) =>
             {
                 var result = await sender.Send(command);
-                return Results.Ok(ApiResponse<object>.Success(result, "Session case progress strictly logged."));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<CaseSessionDto>.Success(result.Value, "Session case progress strictly logged."))
+                    : Results.BadRequest(ApiResponse<CaseSessionDto>.Failure(result.Error, "Failed to log case progress."));
             })
             .RequireAuthorization("StudentPolicy") // Prevents anyone else from messing with the sequence
             .WithName("AddSessionProgress")
-            .WithSummary("Records iterative steps/progress metrics for an ongoing clinical case operation");
+            .WithSummary("Records iterative steps/progress metrics for an ongoing clinical case operation")
+            .Produces<ApiResponse<CaseSessionDto>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<CaseSessionDto>>(StatusCodes.Status400BadRequest);
 
             // 2. Wrap up case structure and send it up for supervisor grading
             group.MapPost("/submit", async (ISender sender, SubmitCaseForReviewCommand command) =>
             {
                 var result = await sender.Send(command);
-                return Results.Ok(ApiResponse<object>.Success(result, "Case successfully submitted for formal review."));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<string>.Success(string.Empty, "Case successfully submitted for formal review."))
+                    : Results.BadRequest(ApiResponse<string>.Failure(result.Error, "Failed to submit case."));
             })
             .RequireAuthorization("StudentPolicy")
             .WithName("SubmitCaseForReview")
-            .WithSummary("Ends the workflow sequence and pushes the case to the pending evaluator review queue");
+            .WithSummary("Ends the workflow sequence and pushes the case to the pending evaluator review queue")
+            .Produces<ApiResponse<string>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<string>>(StatusCodes.Status400BadRequest);
 
             // 3. Status Check
             group.MapGet("/progress", async (ISender sender, [AsParameters] GetStudentProgressQuery query) =>
             {
                 var result = await sender.Send(query);
-                return Results.Ok(ApiResponse<object>.Success(result, "Student progress stats parsed perfectly."));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<StudentProgressDto>.Success(result.Value, "Student progress stats parsed perfectly."))
+                    : Results.BadRequest(ApiResponse<StudentProgressDto>.Failure(result.Error, "Failed to get progress stats."));
             })
             .RequireAuthorization("StudentPolicy")
             .WithName("GetStudentProgress")
-            .WithSummary("Retrieves the general clinical progress overview constraints for the authorized student");
+            .WithSummary("Retrieves the general clinical progress overview constraints for the authorized student")
+            .Produces<ApiResponse<StudentProgressDto>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<StudentProgressDto>>(StatusCodes.Status400BadRequest);
 
 
             // ==== STAFF / INSTRUCTOR ACTIONS ====
@@ -60,32 +74,44 @@ namespace ZU_DCMS.API.Endpoints.Cases
             group.MapPost("/review", async (ISender sender, ReviewCaseCommand command) =>
             {
                 var result = await sender.Send(command);
-                return Results.Ok(ApiResponse<object>.Success(result, "The system registered the formal review evaluation securely."));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<string>.Success(string.Empty, "The system registered the formal review evaluation securely."))
+                    : Results.BadRequest(ApiResponse<string>.Failure(result.Error, "Failed to register review evaluation."));
             })
             .RequireAuthorization("StaffReviewPolicy") // Only for High level staff: Instructors, Dean, ViceDean, Professor Role structures
             .WithName("ReviewCase")
-            .WithSummary("Registers a formal grade and detailed review footprint for a submitted student case");
+            .WithSummary("Registers a formal grade and detailed review footprint for a submitted student case")
+            .Produces<ApiResponse<string>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<string>>(StatusCodes.Status400BadRequest);
 
             // 5. Look up queue
             group.MapGet("/pending-reviews", async (ISender sender, [AsParameters] GetCasesForReviewQuery query) =>
             {
                 var result = await sender.Send(query);
-                return Results.Ok(ApiResponse<object>.Success(result, "Incoming queue of submission cases successfully mapped."));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<List<CaseAssignmentDto>>.Success(result.Value, "Incoming queue of submission cases successfully mapped."))
+                    : Results.BadRequest(ApiResponse<List<CaseAssignmentDto>>.Failure(result.Error, "Failed to map submission cases."));
             })
             .RequireAuthorization("StaffReviewPolicy")
             .WithName("GetCasesForReview")
-            .WithSummary("Retrieves all submitted procedural cases currently pending instructor validation");
+            .WithSummary("Retrieves all submitted procedural cases currently pending instructor validation")
+            .Produces<ApiResponse<List<CaseAssignmentDto>>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<List<CaseAssignmentDto>>>(StatusCodes.Status400BadRequest);
 
             // ==== COMMON LOOKUP ====
             // 6. Common entity fallback
             group.MapGet("/{id}", async (ISender sender, [AsParameters] GetCaseByIdQuery query) =>
             {
                 var result = await sender.Send(query);
-                return Results.Ok(ApiResponse<object>.Success(result, "Extracted the detailed case structure blueprint."));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<CaseAssignmentDto>.Success(result.Value, "Extracted the detailed case structure blueprint."))
+                    : Results.NotFound(ApiResponse<CaseAssignmentDto>.Failure(result.Error, "Case not found."));
             })
             .RequireAuthorization() // Authorized structure allows owner tracking or staff inspection internally mapped
             .WithName("GetCaseById")
-            .WithSummary("Retrieves the full object framework for a specific target clinical case");
+            .WithSummary("Retrieves the full object framework for a specific target clinical case")
+            .Produces<ApiResponse<CaseAssignmentDto>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<CaseAssignmentDto>>(StatusCodes.Status404NotFound);
         }
     }
 }

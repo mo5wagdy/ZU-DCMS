@@ -6,6 +6,7 @@ using ZU_DCMS.APPLICATION.Features.Students.Queries.GetAllStudents;
 using ZU_DCMS.APPLICATION.Features.Students.Queries.GetRequirements;
 using ZU_DCMS.APPLICATION.Features.Students.Queries.GetStudentById;
 using ZU_DCMS.APPLICATION.Features.Students.Queries.GetStudentByUserId;
+using ZU_DCMS.APPLICATION.DTOs.Student;
 
 namespace ZU_DCMS.API.Endpoints.Students
 {
@@ -25,44 +26,60 @@ namespace ZU_DCMS.API.Endpoints.Students
             {
                 var query = new GetAllStudentsQuery(request);
                 var result = await sender.Send(query);
-                return Results.Ok(ApiResponse<object>.Success(result, "All students retrieved."));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<PagedResult<StudentDto>>.Success(result.Value, "All students retrieved."))
+                    : Results.BadRequest(ApiResponse<PagedResult<StudentDto>>.Failure(result.Error, "Failed to retrieve students."));
             })
             // Policy allowing Staff and High-Level Roles (Dean, ViceDean, Professor, Admin)
             .RequireAuthorization("StaffViewPolicy") 
             .WithName("GetAllStudents")
-            .WithSummary("Retrieves a list of all students");
+            .WithSummary("Retrieves a list of all students")
+            .Produces<ApiResponse<PagedResult<StudentDto>>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<PagedResult<StudentDto>>>(StatusCodes.Status400BadRequest);
 
             // 2. Get Student By Intern/Student ID
             group.MapGet("/{id}", async (ISender sender, [AsParameters] GetStudentByIdQuery query) =>
             {
                 var result = await sender.Send(query);
-                return Results.Ok(ApiResponse<object>.Success(result, "Student details retrieved."));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<StudentDto>.Success(result.Value, "Student details retrieved."))
+                    : Results.NotFound(ApiResponse<StudentDto>.Failure(result.Error, "Student not found."));
             })
             .RequireAuthorization("StaffViewPolicy")
             .WithName("GetStudentById")
-            .WithSummary("Retrieves a specific student by their specific DB ID");
+            .WithSummary("Retrieves a specific student by their specific DB ID")
+            .Produces<ApiResponse<StudentDto>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<StudentDto>>(StatusCodes.Status404NotFound);
 
             // 3. Get Student By Identity User ID
             group.MapGet("/user/{id}", async (ISender sender, [AsParameters] GetStudentByUserIdQuery query) =>
             {
                 // Can be accessed by Staff or the student themselves.
                 var result = await sender.Send(query);
-                return Results.Ok(ApiResponse<object>.Success(result, "Student details by user ID retrieved."));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<StudentDto>.Success(result.Value, "Student details by user ID retrieved."))
+                    : Results.NotFound(ApiResponse<StudentDto>.Failure(result.Error, "Student not found by given user ID."));
             })
             .RequireAuthorization() 
             .WithName("GetStudentByUserId")
-            .WithSummary("Retrieves a specific student based on their Identity User ID");
+            .WithSummary("Retrieves a specific student based on their Identity User ID")
+            .Produces<ApiResponse<StudentDto>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<StudentDto>>(StatusCodes.Status404NotFound);
 
             // 4. Get Student Requirements
             group.MapGet("/requirements", async (ISender sender, [AsParameters] GetRequirementsQuery query) =>
             {
                 var result = await sender.Send(query);
-                return Results.Ok(ApiResponse<object>.Success(result, "Student requirements retrieved."));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<List<StudentRequirementDto>>.Success(result.Value, "Student requirements retrieved."))
+                    : Results.BadRequest(ApiResponse<List<StudentRequirementDto>>.Failure(result.Error, "Failed to retrieve student requirements."));
             })
             // Must be authenticated. Usually, they retrieve their own.
             .RequireAuthorization() 
             .WithName("GetStudentRequirements")
-            .WithSummary("Retrieves the clinical requirements assigned to a given student");
+            .WithSummary("Retrieves the clinical requirements assigned to a given student")
+            .Produces<ApiResponse<List<StudentRequirementDto>>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<List<StudentRequirementDto>>>(StatusCodes.Status400BadRequest);
         }
     }
 }

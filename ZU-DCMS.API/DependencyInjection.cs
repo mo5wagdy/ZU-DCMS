@@ -66,13 +66,12 @@ namespace ZU_DCMS.API
                 //    {
                 //        new OpenApiSecurityScheme
                 //        {
-                //            Reference = new OpenApiReference
-                //            {
-                //                Type = ReferenceType.SecurityScheme,
-                //                Id = "Bearer"
-                //            }
+                //            Name = "Authorization",
+                //            In = ParameterLocation.Header,
+                //            Type = SecuritySchemeType.Http,
+                //            Scheme = "Bearer"
                 //        },
-                //        new string[] {}
+                //        new List<string>()
                 //    }
                 //});
             });

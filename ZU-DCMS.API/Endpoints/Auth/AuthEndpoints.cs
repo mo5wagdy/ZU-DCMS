@@ -5,6 +5,7 @@ using ZU_DCMS.APPLICATION.Features.Auth.Commands.Login;
 using ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient;
 using ZU_DCMS.APPLICATION.Features.Auth.Commands.StaffLogin;
 using ZU_DCMS.APPLICATION.Features.Auth.Queries;
+using ZU_DCMS.APPLICATION.DTOs.Auth;
 
 namespace ZU_DCMS.API.Endpoints.Auth
 {
@@ -23,42 +24,58 @@ namespace ZU_DCMS.API.Endpoints.Auth
             group.MapPost("/register", async (ISender sender, RegisterPatientCommand command) =>
             {
                 var result = await sender.Send(command);
-                return Results.Ok(ApiResponse<object>.Success(result, "Patient registered successfully."));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<AuthDto>.Success(result.Value, "Patient registered successfully."))
+                    : Results.BadRequest(ApiResponse<AuthDto>.Failure(result.Error, "Registration failed."));
             })
             .AllowAnonymous()
             .WithName("RegisterPatient")
-            .WithSummary("Registers a new patient into the system");
+            .WithSummary("Registers a new patient into the system")
+            .Produces<ApiResponse<AuthDto>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<AuthDto>>(StatusCodes.Status400BadRequest);
 
             // 2. Default Login
             group.MapPost("/login", async (ISender sender, LoginCommand command) =>
             {
                 var result = await sender.Send(command);
-                return Results.Ok(ApiResponse<object>.Success(result, "Login successful."));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<AuthDto>.Success(result.Value, "Login successful."))
+                    : Results.BadRequest(ApiResponse<AuthDto>.Failure(result.Error, "Login failed."));
             })
             .AllowAnonymous()
             .WithName("Login")
-            .WithSummary("Authenticates a patient or general user and returns a JWT token");
+            .WithSummary("Authenticates a patient or general user and returns a JWT token")
+            .Produces<ApiResponse<AuthDto>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<AuthDto>>(StatusCodes.Status400BadRequest);
 
             // 3. Staff Login
             group.MapPost("/staff-login", async (ISender sender, StaffLoginCommand command) =>
             {
                 // This command processes Admin, Doctor, Dean, ViceDean, Professor logins
                 var result = await sender.Send(command);
-                return Results.Ok(ApiResponse<object>.Success(result, "Staff login successful."));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<AuthDto>.Success(result.Value, "Staff login successful."))
+                    : Results.BadRequest(ApiResponse<AuthDto>.Failure(result.Error, "Staff login failed."));
             })
             .AllowAnonymous()
             .WithName("StaffLogin")
-            .WithSummary("Authenticates staff members and returns access & refresh tokens");
+            .WithSummary("Authenticates staff members and returns access & refresh tokens")
+            .Produces<ApiResponse<AuthDto>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<AuthDto>>(StatusCodes.Status400BadRequest);
 
             // 4. Forgot Phone Password / Reset Flow
             group.MapPost("/forgot-phone", async (ISender sender, ForgotPhoneQuery query) =>
             {
                 var result = await sender.Send(query);
-                return Results.Ok(ApiResponse<object>.Success(result, "Phone reset request processed."));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<ForgotPhoneDto>.Success(result.Value, "Phone reset request processed."))
+                    : Results.BadRequest(ApiResponse<ForgotPhoneDto>.Failure(result.Error, "Phone reset request failed."));
             })
             .AllowAnonymous()
             .WithName("ForgotPhone")
-            .WithSummary("Handles forgot password requests via phone number");
+            .WithSummary("Handles forgot password requests via phone number")
+            .Produces<ApiResponse<ForgotPhoneDto>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<ForgotPhoneDto>>(StatusCodes.Status400BadRequest);
         }
     }
 }

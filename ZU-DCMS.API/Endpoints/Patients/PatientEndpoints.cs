@@ -6,6 +6,7 @@ using ZU_DCMS.APPLICATION.Features.Patients.Commands.UpdateProfile;
 using ZU_DCMS.APPLICATION.Features.Patients.Queries.GetAllPatients;
 using ZU_DCMS.APPLICATION.Features.Patients.Queries.GetPatientById;
 using ZU_DCMS.APPLICATION.Features.Patients.Queries.GetPatientByUserId;
+using ZU_DCMS.APPLICATION.DTOs.Patient;
 
 namespace ZU_DCMS.API.Endpoints.Patients
 {
@@ -24,42 +25,58 @@ namespace ZU_DCMS.API.Endpoints.Patients
             group.MapPut("/profile", async (ISender sender, UpdateProfileCommand command) =>
             {
                 var result = await sender.Send(command);
-                return Results.Ok(ApiResponse<object>.Success(result, "Patient profile successfully updated."));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<UpdatePatientDto>.Success(result.Value, "Patient profile successfully updated."))
+                    : Results.BadRequest(ApiResponse<UpdatePatientDto>.Failure(result.Error, "Failed to update patient profile."));
             })
             .RequireAuthorization("PatientPolicy") // Restrict primarily to Patients making modifications
             .WithName("UpdatePatientProfile")
-            .WithSummary("Modifies the authenticated patient's profile details");
+            .WithSummary("Modifies the authenticated patient's profile details")
+            .Produces<ApiResponse<UpdatePatientDto>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<UpdatePatientDto>>(StatusCodes.Status400BadRequest);
 
             // 2. List all globally
             group.MapGet("/", async ([AsParameters] PagedRequest request, ISender sender) =>
             {
                 var query = new GetAllPatientsQuery(request);
                 var result = await sender.Send(query);
-                return Results.Ok(ApiResponse<object>.Success(result, "Patients directory populated."));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<PagedResult<PatientDto>>.Success(result.Value, "Patients directory populated."))
+                    : Results.BadRequest(ApiResponse<PagedResult<PatientDto>>.Failure(result.Error, "Failed to retrieve patients."));
             })
             .RequireAuthorization("StaffViewPolicy") // Protect standard access strictly for internal personnel
             .WithName("GetAllPatients")
-            .WithSummary("Retrieves all registered external clinical patients");
+            .WithSummary("Retrieves all registered external clinical patients")
+            .Produces<ApiResponse<PagedResult<PatientDto>>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<PagedResult<PatientDto>>>(StatusCodes.Status400BadRequest);
 
             // 3. Drilldown to specific Identity string
             group.MapGet("/{id}", async (ISender sender, [AsParameters] GetPatientByIdQuery query) =>
             {
                 var result = await sender.Send(query);
-                return Results.Ok(ApiResponse<object>.Success(result, "Patient metrics retrieved."));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<PatientDto>.Success(result.Value, "Patient metrics retrieved."))
+                    : Results.NotFound(ApiResponse<PatientDto>.Failure(result.Error, "Patient not found."));
             })
             .RequireAuthorization("StaffViewPolicy")
             .WithName("GetPatientById")
-            .WithSummary("Pulls patient base identity using their absolute Database ID");
+            .WithSummary("Pulls patient base identity using their absolute Database ID")
+            .Produces<ApiResponse<PatientDto>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<PatientDto>>(StatusCodes.Status404NotFound);
 
             // 4. Retrieve by app user link
             group.MapGet("/user/{id}", async (ISender sender, [AsParameters] GetPatientByUserIdQuery query) =>
             {
                 var result = await sender.Send(query);
-                return Results.Ok(ApiResponse<object>.Success(result, "Patient records processed from the underlying User framework."));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<PatientDto>.Success(result.Value, "Patient records processed from the underlying User framework."))
+                    : Results.NotFound(ApiResponse<PatientDto>.Failure(result.Error, "Patient records not found by specified user ID."));
             })
             .RequireAuthorization() // Should be secured
             .WithName("GetPatientByUserId")
-            .WithSummary("Links application User Identity to the Patient's profile data safely");
+            .WithSummary("Links application User Identity to the Patient's profile data safely")
+            .Produces<ApiResponse<PatientDto>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<PatientDto>>(StatusCodes.Status404NotFound);
         }
     }
 }

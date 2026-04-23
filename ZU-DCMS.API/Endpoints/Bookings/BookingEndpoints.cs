@@ -1,10 +1,12 @@
 using Asp.Versioning.Builder;
 using MediatR;
 using ZU_DCMS.API.Common;
+using ZU_DCMS.APPLICATION.Common.Pagination;
 using ZU_DCMS.APPLICATION.Features.Bookings.Commands.CancelBooking;
 using ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking;
 using ZU_DCMS.APPLICATION.Features.Bookings.Commands.PostponeBooking;
 using ZU_DCMS.APPLICATION.Features.Bookings.Queries.GetPatientBookings;
+using ZU_DCMS.APPLICATION.DTOs.Booking;
 
 namespace ZU_DCMS.API.Endpoints.Bookings
 {
@@ -23,41 +25,57 @@ namespace ZU_DCMS.API.Endpoints.Bookings
             group.MapPost("/", async (ISender sender, CreateBookingCommand command) =>
             {
                 var result = await sender.Send(command);
-                return Results.Ok(ApiResponse<object>.Success(result, "Booking successfully created."));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<BookingDto>.Success(result.Value, "Booking successfully created."))
+                    : Results.BadRequest(ApiResponse<BookingDto>.Failure(result.Error, "Failed to create booking."));
             })
             .RequireAuthorization("PatientPolicy") // Security check ensuring only patients book for themselves
             .WithName("CreateBooking")
-            .WithSummary("Creates a new booking reservation for the authenticated patient");
+            .WithSummary("Creates a new booking reservation for the authenticated patient")
+            .Produces<ApiResponse<BookingDto>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<BookingDto>>(StatusCodes.Status400BadRequest);
 
             // 2. Cancel Booking
             group.MapPut("/cancel", async (ISender sender, CancelBookingCommand command) =>
             {
                 var result = await sender.Send(command);
-                return Results.Ok(ApiResponse<object>.Success(result, "Booking successfully cancelled."));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<string>.Success(string.Empty, "Booking successfully cancelled."))
+                    : Results.BadRequest(ApiResponse<string>.Failure(result.Error, "Failed to cancel booking."));
             })
             .RequireAuthorization("PatientPolicy")
             .WithName("CancelBooking")
-            .WithSummary("Cancels an existing booking for the authenticated patient");
+            .WithSummary("Cancels an existing booking for the authenticated patient")
+            .Produces<ApiResponse<string>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<string>>(StatusCodes.Status400BadRequest);
 
             // 3. Postpone Booking
             group.MapPut("/postpone", async (ISender sender, PostponeBookingCommand command) =>
             {
                 var result = await sender.Send(command);
-                return Results.Ok(ApiResponse<object>.Success(result, "Booking successfully postponed."));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<string>.Success(string.Empty, "Booking successfully postponed."))
+                    : Results.BadRequest(ApiResponse<string>.Failure(result.Error, "Failed to postpone booking."));
             })
             .RequireAuthorization("PatientPolicy")
             .WithName("PostponeBooking")
-            .WithSummary("Postpones an active booking to a different timeframe or slot");
+            .WithSummary("Postpones an active booking to a different timeframe or slot")
+            .Produces<ApiResponse<string>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<string>>(StatusCodes.Status400BadRequest);
 
             // 4. Retrieve My Bookings
             group.MapGet("/patient", async (ISender sender, [AsParameters] GetPatientBookingsQuery query) =>
             {
                 var result = await sender.Send(query);
-                return Results.Ok(ApiResponse<object>.Success(result, "Patient bookings retrieved."));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<PagedResult<BookingDto>>.Success(result.Value, "Patient bookings retrieved."))
+                    : Results.BadRequest(ApiResponse<PagedResult<BookingDto>>.Failure(result.Error, "Failed to retrieve bookings."));
             })
             .RequireAuthorization("PatientPolicy")
             .WithName("GetPatientBookings")
-            .WithSummary("Retrieves all bookings explicitly mapping to the authenticated patient");
+            .WithSummary("Retrieves all bookings explicitly mapping to the authenticated patient")
+            .Produces<ApiResponse<PagedResult<BookingDto>>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<PagedResult<BookingDto>>>(StatusCodes.Status400BadRequest);
         }
     }
 }

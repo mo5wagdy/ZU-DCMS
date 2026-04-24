@@ -32,7 +32,7 @@ namespace ZU_DCMS.API.Endpoints.Cases
                 var result = await sender.Send(command);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<CaseSessionDto>.Success(result.Value, "Session case progress strictly logged."))
-                    : Results.BadRequest(ApiResponse<CaseSessionDto>.Failure(result.Error, "Failed to log case progress."));
+                    : Results.BadRequest(ApiResponse<CaseSessionDto>.Failure(result.Errors, "Failed to log case progress."));
             })
             .RequireAuthorization("StudentPolicy") // Prevents anyone else from messing with the sequence
             .WithName("AddSessionProgress")
@@ -46,7 +46,7 @@ namespace ZU_DCMS.API.Endpoints.Cases
                 var result = await sender.Send(command);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<string>.Success(string.Empty, "Case successfully submitted for formal review."))
-                    : Results.BadRequest(ApiResponse<string>.Failure(result.Error, "Failed to submit case."));
+                    : Results.BadRequest(ApiResponse<string>.Failure(result.Errors, "Failed to submit case."));
             })
             .RequireAuthorization("StudentPolicy")
             .WithName("SubmitCaseForReview")
@@ -60,7 +60,7 @@ namespace ZU_DCMS.API.Endpoints.Cases
                 var result = await sender.Send(query);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<StudentProgressDto>.Success(result.Value, "Student progress stats parsed perfectly."))
-                    : Results.BadRequest(ApiResponse<StudentProgressDto>.Failure(result.Error, "Failed to get progress stats."));
+                    : Results.BadRequest(ApiResponse<StudentProgressDto>.Failure(result.Errors, "Failed to get progress stats."));
             })
             .RequireAuthorization("StudentPolicy")
             .WithName("GetStudentProgress")
@@ -77,7 +77,7 @@ namespace ZU_DCMS.API.Endpoints.Cases
                 var result = await sender.Send(command);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<string>.Success(string.Empty, "The system registered the formal review evaluation securely."))
-                    : Results.BadRequest(ApiResponse<string>.Failure(result.Error, "Failed to register review evaluation."));
+                    : Results.BadRequest(ApiResponse<string>.Failure(result.Errors, "Failed to register review evaluation."));
             })
             .RequireAuthorization("StaffReviewPolicy") // Only for High level staff: Instructors, Dean, ViceDean, Professor Role structures
             .WithName("ReviewCase")
@@ -92,7 +92,7 @@ namespace ZU_DCMS.API.Endpoints.Cases
                 var result = await sender.Send(query);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<List<CaseAssignmentDto>>.Success(result.Value, "Incoming queue of submission cases successfully mapped."))
-                    : Results.BadRequest(ApiResponse<List<CaseAssignmentDto>>.Failure(result.Error, "Failed to map submission cases."));
+                    : Results.BadRequest(ApiResponse<List<CaseAssignmentDto>>.Failure(result.Errors, "Failed to map submission cases."));
             })
             .RequireAuthorization("StaffReviewPolicy")
             .WithName("GetCasesForReview")

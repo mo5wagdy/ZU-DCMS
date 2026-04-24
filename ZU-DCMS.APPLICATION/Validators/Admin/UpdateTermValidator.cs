@@ -1,35 +1,40 @@
-﻿using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using ZU_DCMS.APPLICATION.DTOs.Admin;
+using FluentValidation;
+using ZU_DCMS.APPLICATION.Features.Admin.Commands.UpdateTerm;
 
 namespace ZU_DCMS.APPLICATION.Validators.Admin
 {
-    public class UpdateTermValidator : AbstractValidator<UpdateTermDto>
+    public class UpdateTermValidator : AbstractValidator<UpdateTermCommand>
     {
-        // __ This validator ensures that the data provided for updating an existing term is valid. __ //
+        // __ Validator for updating an existing term via UpdateTermCommand __ //
         public UpdateTermValidator()
         {
-            RuleFor(x => x.Name)
+            RuleFor(x => x.TermId)
+                .GreaterThan(0)
+                .WithMessage("معرف الفصل الدراسي غير صحيح");
+
+            RuleFor(x => x.AdminId)
+                .NotEmpty()
+                .WithMessage("معرف المدير مطلوب");
+
+            RuleFor(x => x.Dto.Name)
                    .MaximumLength(100)
                    .WithMessage("الاسم لازم يكون أقل من 100 حرف")
-                   .When(x => !string.IsNullOrEmpty(x.Name));
+                   .When(x => !string.IsNullOrEmpty(x.Dto.Name));
 
-            RuleFor(x => x.StartDate)
+            RuleFor(x => x.Dto.StartDate)
                    .GreaterThan(DateTime.Today)
                    .WithMessage("تاريخ البداية لازم يكون في المستقبل")
-                   .When(x => x.StartDate.HasValue);
+                   .When(x => x.Dto.StartDate.HasValue);
 
-            RuleFor(x => x.EndDate)
-                   .GreaterThan(x => x.StartDate ?? DateTime.Today)
+            RuleFor(x => x.Dto.EndDate)
+                   .GreaterThan(x => x.Dto.StartDate ?? DateTime.Today)
                    .WithMessage("تاريخ النهاية لازم يكون بعد تاريخ البداية")
-                   .When(x => x.EndDate.HasValue);
+                   .When(x => x.Dto.EndDate.HasValue);
 
-            RuleFor(x => x.RequiredCasesCount)
+            RuleFor(x => x.Dto.RequiredCasesCount)
                    .GreaterThan(0)
                    .WithMessage("عدد الحالات لازم يكون أكبر من 0")
-                   .When(x => x.RequiredCasesCount.HasValue);
+                   .When(x => x.Dto.RequiredCasesCount.HasValue);
         }
     }
 }

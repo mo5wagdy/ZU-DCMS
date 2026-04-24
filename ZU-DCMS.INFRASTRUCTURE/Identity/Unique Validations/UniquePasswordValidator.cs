@@ -1,5 +1,6 @@
 ﻿
 using Microsoft.AspNetCore.Identity;
+using ZU_DCMS.Domain.Enums;
 
 namespace ZU_DCMS.INFRASTRUCTURE.Identity.Unique_Validations
 {
@@ -15,13 +16,13 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.Unique_Validations
         public async Task<IdentityResult> ValidateAsync(UserManager<TUser> manager, TUser user, string? password)
         {
             // __ Check if the user is in the "Patient" role. __ //
-            var isPatient = await manager.IsInRoleAsync(user, "Patient");
+            //var isPatient = await manager.IsInRoleAsync(user, "Patient");
 
             // __ If the user is a patient, validate that the password is exactly 14 digits long. __ //
-            if (isPatient)
+            if (user.UserType == UserType.Patient)
             {
                 if (password?.Length == 14 && password.All(char.IsDigit))
-                    return IdentityResult.Success; 
+                    return IdentityResult.Success;
 
                 return IdentityResult.Failed(new IdentityError { Description = "الرقم القومي لازم يكون 14 رقم"});
             }

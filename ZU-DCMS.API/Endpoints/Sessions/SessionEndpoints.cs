@@ -27,7 +27,7 @@ namespace ZU_DCMS.API.Endpoints.Sessions
                 var result = await sender.Send(query);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<List<AvailableSlotDto>>.Success(result.Value, "Available slots retrieved."))
-                    : Results.BadRequest(ApiResponse<List<AvailableSlotDto>>.Failure(result.Error, "Failed to retrieve available slots."));
+                    : Results.BadRequest(ApiResponse<List<AvailableSlotDto>>.Failure(result.Errors, "Failed to retrieve available slots."));
             })
             .RequireAuthorization("PublicViewPolicy") // Patient/Public roles
             .WithName("GetAvailableSlots")
@@ -41,7 +41,7 @@ namespace ZU_DCMS.API.Endpoints.Sessions
                 var result = await sender.Send(query);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<SessionDto>.Success(result.Value, "Session records retrieved."))
-                    : Results.NotFound(ApiResponse<SessionDto>.Failure(result.Error, "Session not found."));
+                    : Results.NotFound(ApiResponse<SessionDto>.Failure(result.Errors, "Session not found."));
             })
             .RequireAuthorization("StaffViewPolicy") // Internal doctors, admins, receptionists
             .WithName("FindSession")
@@ -55,7 +55,7 @@ namespace ZU_DCMS.API.Endpoints.Sessions
                 var result = await sender.Send(query);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<bool>.Success(result.Value, "Availability evaluated."))
-                    : Results.BadRequest(ApiResponse<bool>.Failure(result.Error, "Availability check failed."));
+                    : Results.BadRequest(ApiResponse<bool>.Failure(result.Errors, "Availability check failed."));
             })
             .RequireAuthorization("PublicViewPolicy")
             .WithName("IsSessionAvailable")
@@ -69,7 +69,7 @@ namespace ZU_DCMS.API.Endpoints.Sessions
                 var result = await sender.Send(command);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<List<SessionDto>>.Success(result.Value, "Sessions formally generated."))
-                    : Results.BadRequest(ApiResponse<List<SessionDto>>.Failure(result.Error, "Failed to generate sessions."));
+                    : Results.BadRequest(ApiResponse<List<SessionDto>>.Failure(result.Errors, "Failed to generate sessions."));
             })
             .RequireAuthorization("AdminPolicy") // strictly Admin generator
             .WithName("GenerateSessions")

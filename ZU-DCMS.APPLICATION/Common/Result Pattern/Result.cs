@@ -1,4 +1,4 @@
-﻿
+
 namespace ZU_DCMS.APPLICATION.Common
 {
     /// <summary>
@@ -9,23 +9,28 @@ namespace ZU_DCMS.APPLICATION.Common
     {
         public bool IsSuccess { get; }
         public bool IsFailure => !IsSuccess;
-        public string Error { get; }
-        
-        protected Result(bool isSuccess, string error)
+        public string Error => Errors.FirstOrDefault() ?? string.Empty;
+        public List<string> Errors { get; }
+
+        protected Result(bool isSuccess, IEnumerable<string> errors)
         {
             IsSuccess = isSuccess;
-            Error = error;
+            Errors = errors.ToList();
         }
 
 
         // ____________ Factory Methods ____________ //
-        public static Result Success() => new(true, string.Empty);
+        public static Result Success() => new(true, Enumerable.Empty<string>());
 
-        public static Result Failure(string error) => new(false, error);
+        public static Result Failure(string error) => new(false, new[] { error });
 
-        public static Result<T> Success<T>(T value) => new(value, true, string.Empty);
+        public static Result Failure(IEnumerable<string> errors) => new(false, errors);
 
-        public static Result<T> Failure<T>(string error) => new(default!, false, error);
+        public static Result<T> Success<T>(T value) => new(value, true, Enumerable.Empty<string>());
+
+        public static Result<T> Failure<T>(string error) => new(default!, false, new[] { error });
+
+        public static Result<T> Failure<T>(IEnumerable<string> errors) => new(default!, false, errors);
     }
 
     /// <summary>
@@ -35,7 +40,7 @@ namespace ZU_DCMS.APPLICATION.Common
     {
         private readonly T _value;
 
-        protected internal Result(T value, bool isSuccess, string error) : base(isSuccess, error)
+        protected internal Result(T value, bool isSuccess, IEnumerable<string> errors) : base(isSuccess, errors)
         {
             _value = value;
         }

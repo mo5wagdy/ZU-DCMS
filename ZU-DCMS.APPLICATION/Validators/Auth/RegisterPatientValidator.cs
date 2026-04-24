@@ -1,67 +1,68 @@
 ﻿using FluentValidation;
 using ZU_DCMS.APPLICATION.DTOs.Auth;
+using ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient;
 using ZU_DCMS.APPLICATION.Validators.Shared;
 using ZU_DCMS.Domain.Enums;
 
 namespace ZU_DCMS.APPLICATION.Validators.Auth
 {
-    public class RegisterPatientValidator : AbstractValidator<RegisterPatientDto>
+    public class RegisterPatientValidator : AbstractValidator<RegisterPatientCommand>
     {
         // __ Constructor to define validation rules for registering a patient __ //س
         public RegisterPatientValidator()
         {
-            RuleFor(x => x.Username)
+            RuleFor(x => x.Dto.Username)
                    .NotEmpty().WithMessage("اسم المستخدم مطلوب")
                    .MinimumLength(3).WithMessage("لازم 3 حروف على الأقل")
                    .MaximumLength(50).WithMessage("لازم أقل من 50 حرف")
                    .Matches(@"^[a-zA-Z0-9._-]+$")
                    .WithMessage("يقبل حروف وأرقام و . _ - فقط");
 
-            RuleFor(x => x.FullName)
+            RuleFor(x => x.Dto.FullName)
                    .NotEmpty().WithMessage("الاسم مطلوب")
                    .MinimumLength(3).WithMessage("لازم 3 حروف على الأقل")
                    .MaximumLength(100).WithMessage("لازم أقل من 100 حرف");
 
-            RuleFor(x => x.PhoneNumber)
+            RuleFor(x => x.Dto.PhoneNumber)
                    .NotEmpty().WithMessage("رقم التليفون مطلوب")
                    .Matches(@"^\+?[0-9]{10,15}$")
                    .WithMessage("رقم التليفون غير صحيح");
 
-            RuleFor(x => x.Email)
+            RuleFor(x => x.Dto.Email)
                    .EmailAddress().WithMessage("الإيميل غير صحيح")
-                   .When(x => !string.IsNullOrEmpty(x.Email));
+                   .When(x => !string.IsNullOrEmpty(x.Dto.Email));
 
-            RuleFor(x => x.IdentityType)
+            RuleFor(x => x.Dto.IdentityType)
                    .IsInEnum()
                    .WithMessage("نوع الهوية غير صحيح برجاء إختيار نوع هوية مناسب");
 
-            RuleFor(x => x.IdentityNumber)
+            RuleFor(x => x.Dto.IdentityNumber)
                    .NotEmpty().WithMessage("رقم الهوية مطلوب")
-                   .Must((dto, number) => BeValidIdentityNumber(number, dto.IdentityType))
+                   .Must((x, number) => BeValidIdentityNumber(number, x.Dto.IdentityType))
                    .WithMessage("رقم الهوية غير صحيح");
 
-            RuleFor(x => x.DateOfBirth)
+            RuleFor(x => x.Dto.DateOfBirth)
                    .NotEmpty().WithMessage("تاريخ الميلاد مطلوب")
                    .Must(BeValidAge)
                    .WithMessage("السن لازم يكون بين 1 و 120 سنة");
 
-            RuleFor(x => x.Gender)
+            RuleFor(x => x.Dto.Gender)
                    .IsInEnum()
                    .WithMessage("النوع غير صحيح");
 
-            RuleFor(x => x.ChronicConditions)
+            RuleFor(x => x.Dto.ChronicConditions)
                    .IsInEnum()
                    .WithMessage("الأمراض المزمنة غير صحيحة");
 
-            RuleFor(x => x.OtherConditions)
+            RuleFor(x => x.Dto.OtherConditions)
                    .MaximumLength(500)
                    .WithMessage("لازم يكون أقل من 500 حرف")
-                   .When(x => !string.IsNullOrEmpty(x.OtherConditions));
+                   .When(x => !string.IsNullOrEmpty(x.Dto.OtherConditions));
             
-            RuleFor(x => x.Address)
+            RuleFor(x => x.Dto.Address)
                    .NotEmpty().WithMessage("العنوان مطلوب")
                    .ValidAddress()
-                   .When(x => !string.IsNullOrEmpty(x.Address));
+                   .When(x => !string.IsNullOrEmpty(x.Dto.Address));
         }
 
         // _____________ Custom Validation Methods _____________ //

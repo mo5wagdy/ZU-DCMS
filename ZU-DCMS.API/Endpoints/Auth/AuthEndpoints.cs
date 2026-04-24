@@ -27,7 +27,7 @@ namespace ZU_DCMS.API.Endpoints.Auth
                 var result = await sender.Send(command);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<AuthDto>.Success(result.Value, "Patient registered successfully."))
-                    : Results.BadRequest(ApiResponse<AuthDto>.Failure(result.Error, "Registration failed."));
+                    : Results.BadRequest(ApiResponse<AuthDto>.Failure(result.Errors, "Registration failed."));
             })
             .AllowAnonymous()
             .WithName("RegisterPatient")
@@ -41,7 +41,7 @@ namespace ZU_DCMS.API.Endpoints.Auth
                 var result = await sender.Send(command);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<AuthDto>.Success(result.Value, "Login successful."))
-                    : Results.BadRequest(ApiResponse<AuthDto>.Failure(result.Error, "Login failed."));
+                    : Results.BadRequest(ApiResponse<AuthDto>.Failure(result.Errors, "Login failed."));
             })
             .AllowAnonymous()
             .WithName("Login")
@@ -56,7 +56,7 @@ namespace ZU_DCMS.API.Endpoints.Auth
                 var result = await sender.Send(command);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<AuthDto>.Success(result.Value, "Staff login successful."))
-                    : Results.BadRequest(ApiResponse<AuthDto>.Failure(result.Error, "Staff login failed."));
+                    : Results.BadRequest(ApiResponse<AuthDto>.Failure(result.Errors, "Staff login failed."));
             })
             .AllowAnonymous()
             .WithName("StaffLogin")
@@ -71,7 +71,7 @@ namespace ZU_DCMS.API.Endpoints.Auth
                 var result = await sender.Send(command);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<ForgotPhoneResponseDto>.Success(result.Value, "Phone reset request processed."))
-                    : Results.BadRequest(ApiResponse<ForgotPhoneResponseDto>.Failure(result.Error, "Phone reset request failed."));
+                    : Results.BadRequest(ApiResponse<ForgotPhoneResponseDto>.Failure(result.Errors, "Phone reset request failed."));
             })
             .AllowAnonymous()
             .WithName("ForgotPhone")

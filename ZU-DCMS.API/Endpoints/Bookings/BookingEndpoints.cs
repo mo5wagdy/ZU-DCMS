@@ -28,7 +28,7 @@ namespace ZU_DCMS.API.Endpoints.Bookings
                 var result = await sender.Send(command);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<BookingDto>.Success(result.Value, "Booking successfully created."))
-                    : Results.BadRequest(ApiResponse<BookingDto>.Failure(result.Error, "Failed to create booking."));
+                    : Results.BadRequest(ApiResponse<BookingDto>.Failure(result.Errors, "Failed to create booking."));
             })
             .RequireAuthorization("PatientPolicy") // Security check ensuring only patients book for themselves
             .WithName("CreateBooking")
@@ -42,7 +42,7 @@ namespace ZU_DCMS.API.Endpoints.Bookings
                 var result = await sender.Send(command);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<string>.Success(string.Empty, "Booking successfully cancelled."))
-                    : Results.BadRequest(ApiResponse<string>.Failure(result.Error, "Failed to cancel booking."));
+                    : Results.BadRequest(ApiResponse<string>.Failure(result.Errors, "Failed to cancel booking."));
             })
             .RequireAuthorization("PatientPolicy")
             .WithName("CancelBooking")
@@ -56,7 +56,7 @@ namespace ZU_DCMS.API.Endpoints.Bookings
                 var result = await sender.Send(command);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<string>.Success(string.Empty, "Booking successfully postponed."))
-                    : Results.BadRequest(ApiResponse<string>.Failure(result.Error, "Failed to postpone booking."));
+                    : Results.BadRequest(ApiResponse<string>.Failure(result.Errors, "Failed to postpone booking."));
             })
             .RequireAuthorization("PatientPolicy")
             .WithName("PostponeBooking")
@@ -71,7 +71,7 @@ namespace ZU_DCMS.API.Endpoints.Bookings
                 var result = await sender.Send(query);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<PagedResult<BookingDto>>.Success(result.Value, "Patient bookings retrieved."))
-                    : Results.BadRequest(ApiResponse<PagedResult<BookingDto>>.Failure(result.Error, "Failed to retrieve bookings."));
+                    : Results.BadRequest(ApiResponse<PagedResult<BookingDto>>.Failure(result.Errors, "Failed to retrieve bookings."));
             })
             .RequireAuthorization("PatientPolicy")
             .WithName("GetPatientBookings")

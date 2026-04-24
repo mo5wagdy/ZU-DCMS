@@ -9,6 +9,7 @@ using ZU_DCMS.APPLICATION.Contracts.Auth;
 using ZU_DCMS.APPLICATION.Contracts.Logger;
 using ZU_DCMS.APPLICATION.DTOs.Auth;
 using ZU_DCMS.Domain.Entities;
+using ZU_DCMS.Domain.Enums;
 using ZU_DCMS.Domain.Interfaces;
 using ZU_DCMS.Domain.UserRoles;
 
@@ -71,6 +72,13 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient
                 return Result.Failure<AuthDto>("رقم الهاتف مسجل بالفعل");
             }
 
+            if (dto.type != UserType.Patient)
+            {
+                _logger.LogWarning("Attempt Registering With Different Type Which Is Not Allowed");
+
+                return Result.Failure<AuthDto>("غير مسموح");
+            }
+
             // __ Begin transaction — Identity + Patient must both succeed __ //
             await _uow.BeginTransactionAsync();
            
@@ -85,6 +93,7 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient
                     dto.Email,
                     dto.PhoneNumber,
                     dto.FullName,
+                    dto.type,
                     dto.IdentityNumber
                 );
 

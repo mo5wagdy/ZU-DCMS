@@ -32,10 +32,10 @@ namespace ZU_DCMS.API.Common
         /// <summary>
         /// Creates a failure response containing a list of error messages and a descriptive message.
         /// </summary>
-        public static ApiResponse<T> Failure(List<string> errors, string message) => new() 
+        public static ApiResponse<T> Failure(IEnumerable<string> errors, string message) => new() 
         { 
             IsSuccess = false, 
-            Errors = errors ?? new List<string>(),
+            Errors = errors?.ToList() ?? new List<string>(),
             Message = message
         };
 

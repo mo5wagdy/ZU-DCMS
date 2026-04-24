@@ -77,6 +77,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
                         dto.Email,
                         dto.PhoneNumber,
                         dto.FullName,
+                        dto.type,
                         dto.Password
                     );
 

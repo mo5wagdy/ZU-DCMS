@@ -29,7 +29,7 @@ namespace ZU_DCMS.API.Endpoints.Students
                 var result = await sender.Send(query);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<PagedResult<StudentDto>>.Success(result.Value, "All students retrieved."))
-                    : Results.BadRequest(ApiResponse<PagedResult<StudentDto>>.Failure(result.Error, "Failed to retrieve students."));
+                    : Results.BadRequest(ApiResponse<PagedResult<StudentDto>>.Failure(result.Errors, "Failed to retrieve students."));
             })
             // Policy allowing Staff and High-Level Roles (Dean, ViceDean, Professor, Admin)
             .RequireAuthorization("StaffViewPolicy") 
@@ -44,7 +44,7 @@ namespace ZU_DCMS.API.Endpoints.Students
                 var result = await sender.Send(query);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<StudentDto>.Success(result.Value, "Student details retrieved."))
-                    : Results.NotFound(ApiResponse<StudentDto>.Failure(result.Error, "Student not found."));
+                    : Results.NotFound(ApiResponse<StudentDto>.Failure(result.Errors, "Student not found."));
             })
             .RequireAuthorization("StaffViewPolicy")
             .WithName("GetStudentById")
@@ -59,7 +59,7 @@ namespace ZU_DCMS.API.Endpoints.Students
                 var result = await sender.Send(query);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<StudentDto>.Success(result.Value, "Student details by user ID retrieved."))
-                    : Results.NotFound(ApiResponse<StudentDto>.Failure(result.Error, "Student not found by given user ID."));
+                    : Results.NotFound(ApiResponse<StudentDto>.Failure(result.Errors, "Student not found by given user ID."));
             })
             .RequireAuthorization() 
             .WithName("GetStudentByUserId")
@@ -73,7 +73,7 @@ namespace ZU_DCMS.API.Endpoints.Students
                 var result = await sender.Send(query);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<List<StudentRequirementDto>>.Success(result.Value, "Student requirements retrieved."))
-                    : Results.BadRequest(ApiResponse<List<StudentRequirementDto>>.Failure(result.Error, "Failed to retrieve student requirements."));
+                    : Results.BadRequest(ApiResponse<List<StudentRequirementDto>>.Failure(result.Errors, "Failed to retrieve student requirements."));
             })
             // Must be authenticated. Usually, they retrieve their own.
             .RequireAuthorization() 

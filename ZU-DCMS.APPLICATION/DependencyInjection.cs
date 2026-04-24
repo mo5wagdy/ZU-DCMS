@@ -17,15 +17,15 @@ namespace ZU_DCMS.APPLICATION
         // ___________________________ Application Service Registrations ___________________________ //
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
-            // __________ Validators __________ //
-            services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
-
             // __________ MediatR __________ //
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(LoginHandler).Assembly));
 
             // __________ MediatR behaviors __________ //
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
+
+            // __________ Validators __________ //
+            services.AddValidatorsFromAssembly(typeof(ValidationBehavior<,>).Assembly);
 
             // __________ AutoMapper __________ //
             services.AddAutoMapper(cfg => { }, typeof(DependencyInjection));

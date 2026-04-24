@@ -1,15 +1,13 @@
 using System.Net;
 using System.Text.Json;
 using ZU_DCMS.API.Common;
-using ZU_DCMS.APPLICATION.Contracts.Logger;
 using ZU_DCMS.APPLICATION.Exceptions;
-using ZU_DCMS.INFRASTRUCTURE.Persistence.ContractImplementation;
 
 namespace ZU_DCMS.API.Middlewares
 {
     /// <summary>
-    /// Middleware to catch unhandled exceptions globally, map them to HTTP status codes,
-    /// and return standardized API responses in a unified format.
+    /// Global exception handler middleware
+    /// Maps exceptions to HTTP responses in a unified ApiResponse format
     /// </summary>
     public class CustomExceptionMiddleware
     {
@@ -24,54 +22,97 @@ namespace ZU_DCMS.API.Middlewares
         {
             try
             {
-                // Proceed with the rest of the request pipeline
+                // Execute next middleware in pipeline
                 await _next(context);
             }
             catch (Exception ex)
-            {   
-                // Handle the exception and format the response to the user
+            {
+                // Handle any unhandled exception globally
                 await HandleExceptionAsync(context, ex);
+
+                //context.Response.StatusCode = 500;
+
+                //await context.Response.WriteAsync(JsonSerializer.Serialize(new { type = ex.GetType().Name, message = ex.Message, stack = ex.StackTrace }));
+
+                //return;
             }
         }
 
         /// <summary>
-        /// Maps common exceptions to domain-specific HTTP status codes and wraps them in a standard ApiResponse.
+        /// Maps exceptions to proper HTTP responses
         /// </summary>
         private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            var statusCode = HttpStatusCode.InternalServerError;
-            var response = ApiResponse<object>.Failure(exception.Message, "An internal server error occurred.");
+            context.Response.ContentType = "application/json";
 
-            // Map custom exceptions to appropriate HTTP status codes and response structures
+            var options = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+
+            ApiResponse<object> response;
+            HttpStatusCode statusCode;
+
             switch (exception)
             {
-                case ValidationException validationException:
-                    statusCode = HttpStatusCode.BadRequest;
-                    response = ApiResponse<object>.Failure(validationException.Errors.ToList(), "Validation Error");
-                    break;
+                // ---------------- VALIDATION ERROR ----------------
+                //case ValidationException validationException:
+                //    statusCode = HttpStatusCode.BadRequest;
+
+                //    response = ApiResponse<object>.Failure(
+                //        new List<string> { "Validation Failed" },
+                //        "Validation Error",
+                //        validationException.Errors
+                //    );
+                //    break;
+
+                // ---------------- NOT FOUND ----------------
                 case NotFoundException notFoundException:
                     statusCode = HttpStatusCode.NotFound;
-                    response = ApiResponse<object>.Failure(notFoundException.Message, "Resource Not Found");
+
+                    response = ApiResponse<object>.Failure(
+                        new List<string> { notFoundException.Message },
+                        "Resource Not Found"
+                    );
                     break;
+
+                // ---------------- UNAUTHORIZED ----------------
                 case UnauthorizedAccessException unauthorizedAccessException:
                     statusCode = HttpStatusCode.Unauthorized;
-                    response = ApiResponse<object>.Failure(unauthorizedAccessException.Message, "Unauthorized Access");
+
+                    response = ApiResponse<object>.Failure(
+                        new List<string> { unauthorizedAccessException.Message },
+                        "Unauthorized Access"
+                    );
                     break;
+
+                // ---------------- FORBIDDEN ----------------
                 case ForbiddenException forbiddenException:
                     statusCode = HttpStatusCode.Forbidden;
-                    response = ApiResponse<object>.Failure(forbiddenException.Message, "Forbidden Access");
+
+                    response = ApiResponse<object>.Failure(
+                        new List<string> { forbiddenException.Message },
+                        "Forbidden Access"
+                    );
+                    break;
+
+                // ---------------- UNEXPECTED ERROR ----------------
+                default:
+                    statusCode = HttpStatusCode.InternalServerError;
+
+                    response = ApiResponse<object>.Failure(
+                        new List<string> { exception.Message },
+                        "Internal Server Error"
+                    );
                     break;
             }
 
-            // Configure the HTTP response properties
-            context.Response.ContentType = "application/json";
+            // Set status code
             context.Response.StatusCode = (int)statusCode;
 
-            // Serialize the generic application response object to camel case json
-            var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-            var jsonResponse = JsonSerializer.Serialize(response, options);
-
-            await context.Response.WriteAsync(jsonResponse);
+            // Return JSON response
+            var json = JsonSerializer.Serialize(response, options);
+            await context.Response.WriteAsync(json);
         }
     }
 }

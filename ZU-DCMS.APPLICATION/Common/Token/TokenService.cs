@@ -1,9 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Text;
-using ZU_DCMS.APPLICATION.Common;
+﻿using System.Security.Claims;
 using ZU_DCMS.APPLICATION.Contracts.Auth;
 using ZU_DCMS.APPLICATION.DTOs.Token;
 using ZU_DCMS.Domain.Entities;
@@ -66,14 +61,14 @@ namespace ZU_DCMS.APPLICATION.Common.Token
             var stored = await _uow.Repository<RefreshToken>().GetFirstOrDefaultAsync(t => t.Token == refreshToken);
 
             if (stored == null || !stored.IsActive)
-                return TokenResult.Fail("الـ Token غير صالح");
+                return TokenResult.Fail(new[] { "الـ Token غير صالح" });
 
             if (stored.IsRevoked)
-                return TokenResult.Fail("تم استخدام توكن قديم");
+                return TokenResult.Fail(new[] { "تم استخدام توكن قديم" });
 
             var user = await _identity.FindByIdAsync(stored.UserId);
             if (user == null || !user.IsActive)
-                return TokenResult.Fail("الحساب غير موجود أو موقوف");
+                return TokenResult.Fail(new[] { "الحساب غير موجود أو موقوف" });
 
             // __ Begin a database transaction to revoke the old refresh token and generate a new access token and refresh token atomically __ //
             await _uow.BeginTransactionAsync();

@@ -1,13 +1,10 @@
 ﻿using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using ZU_DCMS.APPLICATION.Common;
-using ZU_DCMS.APPLICATION.DTOs.Admin;
+using ZU_DCMS.APPLICATION.Features.Admin.Commands.UpdateConfig;
 
 namespace ZU_DCMS.APPLICATION.Validators.Admin
 {
-    public class UpdateSystemConfigValidator : AbstractValidator<SystemConfigDto>
+    public class UpdateSystemConfigValidator : AbstractValidator<UpdateConfigCommand>
     {
         // __ This validator ensures that the data provided for updating a system configuration is valid. __ //
         private static readonly string[] ValidKeys =

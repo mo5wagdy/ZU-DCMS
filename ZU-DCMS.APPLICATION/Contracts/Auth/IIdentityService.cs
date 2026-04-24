@@ -1,6 +1,7 @@
 ﻿using ZU_DCMS.APPLICATION.Common.Pagination;
 using ZU_DCMS.APPLICATION.DTOs.Admin;
 using ZU_DCMS.APPLICATION.DTOs.Auth;
+using ZU_DCMS.Domain.Enums;
 
 namespace ZU_DCMS.APPLICATION.Contracts.Auth
 {
@@ -18,6 +19,7 @@ namespace ZU_DCMS.APPLICATION.Contracts.Auth
                 string? email,
                 string phoneNumber,
                 string fullName,
+                UserType type,
                 string password
             );
 

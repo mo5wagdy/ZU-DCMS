@@ -39,7 +39,7 @@ namespace ZU_DCMS.API.Endpoints.Admin
                 var result = await sender.Send(new GetAllConfigsQuery());
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<List<SystemConfigDto>>.Success(result.Value, "System configurations retrieved."))
-                    : Results.BadRequest(ApiResponse<List<SystemConfigDto>>.Failure(result.Error, "Failed to retrieve configurations."));
+                    : Results.BadRequest(ApiResponse<List<SystemConfigDto>>.Failure(result.Errors, "Failed to retrieve configurations."));
             })
             .WithName("GetAllConfigs")
             .WithSummary("Retrieves all system configurations")
@@ -51,7 +51,7 @@ namespace ZU_DCMS.API.Endpoints.Admin
                 var result = await sender.Send(new GetAllTermsQuery());
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<List<TermDto>>.Success(result.Value, "Terms retrieved."))
-                    : Results.BadRequest(ApiResponse<List<TermDto>>.Failure(result.Error, "Failed to retrieve terms."));
+                    : Results.BadRequest(ApiResponse<List<TermDto>>.Failure(result.Errors, "Failed to retrieve terms."));
             })
             .WithName("GetAllTerms")
             .WithSummary("Retrieves all academic terms")

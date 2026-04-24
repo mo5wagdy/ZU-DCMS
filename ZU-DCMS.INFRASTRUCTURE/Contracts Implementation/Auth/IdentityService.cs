@@ -5,7 +5,7 @@ using ZU_DCMS.APPLICATION.DTOs.Admin;
 using ZU_DCMS.APPLICATION.DTOs.Auth;
 using ZU_DCMS.APPLICATION.Common.Pagination;
 using ZU_DCMS.APPLICATION.Contracts.Auth;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using ZU_DCMS.Domain.Enums;
 
 namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
 {
@@ -81,6 +81,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
             string? phoneNumber,
             string? email,
             string fullName,
+            UserType type,
             string password
         )
         {
@@ -90,6 +91,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
                 Email = email?.Trim().ToLower(),
                 PhoneNumber = phoneNumber?.Trim(),
                 FullName = fullName.Trim(),
+                UserType = type,
                 EmailConfirmed = email != null,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow

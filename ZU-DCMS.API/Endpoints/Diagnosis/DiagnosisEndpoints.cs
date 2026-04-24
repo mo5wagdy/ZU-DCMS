@@ -30,7 +30,7 @@ namespace ZU_DCMS.API.Endpoints.Diagnosis
                 var result = await sender.Send(command);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<DiagnosisRecordDto>.Success(result.Value, "Patient diagnosis recorded successfully."))
-                    : Results.BadRequest(ApiResponse<DiagnosisRecordDto>.Failure(result.Error, "Failed to record diagnosis."));
+                    : Results.BadRequest(ApiResponse<DiagnosisRecordDto>.Failure(result.Errors, "Failed to record diagnosis."));
             })
             .WithName("DiagnosePatient")
             .WithSummary("Records a new clinical diagnosis assessment for a queued patient")
@@ -43,7 +43,7 @@ namespace ZU_DCMS.API.Endpoints.Diagnosis
                 var result = await sender.Send(query);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<List<StudentPriorityDto>>.Success(result.Value, "Matching available students retrieved."))
-                    : Results.BadRequest(ApiResponse<List<StudentPriorityDto>>.Failure(result.Error, "Failed to retrieve available students."));
+                    : Results.BadRequest(ApiResponse<List<StudentPriorityDto>>.Failure(result.Errors, "Failed to retrieve available students."));
             })
             .WithName("GetAvailableStudents")
             .WithSummary("Finds active students who actually need the specific procedure requirement")
@@ -56,7 +56,7 @@ namespace ZU_DCMS.API.Endpoints.Diagnosis
                 var result = await sender.Send(command);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<CaseAssignmentDto>.Success(result.Value, "Student was successfully assigned to this patient's case."))
-                    : Results.BadRequest(ApiResponse<CaseAssignmentDto>.Failure(result.Error, "Failed to assign student."));
+                    : Results.BadRequest(ApiResponse<CaseAssignmentDto>.Failure(result.Errors, "Failed to assign student."));
             })
             .WithName("AssignStudent")
             .WithSummary("Binds a clinical case to a specific student that needed it")

@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using ZU_DCMS.Domain.Enums;
 
 namespace ZU_DCMS.INFRASTRUCTURE.Identity
 {
@@ -13,6 +11,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity
     {
         public string FullName { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
+        public UserType UserType { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

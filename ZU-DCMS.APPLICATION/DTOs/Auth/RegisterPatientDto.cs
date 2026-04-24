@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ZU_DCMS.Domain.Enums;
+﻿using ZU_DCMS.Domain.Enums;
 
 namespace ZU_DCMS.APPLICATION.DTOs.Auth
 {
@@ -17,6 +14,7 @@ namespace ZU_DCMS.APPLICATION.DTOs.Auth
         public string? Email { get; set; }
         public DateTime DateOfBirth { get; set; }
         public Gender Gender { get; set; }
+        public UserType type { get; set; } = UserType.Patient;
         public ChronicCondition ChronicConditions { get; set; }
         public string? OtherConditions { get; set; }
     }

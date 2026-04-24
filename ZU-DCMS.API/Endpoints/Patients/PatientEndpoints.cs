@@ -28,7 +28,7 @@ namespace ZU_DCMS.API.Endpoints.Patients
                 var result = await sender.Send(command);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<UpdatePatientDto>.Success(result.Value, "Patient profile successfully updated."))
-                    : Results.BadRequest(ApiResponse<UpdatePatientDto>.Failure(result.Error, "Failed to update patient profile."));
+                    : Results.BadRequest(ApiResponse<UpdatePatientDto>.Failure(result.Errors, "Failed to update patient profile."));
             })
             .RequireAuthorization("PatientPolicy") // Restrict primarily to Patients making modifications
             .WithName("UpdatePatientProfile")
@@ -43,7 +43,7 @@ namespace ZU_DCMS.API.Endpoints.Patients
                 var result = await sender.Send(query);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<PagedResult<PatientDto>>.Success(result.Value, "Patients directory populated."))
-                    : Results.BadRequest(ApiResponse<PagedResult<PatientDto>>.Failure(result.Error, "Failed to retrieve patients."));
+                    : Results.BadRequest(ApiResponse<PagedResult<PatientDto>>.Failure(result.Errors, "Failed to retrieve patients."));
             })
             .RequireAuthorization("StaffViewPolicy") // Protect standard access strictly for internal personnel
             .WithName("GetAllPatients")
@@ -57,7 +57,7 @@ namespace ZU_DCMS.API.Endpoints.Patients
                 var result = await sender.Send(query);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<PatientDto>.Success(result.Value, "Patient metrics retrieved."))
-                    : Results.NotFound(ApiResponse<PatientDto>.Failure(result.Error, "Patient not found."));
+                    : Results.NotFound(ApiResponse<PatientDto>.Failure(result.Errors, "Patient not found."));
             })
             .RequireAuthorization("StaffViewPolicy")
             .WithName("GetPatientById")
@@ -71,7 +71,7 @@ namespace ZU_DCMS.API.Endpoints.Patients
                 var result = await sender.Send(query);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<PatientDto>.Success(result.Value, "Patient records processed from the underlying User framework."))
-                    : Results.NotFound(ApiResponse<PatientDto>.Failure(result.Error, "Patient records not found by specified user ID."));
+                    : Results.NotFound(ApiResponse<PatientDto>.Failure(result.Errors, "Patient records not found by specified user ID."));
             })
             .RequireAuthorization() // Should be secured
             .WithName("GetPatientByUserId")

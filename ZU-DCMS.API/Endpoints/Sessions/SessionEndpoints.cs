@@ -1,12 +1,12 @@
 using Asp.Versioning.Builder;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using ZU_DCMS.API.Common;
 using ZU_DCMS.APPLICATION.Features.Sessions.Commands.GenerateSessions;
 using ZU_DCMS.APPLICATION.Features.Sessions.Queries.FindSession;
 using ZU_DCMS.APPLICATION.Features.Sessions.Queries.GetAvailableSlots;
 using ZU_DCMS.APPLICATION.Features.Sessions.Queries.IsSessionAvailable;
 using ZU_DCMS.APPLICATION.DTOs.Session;
-using ZU_DCMS.Domain.Entities;
 
 namespace ZU_DCMS.API.Endpoints.Sessions
 {
@@ -17,12 +17,12 @@ namespace ZU_DCMS.API.Endpoints.Sessions
     {
         public static void MapSessionEndpoints(this IEndpointRouteBuilder app, ApiVersionSet versionSet)
         {
-            var group = app.MapGroup("api/v{version:apiVersion}/sessions")
+            var group = app.MapGroup("api/v1/sessions")
                            .WithApiVersionSet(versionSet)
                            .WithTags("Sessions");
 
             // 1. Check open slots (For Patients or Public booking access)
-            group.MapGet("/available-slots", async (ISender sender, [AsParameters] GetAvailableSlotsQuery query) =>
+            group.MapGet("/available-slots", async ([FromServices] ISender sender, [AsParameters] GetAvailableSlotsQuery query) =>
             {
                 var result = await sender.Send(query);
                 return result.IsSuccess
@@ -36,21 +36,21 @@ namespace ZU_DCMS.API.Endpoints.Sessions
             .Produces<ApiResponse<List<AvailableSlotDto>>>(StatusCodes.Status400BadRequest);
 
             // 2. Staff lookup session filters
-            group.MapGet("/find", async (ISender sender, [AsParameters] FindSessionQuery query) =>
+            group.MapGet("/find", async ([FromServices] ISender sender, [AsParameters] FindSessionQuery query) =>
             {
                 var result = await sender.Send(query);
                 return result.IsSuccess
-                    ? Results.Ok(ApiResponse<Session>.Success(result.Value, "Session records retrieved."))
-                    : Results.NotFound(ApiResponse<Session>.Failure(result.Error, "Session not found."));
+                    ? Results.Ok(ApiResponse<SessionDto>.Success(result.Value, "Session records retrieved."))
+                    : Results.NotFound(ApiResponse<SessionDto>.Failure(result.Error, "Session not found."));
             })
             .RequireAuthorization("StaffViewPolicy") // Internal doctors, admins, receptionists
             .WithName("FindSession")
             .WithSummary("Searches for specific clinical sessions via complex filters")
-            .Produces<ApiResponse<Session>>(StatusCodes.Status200OK)
-            .Produces<ApiResponse<Session>>(StatusCodes.Status404NotFound);
+            .Produces<ApiResponse<SessionDto>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<SessionDto>>(StatusCodes.Status404NotFound);
 
             // 3. Logic check for session capacity/flags
-            group.MapGet("/check-availability", async (ISender sender, [AsParameters] IsSessionAvailableQuery query) =>
+            group.MapGet("/check-availability", async ([FromServices] ISender sender, [AsParameters] IsSessionAvailableQuery query) =>
             {
                 var result = await sender.Send(query);
                 return result.IsSuccess
@@ -64,7 +64,7 @@ namespace ZU_DCMS.API.Endpoints.Sessions
             .Produces<ApiResponse<bool>>(StatusCodes.Status400BadRequest);
 
             // 4. Generator (Admin Only)
-            group.MapPost("/generate", async (ISender sender, GenerateSessionsCommand command) =>
+            group.MapPost("/generate", async ([FromServices] ISender sender, [FromBody] GenerateSessionsCommand command) =>
             {
                 var result = await sender.Send(command);
                 return result.IsSuccess

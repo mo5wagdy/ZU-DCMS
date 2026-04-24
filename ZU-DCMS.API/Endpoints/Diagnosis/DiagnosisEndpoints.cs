@@ -1,5 +1,6 @@
 using Asp.Versioning.Builder;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using ZU_DCMS.API.Common;
 using ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent;
 using ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.DiagnosePatient;
@@ -17,14 +18,14 @@ namespace ZU_DCMS.API.Endpoints.Diagnosis
     {
         public static void MapDiagnosisEndpoints(this IEndpointRouteBuilder app, ApiVersionSet versionSet)
         {
-            var group = app.MapGroup("api/v{version:apiVersion}/diagnosis")
+            var group = app.MapGroup("api/v1/diagnosis")
                            .WithApiVersionSet(versionSet)
                            .WithTags("Diagnosis")
                            // Protect via Clinical Core Policy (InternDoctor, Receptionist, Admin)
                            .RequireAuthorization("ClinicalCorePolicy"); 
 
             // 1. Log a diagnosis
-            group.MapPost("/", async (ISender sender, DiagnosePatientCommand command) =>
+            group.MapPost("/", async ([FromServices] ISender sender, [FromBody] DiagnosePatientCommand command) =>
             {
                 var result = await sender.Send(command);
                 return result.IsSuccess
@@ -37,7 +38,7 @@ namespace ZU_DCMS.API.Endpoints.Diagnosis
             .Produces<ApiResponse<DiagnosisRecordDto>>(StatusCodes.Status400BadRequest);
 
             // 2. See which students need this case constraint
-            group.MapGet("/available-students", async (ISender sender, [AsParameters] GetAvailableStudentsQuery query) =>
+            group.MapGet("/available-students", async ([FromServices] ISender sender, [AsParameters] GetAvailableStudentsQuery query) =>
             {
                 var result = await sender.Send(query);
                 return result.IsSuccess
@@ -50,7 +51,7 @@ namespace ZU_DCMS.API.Endpoints.Diagnosis
             .Produces<ApiResponse<List<StudentPriorityDto>>>(StatusCodes.Status400BadRequest);
 
             // 3. Assign
-            group.MapPost("/assign", async (ISender sender, AssignStudentCommand command) =>
+            group.MapPost("/assign", async ([FromServices] ISender sender, [FromBody] AssignStudentCommand command) =>
             {
                 var result = await sender.Send(command);
                 return result.IsSuccess

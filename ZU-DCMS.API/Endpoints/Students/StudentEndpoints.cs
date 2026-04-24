@@ -1,5 +1,6 @@
 using Asp.Versioning.Builder;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using ZU_DCMS.API.Common;
 using ZU_DCMS.APPLICATION.Common.Pagination;
 using ZU_DCMS.APPLICATION.Features.Students.Queries.GetAllStudents;
@@ -17,12 +18,12 @@ namespace ZU_DCMS.API.Endpoints.Students
     {
         public static void MapStudentEndpoints(this IEndpointRouteBuilder app, ApiVersionSet versionSet)
         {
-            var group = app.MapGroup("api/v{version:apiVersion}/students")
+            var group = app.MapGroup("api/v1/students")
                            .WithApiVersionSet(versionSet)
                            .WithTags("Students");
 
             // 1. Get All Students
-            group.MapGet("/", async ([AsParameters] PagedRequest request, ISender sender) =>
+            group.MapGet("/", async ([AsParameters] PagedRequest request, [FromServices] ISender sender) =>
             {
                 var query = new GetAllStudentsQuery(request);
                 var result = await sender.Send(query);
@@ -38,7 +39,7 @@ namespace ZU_DCMS.API.Endpoints.Students
             .Produces<ApiResponse<PagedResult<StudentDto>>>(StatusCodes.Status400BadRequest);
 
             // 2. Get Student By Intern/Student ID
-            group.MapGet("/{id}", async (ISender sender, [AsParameters] GetStudentByIdQuery query) =>
+            group.MapGet("/{studentId}", async ([FromServices] ISender sender, [AsParameters] GetStudentByIdQuery query) =>
             {
                 var result = await sender.Send(query);
                 return result.IsSuccess
@@ -52,7 +53,7 @@ namespace ZU_DCMS.API.Endpoints.Students
             .Produces<ApiResponse<StudentDto>>(StatusCodes.Status404NotFound);
 
             // 3. Get Student By Identity User ID
-            group.MapGet("/user/{id}", async (ISender sender, [AsParameters] GetStudentByUserIdQuery query) =>
+            group.MapGet("/user/{userId}", async ([FromServices] ISender sender, [AsParameters] GetStudentByUserIdQuery query) =>
             {
                 // Can be accessed by Staff or the student themselves.
                 var result = await sender.Send(query);
@@ -67,7 +68,7 @@ namespace ZU_DCMS.API.Endpoints.Students
             .Produces<ApiResponse<StudentDto>>(StatusCodes.Status404NotFound);
 
             // 4. Get Student Requirements
-            group.MapGet("/requirements", async (ISender sender, [AsParameters] GetRequirementsQuery query) =>
+            group.MapGet("/requirements", async ([FromServices] ISender sender, [AsParameters] GetRequirementsQuery query) =>
             {
                 var result = await sender.Send(query);
                 return result.IsSuccess

@@ -1,5 +1,6 @@
 using Asp.Versioning.Builder;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using ZU_DCMS.API.Common;
 using ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress;
 using ZU_DCMS.APPLICATION.Features.Cases.Commands.ReviewCase;
@@ -19,14 +20,14 @@ namespace ZU_DCMS.API.Endpoints.Cases
     {
         public static void MapCaseEndpoints(this IEndpointRouteBuilder app, ApiVersionSet versionSet)
         {
-            var group = app.MapGroup("api/v{version:apiVersion}/cases")
+            var group = app.MapGroup("api/v1/cases")
                            .WithApiVersionSet(versionSet)
                            .WithTags("Clinical Cases");
 
             // ==== STUDENT ACTIONS ====
 
             // 1. Add procedural progress into a clinic session iteration
-            group.MapPost("/progress", async (ISender sender, AddSessionProgressCommand command) =>
+            group.MapPost("/progress", async ([FromServices] ISender sender, [FromBody] AddSessionProgressCommand command) =>
             {
                 var result = await sender.Send(command);
                 return result.IsSuccess
@@ -40,7 +41,7 @@ namespace ZU_DCMS.API.Endpoints.Cases
             .Produces<ApiResponse<CaseSessionDto>>(StatusCodes.Status400BadRequest);
 
             // 2. Wrap up case structure and send it up for supervisor grading
-            group.MapPost("/submit", async (ISender sender, SubmitCaseForReviewCommand command) =>
+            group.MapPost("/submit", async ([FromServices] ISender sender, [FromBody] SubmitCaseForReviewCommand command) =>
             {
                 var result = await sender.Send(command);
                 return result.IsSuccess
@@ -54,7 +55,7 @@ namespace ZU_DCMS.API.Endpoints.Cases
             .Produces<ApiResponse<string>>(StatusCodes.Status400BadRequest);
 
             // 3. Status Check
-            group.MapGet("/progress", async (ISender sender, [AsParameters] GetStudentProgressQuery query) =>
+            group.MapGet("/progress", async ([FromServices] ISender sender, [AsParameters] GetStudentProgressQuery query) =>
             {
                 var result = await sender.Send(query);
                 return result.IsSuccess
@@ -71,7 +72,7 @@ namespace ZU_DCMS.API.Endpoints.Cases
             // ==== STAFF / INSTRUCTOR ACTIONS ====
 
             // 4. Submit an instructor grade/decision on a student's case
-            group.MapPost("/review", async (ISender sender, ReviewCaseCommand command) =>
+            group.MapPost("/review", async ([FromServices] ISender sender, [FromBody] ReviewCaseCommand command) =>
             {
                 var result = await sender.Send(command);
                 return result.IsSuccess
@@ -85,8 +86,9 @@ namespace ZU_DCMS.API.Endpoints.Cases
             .Produces<ApiResponse<string>>(StatusCodes.Status400BadRequest);
 
             // 5. Look up queue
-            group.MapGet("/pending-reviews", async (ISender sender, [AsParameters] GetCasesForReviewQuery query) =>
+            group.MapGet("/pending-reviews", async ([FromServices] ISender sender) =>
             {
+                var query = new GetCasesForReviewQuery();
                 var result = await sender.Send(query);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<List<CaseAssignmentDto>>.Success(result.Value, "Incoming queue of submission cases successfully mapped."))
@@ -100,7 +102,7 @@ namespace ZU_DCMS.API.Endpoints.Cases
 
             // ==== COMMON LOOKUP ====
             // 6. Common entity fallback
-            group.MapGet("/{id}", async (ISender sender, [AsParameters] GetCaseByIdQuery query) =>
+            group.MapGet("/{caseAssignmentId}", async ([FromServices] ISender sender, [AsParameters] GetCaseByIdQuery query) =>
             {
                 var result = await sender.Send(query);
                 return result.IsSuccess

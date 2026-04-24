@@ -1,4 +1,4 @@
-﻿
+
 using MediatR;
 using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Contracts.Auth;
@@ -6,9 +6,9 @@ using ZU_DCMS.APPLICATION.DTOs.Auth;
 using ZU_DCMS.Domain.Entities;
 using ZU_DCMS.Domain.Interfaces;
 
-namespace ZU_DCMS.APPLICATION.Features.Auth.Queries.ForgotPhone
+namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.ForgotPhone
 {
-    public class ForgotPhoneHandler : IRequestHandler<ForgotPhoneQuery, Result<ForgotPhoneDto>>
+    public class ForgotPhoneHandler : IRequestHandler<ForgotPhoneCommand, Result<ForgotPhoneResponseDto>>
     {
         private readonly IUnitOfWork _uow;
         private readonly IIdentityService _identity;
@@ -22,9 +22,9 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Queries.ForgotPhone
             _identity = identity;
         }
 
-        public async Task<Result<ForgotPhoneDto>> Handle(ForgotPhoneQuery query, CancellationToken cancellationToken)
+        public async Task<Result<ForgotPhoneResponseDto>> Handle(ForgotPhoneCommand command, CancellationToken cancellationToken)
         {
-            var nationalId = query.nationalId.Trim();
+            var nationalId = command.NationalId.Trim();
 
             // __ Fetching Patient From DB According to His NID __ //
             var patient = await _uow.Repository<Patient>().GetFirstOrDefaultAsync(p => p.IdentityNumber == nationalId);
@@ -32,7 +32,7 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Queries.ForgotPhone
             // __ If Not Found __ //
             if (patient is null)
             {
-                return Result.Failure<ForgotPhoneDto>("البيانات غير صحيحه");
+                return Result.Failure<ForgotPhoneResponseDto>("البيانات غير صحيحه");
             }
 
             // __ Fetching Identity User For The Patient __ //
@@ -40,16 +40,16 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Queries.ForgotPhone
 
             if (user is null || string.IsNullOrWhiteSpace(user.PhoneNumber))
             {
-                return Result.Failure<ForgotPhoneDto>("لا يوجد رقم مسجل");
+                return Result.Failure<ForgotPhoneResponseDto>("لا يوجد رقم مسجل");
             }
 
             // __ Masking Phone Number __ //
             var masked = MaskPhoneNumber(user.PhoneNumber);
 
             // __ Return Masked Phone Number
-            return Result.Success<ForgotPhoneDto>
+            return Result.Success<ForgotPhoneResponseDto>
                 (
-                   new ForgotPhoneDto
+                   new ForgotPhoneResponseDto
                    {
                       MaskedPhoneNumber = masked
                    }

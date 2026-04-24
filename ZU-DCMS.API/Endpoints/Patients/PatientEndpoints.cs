@@ -1,5 +1,6 @@
 using Asp.Versioning.Builder;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using ZU_DCMS.API.Common;
 using ZU_DCMS.APPLICATION.Common.Pagination;
 using ZU_DCMS.APPLICATION.Features.Patients.Commands.UpdateProfile;
@@ -17,12 +18,12 @@ namespace ZU_DCMS.API.Endpoints.Patients
     {
         public static void MapPatientEndpoints(this IEndpointRouteBuilder app, ApiVersionSet versionSet)
         {
-            var group = app.MapGroup("api/v{version:apiVersion}/patients")
+            var group = app.MapGroup("api/v1/patients")
                            .WithApiVersionSet(versionSet)
                            .WithTags("Patients");
 
             // 1. Patient edits their own base info
-            group.MapPut("/profile", async (ISender sender, UpdateProfileCommand command) =>
+            group.MapPut("/profile", async ([FromServices] ISender sender, [FromBody] UpdateProfileCommand command) =>
             {
                 var result = await sender.Send(command);
                 return result.IsSuccess
@@ -36,7 +37,7 @@ namespace ZU_DCMS.API.Endpoints.Patients
             .Produces<ApiResponse<UpdatePatientDto>>(StatusCodes.Status400BadRequest);
 
             // 2. List all globally
-            group.MapGet("/", async ([AsParameters] PagedRequest request, ISender sender) =>
+            group.MapGet("/", async ([AsParameters] PagedRequest request, [FromServices] ISender sender) =>
             {
                 var query = new GetAllPatientsQuery(request);
                 var result = await sender.Send(query);
@@ -51,7 +52,7 @@ namespace ZU_DCMS.API.Endpoints.Patients
             .Produces<ApiResponse<PagedResult<PatientDto>>>(StatusCodes.Status400BadRequest);
 
             // 3. Drilldown to specific Identity string
-            group.MapGet("/{id}", async (ISender sender, [AsParameters] GetPatientByIdQuery query) =>
+            group.MapGet("/{id}", async ([FromServices] ISender sender, [AsParameters] GetPatientByIdQuery query) =>
             {
                 var result = await sender.Send(query);
                 return result.IsSuccess
@@ -65,7 +66,7 @@ namespace ZU_DCMS.API.Endpoints.Patients
             .Produces<ApiResponse<PatientDto>>(StatusCodes.Status404NotFound);
 
             // 4. Retrieve by app user link
-            group.MapGet("/user/{id}", async (ISender sender, [AsParameters] GetPatientByUserIdQuery query) =>
+            group.MapGet("/user/{userId}", async ([FromServices] ISender sender, [AsParameters] GetPatientByUserIdQuery query) =>
             {
                 var result = await sender.Send(query);
                 return result.IsSuccess

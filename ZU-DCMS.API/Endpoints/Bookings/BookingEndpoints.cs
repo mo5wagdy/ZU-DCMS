@@ -1,5 +1,6 @@
 using Asp.Versioning.Builder;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using ZU_DCMS.API.Common;
 using ZU_DCMS.APPLICATION.Common.Pagination;
 using ZU_DCMS.APPLICATION.Features.Bookings.Commands.CancelBooking;
@@ -17,12 +18,12 @@ namespace ZU_DCMS.API.Endpoints.Bookings
     {
         public static void MapBookingEndpoints(this IEndpointRouteBuilder app, ApiVersionSet versionSet)
         {
-            var group = app.MapGroup("api/v{version:apiVersion}/bookings")
+            var group = app.MapGroup("api/v1/bookings")
                            .WithApiVersionSet(versionSet)
                            .WithTags("Bookings");
 
             // 1. Create Booking
-            group.MapPost("/", async (ISender sender, CreateBookingCommand command) =>
+            group.MapPost("/", async ([FromServices] ISender sender, [FromBody] CreateBookingCommand command) =>
             {
                 var result = await sender.Send(command);
                 return result.IsSuccess
@@ -36,7 +37,7 @@ namespace ZU_DCMS.API.Endpoints.Bookings
             .Produces<ApiResponse<BookingDto>>(StatusCodes.Status400BadRequest);
 
             // 2. Cancel Booking
-            group.MapPut("/cancel", async (ISender sender, CancelBookingCommand command) =>
+            group.MapPut("/cancel", async ([FromServices] ISender sender, [FromBody] CancelBookingCommand command) =>
             {
                 var result = await sender.Send(command);
                 return result.IsSuccess
@@ -50,7 +51,7 @@ namespace ZU_DCMS.API.Endpoints.Bookings
             .Produces<ApiResponse<string>>(StatusCodes.Status400BadRequest);
 
             // 3. Postpone Booking
-            group.MapPut("/postpone", async (ISender sender, PostponeBookingCommand command) =>
+            group.MapPut("/postpone", async ([FromServices] ISender sender, [FromBody] PostponeBookingCommand command) =>
             {
                 var result = await sender.Send(command);
                 return result.IsSuccess
@@ -64,8 +65,9 @@ namespace ZU_DCMS.API.Endpoints.Bookings
             .Produces<ApiResponse<string>>(StatusCodes.Status400BadRequest);
 
             // 4. Retrieve My Bookings
-            group.MapGet("/patient", async (ISender sender, [AsParameters] GetPatientBookingsQuery query) =>
+            group.MapGet("/patient", async ([FromQuery] int patientId, [AsParameters] PagedRequest request, [FromServices] ISender sender) =>
             {
+                var query = new GetPatientBookingsQuery(patientId, request);
                 var result = await sender.Send(query);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<PagedResult<BookingDto>>.Success(result.Value, "Patient bookings retrieved."))

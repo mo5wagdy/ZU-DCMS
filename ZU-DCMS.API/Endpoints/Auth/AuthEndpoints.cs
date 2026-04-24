@@ -1,11 +1,12 @@
 using Asp.Versioning.Builder;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using ZU_DCMS.API.Common;
 using ZU_DCMS.APPLICATION.Features.Auth.Commands.Login;
 using ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient;
 using ZU_DCMS.APPLICATION.Features.Auth.Commands.StaffLogin;
-using ZU_DCMS.APPLICATION.Features.Auth.Queries;
 using ZU_DCMS.APPLICATION.DTOs.Auth;
+using ZU_DCMS.APPLICATION.Features.Auth.Commands.ForgotPhone;
 
 namespace ZU_DCMS.API.Endpoints.Auth
 {
@@ -16,12 +17,12 @@ namespace ZU_DCMS.API.Endpoints.Auth
     {
         public static void MapAuthEndpoints(this IEndpointRouteBuilder app, ApiVersionSet versionSet)
         {
-            var group = app.MapGroup("api/v{version:apiVersion}/auth")
+            var group = app.MapGroup("api/v1/auth")
                            .WithApiVersionSet(versionSet)
                            .WithTags("Authentication");
 
             // 1. Patient Register
-            group.MapPost("/register", async (ISender sender, RegisterPatientCommand command) =>
+            group.MapPost("/register", async ([FromServices] ISender sender, [FromBody] RegisterPatientCommand command) =>
             {
                 var result = await sender.Send(command);
                 return result.IsSuccess
@@ -35,7 +36,7 @@ namespace ZU_DCMS.API.Endpoints.Auth
             .Produces<ApiResponse<AuthDto>>(StatusCodes.Status400BadRequest);
 
             // 2. Default Login
-            group.MapPost("/login", async (ISender sender, LoginCommand command) =>
+            group.MapPost("/login", async ([FromServices] ISender sender, [FromBody] LoginCommand command) =>
             {
                 var result = await sender.Send(command);
                 return result.IsSuccess
@@ -49,7 +50,7 @@ namespace ZU_DCMS.API.Endpoints.Auth
             .Produces<ApiResponse<AuthDto>>(StatusCodes.Status400BadRequest);
 
             // 3. Staff Login
-            group.MapPost("/staff-login", async (ISender sender, StaffLoginCommand command) =>
+            group.MapPost("/staff-login", async ([FromServices] ISender sender, [FromBody] StaffLoginCommand command) =>
             {
                 // This command processes Admin, Doctor, Dean, ViceDean, Professor logins
                 var result = await sender.Send(command);
@@ -64,18 +65,19 @@ namespace ZU_DCMS.API.Endpoints.Auth
             .Produces<ApiResponse<AuthDto>>(StatusCodes.Status400BadRequest);
 
             // 4. Forgot Phone Password / Reset Flow
-            group.MapPost("/forgot-phone", async (ISender sender, ForgotPhoneQuery query) =>
+            group.MapGet("/forgot-phone", async ([FromServices] ISender sender, [FromQuery] string nationalId) =>
             {
-                var result = await sender.Send(query);
+                var command = new ForgotPhoneCommand(nationalId);
+                var result = await sender.Send(command);
                 return result.IsSuccess
-                    ? Results.Ok(ApiResponse<ForgotPhoneDto>.Success(result.Value, "Phone reset request processed."))
-                    : Results.BadRequest(ApiResponse<ForgotPhoneDto>.Failure(result.Error, "Phone reset request failed."));
+                    ? Results.Ok(ApiResponse<ForgotPhoneResponseDto>.Success(result.Value, "Phone reset request processed."))
+                    : Results.BadRequest(ApiResponse<ForgotPhoneResponseDto>.Failure(result.Error, "Phone reset request failed."));
             })
             .AllowAnonymous()
             .WithName("ForgotPhone")
             .WithSummary("Handles forgot password requests via phone number")
-            .Produces<ApiResponse<ForgotPhoneDto>>(StatusCodes.Status200OK)
-            .Produces<ApiResponse<ForgotPhoneDto>>(StatusCodes.Status400BadRequest);
+            .Produces<ApiResponse<ForgotPhoneResponseDto>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<ForgotPhoneResponseDto>>(StatusCodes.Status400BadRequest);
         }
     }
 }

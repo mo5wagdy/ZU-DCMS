@@ -1,5 +1,6 @@
 using Asp.Versioning.Builder;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using ZU_DCMS.API.Common;
 using ZU_DCMS.APPLICATION.Common.Pagination;
 using ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateTerm;
@@ -26,14 +27,14 @@ namespace ZU_DCMS.API.Endpoints.Admin
     {
         public static void MapAdminEndpoints(this IEndpointRouteBuilder app, ApiVersionSet versionSet)
         {
-            var group = app.MapGroup("api/v{version:apiVersion}/admin")
+            var group = app.MapGroup("api/v1/admin")
                            .WithApiVersionSet(versionSet)
                            .WithTags("Administration")
                            .RequireAuthorization("AdminPolicy"); // Restrict all these to the Admin policy
 
             // ==== QUERIES ====
 
-            group.MapGet("/configs", async (ISender sender) =>
+            group.MapGet("/configs", async ([FromServices] ISender sender) =>
             {
                 var result = await sender.Send(new GetAllConfigsQuery());
                 return result.IsSuccess
@@ -45,7 +46,7 @@ namespace ZU_DCMS.API.Endpoints.Admin
             .Produces<ApiResponse<List<SystemConfigDto>>>(StatusCodes.Status200OK)
             .Produces<ApiResponse<List<SystemConfigDto>>>(StatusCodes.Status400BadRequest);
 
-            group.MapGet("/terms", async (ISender sender) =>
+            group.MapGet("/terms", async ([FromServices] ISender sender) =>
             {
                 var result = await sender.Send(new GetAllTermsQuery());
                 return result.IsSuccess
@@ -57,7 +58,7 @@ namespace ZU_DCMS.API.Endpoints.Admin
             .Produces<ApiResponse<List<TermDto>>>(StatusCodes.Status200OK)
             .Produces<ApiResponse<List<TermDto>>>(StatusCodes.Status400BadRequest);
 
-            group.MapGet("/terms/{id}", async (ISender sender, [AsParameters] GetTermByIdQuery query) =>
+            group.MapGet("/terms/{termId}", async ([FromServices] ISender sender, [AsParameters] GetTermByIdQuery query) =>
             {
                 var result = await sender.Send(query);
                 return result.IsSuccess
@@ -69,9 +70,9 @@ namespace ZU_DCMS.API.Endpoints.Admin
             .Produces<ApiResponse<TermDto>>(StatusCodes.Status200OK)
             .Produces<ApiResponse<TermDto>>(StatusCodes.Status404NotFound);
 
-            group.MapGet("/users", async ([AsParameters] PagedRequest request, string? search, ISender sender) =>
+            group.MapGet("/users", async ([AsParameters] PagedRequest request, [FromQuery] string? role, [FromServices] ISender sender) =>
             {
-                var query = new GetAllUsersQuery(request, search ?? "");
+                var query = new GetAllUsersQuery(request, role ?? "");
                 var result = await sender.Send(query);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<PagedResult<StaffUsersDto>>.Success(result.Value, "Users retrieved."))
@@ -82,7 +83,7 @@ namespace ZU_DCMS.API.Endpoints.Admin
             .Produces<ApiResponse<PagedResult<StaffUsersDto>>>(StatusCodes.Status200OK)
             .Produces<ApiResponse<PagedResult<StaffUsersDto>>>(StatusCodes.Status400BadRequest);
 
-            group.MapGet("/users/{id}", async (ISender sender, [AsParameters] GetUserByIdQuery query) =>
+            group.MapGet("/users/{userId}", async ([FromServices] ISender sender, [AsParameters] GetUserByIdQuery query) =>
             {
                 var result = await sender.Send(query);
                 return result.IsSuccess
@@ -94,7 +95,7 @@ namespace ZU_DCMS.API.Endpoints.Admin
             .Produces<ApiResponse<StaffUsersDto>>(StatusCodes.Status200OK)
             .Produces<ApiResponse<StaffUsersDto>>(StatusCodes.Status404NotFound);
 
-            group.MapGet("/students/{studentId}/requirements/term/{termId}", async (int studentId, int termId, ISender sender) =>
+            group.MapGet("/students/{studentId}/requirements/term/{termId}", async ([FromRoute] int studentId, [FromRoute] int termId, [FromServices] ISender sender) =>
             {
                 var query = new GetStudentRequirementsQuery(studentId, termId);
                 var result = await sender.Send(query);
@@ -109,7 +110,7 @@ namespace ZU_DCMS.API.Endpoints.Admin
 
             // ==== COMMANDS ====
 
-            group.MapPost("/terms", async (ISender sender, CreateTermCommand command) =>
+            group.MapPost("/terms", async ([FromServices] ISender sender, [FromBody] CreateTermCommand command) =>
             {
                 var result = await sender.Send(command);
                 return result.IsSuccess
@@ -121,7 +122,7 @@ namespace ZU_DCMS.API.Endpoints.Admin
             .Produces<ApiResponse<TermDto>>(StatusCodes.Status200OK)
             .Produces<ApiResponse<TermDto>>(StatusCodes.Status400BadRequest);
 
-            group.MapPut("/terms", async (ISender sender, UpdateTermCommand command) =>
+            group.MapPut("/terms", async ([FromServices] ISender sender, [FromBody] UpdateTermCommand command) =>
             {
                 var result = await sender.Send(command);
                 return result.IsSuccess
@@ -133,7 +134,7 @@ namespace ZU_DCMS.API.Endpoints.Admin
             .Produces<ApiResponse<TermDto>>(StatusCodes.Status200OK)
             .Produces<ApiResponse<TermDto>>(StatusCodes.Status400BadRequest);
 
-            group.MapPut("/terms/set-active", async (ISender sender, SetActiveTermCommand command) =>
+            group.MapPut("/terms/set-active", async ([FromServices] ISender sender, [FromBody] SetActiveTermCommand command) =>
             {
                 var result = await sender.Send(command);
                 return result.IsSuccess
@@ -145,7 +146,7 @@ namespace ZU_DCMS.API.Endpoints.Admin
             .Produces<ApiResponse<string>>(StatusCodes.Status200OK)
             .Produces<ApiResponse<string>>(StatusCodes.Status400BadRequest);
 
-            group.MapPost("/users", async (ISender sender, CreateUserCommand command) =>
+            group.MapPost("/users", async ([FromServices] ISender sender, [FromBody] CreateUserCommand command) =>
             {
                 var result = await sender.Send(command);
                 return result.IsSuccess
@@ -157,7 +158,7 @@ namespace ZU_DCMS.API.Endpoints.Admin
             .Produces<ApiResponse<StaffUsersDto>>(StatusCodes.Status200OK)
             .Produces<ApiResponse<StaffUsersDto>>(StatusCodes.Status400BadRequest);
 
-            group.MapPut("/student-requirements", async (ISender sender, SetStudentRequirementsCommand command) =>
+            group.MapPut("/student-requirements", async ([FromServices] ISender sender, [FromBody] SetStudentRequirementsCommand command) =>
             {
                 var result = await sender.Send(command);
                 return result.IsSuccess
@@ -169,7 +170,7 @@ namespace ZU_DCMS.API.Endpoints.Admin
             .Produces<ApiResponse<string>>(StatusCodes.Status200OK)
             .Produces<ApiResponse<string>>(StatusCodes.Status400BadRequest);
 
-            group.MapPut("/configs", async (ISender sender, UpdateConfigCommand command) =>
+            group.MapPut("/configs", async ([FromServices] ISender sender, [FromBody] UpdateConfigCommand command) =>
             {
                 var result = await sender.Send(command);
                 return result.IsSuccess

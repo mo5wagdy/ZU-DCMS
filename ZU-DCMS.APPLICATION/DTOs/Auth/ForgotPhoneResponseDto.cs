@@ -1,7 +1,7 @@
 ﻿
 namespace ZU_DCMS.APPLICATION.DTOs.Auth
 {
-    public class ForgotPhoneDto
+    public class ForgotPhoneResponseDto
     {
         public string MaskedPhoneNumber { get; set; } = string.Empty;
     }

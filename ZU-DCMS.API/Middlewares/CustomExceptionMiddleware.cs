@@ -3,6 +3,7 @@ using System.Text.Json;
 using ZU_DCMS.API.Common;
 using ZU_DCMS.APPLICATION.Contracts.Logger;
 using ZU_DCMS.APPLICATION.Exceptions;
+using ZU_DCMS.INFRASTRUCTURE.Persistence.ContractImplementation;
 
 namespace ZU_DCMS.API.Middlewares
 {
@@ -13,12 +14,10 @@ namespace ZU_DCMS.API.Middlewares
     public class CustomExceptionMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly IAppLogger<CustomExceptionMiddleware> _logger;
 
-        public CustomExceptionMiddleware(RequestDelegate next, IAppLogger<CustomExceptionMiddleware> logger)
+        public CustomExceptionMiddleware(RequestDelegate next)
         {
             _next = next;
-            _logger = logger;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -29,10 +28,7 @@ namespace ZU_DCMS.API.Middlewares
                 await _next(context);
             }
             catch (Exception ex)
-            {
-                // Log the exception details using application logger
-                _logger.LogError(ex.Message, ex);
-                
+            {   
                 // Handle the exception and format the response to the user
                 await HandleExceptionAsync(context, ex);
             }
@@ -60,6 +56,10 @@ namespace ZU_DCMS.API.Middlewares
                 case UnauthorizedAccessException unauthorizedAccessException:
                     statusCode = HttpStatusCode.Unauthorized;
                     response = ApiResponse<object>.Failure(unauthorizedAccessException.Message, "Unauthorized Access");
+                    break;
+                case ForbiddenException forbiddenException:
+                    statusCode = HttpStatusCode.Forbidden;
+                    response = ApiResponse<object>.Failure(forbiddenException.Message, "Forbidden Access");
                     break;
             }
 

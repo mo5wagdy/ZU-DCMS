@@ -11,7 +11,7 @@ namespace ZU_DCMS.API
     {
         public static IServiceCollection AddApiServices(this IServiceCollection services, IConfiguration configuration)
         {
-            // 1. Configure Authentication & JWT Settings
+            // __ Configure Authentication & JWT Settings __ //
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -34,7 +34,23 @@ namespace ZU_DCMS.API
                 };
             });
 
-            // 2. Configure API Versioning (Defaults to V1)
+            // __ Authorizing Policies __ //
+            services.AddAuthorization(o =>
+            {
+                o.AddPolicy("PatientPolicy", policy => policy.RequireClaim("UserType", "Patient").RequireRole("Patient"));
+                o.AddPolicy("AdminPolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("Admin"));
+                o.AddPolicy("StudentPolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("Student"));
+                o.AddPolicy("StaffReviewPolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("TeachingAssistant"));
+                o.AddPolicy("ClinicalCorePolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("InternDoctor"));
+                o.AddPolicy("PublicViewPolicy", policy => policy.RequireClaim("UserType", "Staff"));
+                o.AddPolicy("PublicViewPolicy", policy => policy.RequireClaim("UserType", "Patient"));
+                o.AddPolicy("StaffViewPolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("InternDoctor"));
+                o.AddPolicy("StaffViewPolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("Dean"));
+                o.AddPolicy("StaffViewPolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("ViceDean"));
+                o.AddPolicy("StaffViewPolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("Professor"));
+            });
+
+            // __ Configure API Versioning (Defaults to V1) __ //
             services.AddApiVersioning(options =>
             {
                 options.DefaultApiVersion = new ApiVersion(1, 0); // V1
@@ -43,7 +59,7 @@ namespace ZU_DCMS.API
                 options.ApiVersionReader = new UrlSegmentApiVersionReader();
             });
 
-            // 3. Configure Swagger with JWT Support
+            // __ Configure Swagger with JWT Support __ //
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(c =>
             {
@@ -76,7 +92,7 @@ namespace ZU_DCMS.API
                 //});
             });
 
-            // 4. Configure CORS Policies
+            // __ Configure CORS Policies __ //
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowAllOrigins", policy =>
@@ -87,7 +103,7 @@ namespace ZU_DCMS.API
                 });
             });
 
-            // 5. Configure Rate Limiting (Basic fixed window limiter)
+            // __ Configure Rate Limiting (Basic fixed window limiter) __ //
             services.AddRateLimiter(options =>
             {
                 options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>

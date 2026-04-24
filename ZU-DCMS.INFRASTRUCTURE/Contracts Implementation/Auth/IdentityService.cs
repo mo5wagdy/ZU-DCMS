@@ -6,6 +6,7 @@ using ZU_DCMS.APPLICATION.DTOs.Auth;
 using ZU_DCMS.APPLICATION.Common.Pagination;
 using ZU_DCMS.APPLICATION.Contracts.Auth;
 using ZU_DCMS.Domain.Enums;
+using System.Security.Claims;
 
 namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
 {
@@ -98,6 +99,8 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
             };
 
             var result = await _userManager.CreateAsync(user, password);
+
+            await _userManager.AddClaimAsync(user, new Claim("UserType", type.ToString()));
 
             return result.Succeeded ? (true, user.Id, string.Empty) : (false, string.Empty, result.Errors.First().Description);
         }

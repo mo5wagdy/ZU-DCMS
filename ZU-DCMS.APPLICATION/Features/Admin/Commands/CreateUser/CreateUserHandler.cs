@@ -6,6 +6,7 @@ using ZU_DCMS.APPLICATION.Contracts;
 using ZU_DCMS.APPLICATION.Contracts.Auth;
 using ZU_DCMS.APPLICATION.DTOs.Admin;
 using ZU_DCMS.Domain.Entities;
+using ZU_DCMS.Domain.Enums;
 using ZU_DCMS.Domain.Interfaces;
 using ZU_DCMS.Domain.UserRoles;
 
@@ -51,11 +52,18 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
                 return Result.Failure<StaffUsersDto>("اسم المستخدم موجود بالفعل");
             }
 
+            // __ Chech phone uniqueness __ //
             var phone = _identity.FindByPhoneAsync(dto.PhoneNumber);
             
-            if(phone != null)
+            if (phone != null)
             {
                 return Result.Failure<StaffUsersDto>("رقم الهاتف موجود بالفعل");
+            }
+
+            // __ Patients not allowed __ //
+            if (dto.type != UserType.Staff)
+            {
+                return Result.Failure<StaffUsersDto>("لا يمكن إضافة عيان إلى الطاقم الإداري");
             }
 
             // __ Check Roles must not be patient __ //

@@ -71,7 +71,7 @@ namespace ZU_DCMS.API.Endpoints.Cases
 
             // ==== STAFF / INSTRUCTOR ACTIONS ====
 
-            // 4. Submit an instructor grade/decision on a student's case
+            // 4. Submit an Teaching assistant grade/decision on a student's case
             group.MapPost("/review", async ([FromServices] ISender sender, [FromBody] ReviewCaseCommand command) =>
             {
                 var result = await sender.Send(command);

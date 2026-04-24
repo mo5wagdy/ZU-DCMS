@@ -16,26 +16,12 @@ namespace ZU_DCMS.APPLICATION.Validators.Case
                 .GreaterThan(0)
                 .WithMessage("الفصل الدراسي مطلوب");
 
-            RuleFor(x => x.Dto.CaseId)
+            RuleFor(x => x.Dto.CaseAssignmentId)
                    .GreaterThan(0)
                    .WithMessage("الحالة مطلوبة");
 
-            RuleFor(x => x.Dto.ClinicId)
-                   .GreaterThan(0)
-                   .WithMessage("العيادة مطلوبة");
-
-            RuleFor(x => x.Dto.SessionDate)
-                   .NotEmpty().WithMessage("تاريخ الجلسة مطلوب")
-                   .LessThanOrEqualTo(DateTime.UtcNow)
-                   .WithMessage("التاريخ لازم يكون اليوم أو في الماضي");
-
-            RuleFor(x => x.Dto.ProcedureDone)
+            RuleFor(x => x.Dto.ProcedureIds)
                    .NotEmpty().WithMessage("الإجراء اللي تم مطلوب");
-
-            RuleFor(x => x.Dto.NextVisitPlan)
-                   .MaximumLength(500)
-                   .WithMessage("الخطة القادمة لازم تكون أقل من 500 حرف")
-                   .When(x => !string.IsNullOrEmpty(x.Dto.NextVisitPlan));
         }
     }
 }

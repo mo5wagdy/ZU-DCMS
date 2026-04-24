@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace ZU_DCMS.APPLICATION.DTOs.Case
 {
     // __ DTO for adding a new Case Session __ //

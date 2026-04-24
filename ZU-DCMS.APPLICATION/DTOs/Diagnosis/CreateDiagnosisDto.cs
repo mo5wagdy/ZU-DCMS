@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace ZU_DCMS.APPLICATION.DTOs.Diagnosis
 {
     // __ Dto for creating a new diagnosis __ //

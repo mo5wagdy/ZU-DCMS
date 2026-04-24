@@ -16,20 +16,11 @@ namespace ZU_DCMS.APPLICATION.Validators.Diagnosis
                    .IsInEnum()
                    .WithMessage("نوع التشخيص غير صحيح");
 
-            RuleFor(x => x.Dto.InitialDiagnosis)
+            RuleFor(x => x.Dto.Complaint)
                    .NotEmpty()
-                   .WithMessage("التشخيص المبدئي مطلوب")
+                   .WithMessage("التشخيص مطلوب")
                    .MaximumLength(1000)
-                   .WithMessage("التشخيص المبدئي لازم يكون أقل من 1000 حرف");
-
-            RuleFor(x => x.Dto.FinalDiagnosis)
-                   .MaximumLength(1000)
-                   .WithMessage("التشخيص النهائي لازم يكون أقل من 1000 حرف")
-                   .When(x => !string.IsNullOrEmpty(x.Dto.FinalDiagnosis));
-
-            RuleFor(x => x.Dto.SpecialtyId)
-                   .GreaterThan(0)
-                   .WithMessage("التخصص مطلوب");
+                   .WithMessage("التشخيص لازم يكون أقل من 1000 حرف");
 
             RuleFor(x => x.Dto.Notes)
                    .MaximumLength(1000)

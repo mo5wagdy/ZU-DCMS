@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using ZU_DCMS.APPLICATION.DTOs.Admin;
@@ -79,8 +79,8 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
         public async Task<(bool Success, string UserId, string Error)> CreateUserAsync
         (
             string username,
-            string? phoneNumber,
             string? email,
+            string? phoneNumber,
             string fullName,
             UserType type,
             string password
@@ -91,6 +91,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
                 UserName = username.Trim().ToLower(),
                 Email = email?.Trim().ToLower(),
                 PhoneNumber = phoneNumber?.Trim(),
+                PhoneNumberConfirmed = true,
                 FullName = fullName.Trim(),
                 UserType = type,
                 EmailConfirmed = email != null,

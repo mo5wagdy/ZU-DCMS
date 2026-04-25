@@ -66,29 +66,20 @@ namespace ZU_DCMS.API
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "ZU-DCMS API", Version = "v1" });
 
                 // Define the security scheme for Swagger UI
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                c.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
                 {
-                    Description = "JWT Authorization. Example: 'Bearer {token}'",
+                    Description = "JWT Authorization. Example: 'bearer {token}'",
                     Name = "Authorization",
                     In = ParameterLocation.Header,
                     Type = SecuritySchemeType.Http,
-                    Scheme = "Bearer",
+                    Scheme = "bearer",
                     BearerFormat = "JWT"
                 });
 
                 // Apply the security scheme globally to all endpoints
-                //c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                //c.AddSecurityRequirement(document => new
                 //{
-                //    {
-                //        new OpenApiSecurityScheme
-                //        {
-                //            Name = "Authorization",
-                //            In = ParameterLocation.Header,
-                //            Type = SecuritySchemeType.Http,
-                //            Scheme = "Bearer"
-                //        },
-                //        new List<string>()
-                //    }
+                //    [new OpenApiSecuritySchemeReference("Bearer", document)] = []
                 //});
             });
 

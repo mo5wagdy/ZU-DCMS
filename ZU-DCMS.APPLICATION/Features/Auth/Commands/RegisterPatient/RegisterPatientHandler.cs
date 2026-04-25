@@ -89,12 +89,12 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient
                 // __ Create Identity user — password is the identity number __ //
                 var (success, userId, error) = await _identity.CreateUserAsync
                 (
-                    dto.Username,
-                    dto.Email,
-                    dto.PhoneNumber,
-                    dto.FullName,
-                    dto.type,
-                    dto.IdentityNumber
+                   username: dto.Username,
+                    phoneNumber: dto.PhoneNumber,
+                    email: dto.Email,
+                    fullName: dto.FullName,
+                    type : dto.type,
+                    password : dto.IdentityNumber
                 );
 
                 if (!success)

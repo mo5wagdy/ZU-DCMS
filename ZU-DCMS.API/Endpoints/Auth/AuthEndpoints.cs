@@ -75,7 +75,7 @@ namespace ZU_DCMS.API.Endpoints.Auth
             })
             .AllowAnonymous()
             .WithName("ForgotPhone")
-            .WithSummary("Handles forgot password requests via phone number")
+            .WithSummary("Handles forgot phone requests via identity number")
             .Produces<ApiResponse<ForgotPhoneResponseDto>>(StatusCodes.Status200OK)
             .Produces<ApiResponse<ForgotPhoneResponseDto>>(StatusCodes.Status400BadRequest);
         }

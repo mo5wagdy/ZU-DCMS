@@ -38,13 +38,21 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.ForgotPhone
             // __ Fetching Identity User For The Patient __ //
             var user = await _identity.FindByIdAsync(patient.ApplicationUserId);
 
-            if (user is null || string.IsNullOrWhiteSpace(user.PhoneNumber))
+            if (user is null)
+            {
+                return Result.Failure<ForgotPhoneResponseDto>("لا يوجد شخص مسجل بالرقم القومي هذا");
+            }
+
+            // __ Checking phone number __ //
+            var phoneNumber = patient.PhoneNumber;
+
+            if (phoneNumber is null)
             {
                 return Result.Failure<ForgotPhoneResponseDto>("لا يوجد رقم مسجل");
             }
 
             // __ Masking Phone Number __ //
-            var masked = MaskPhoneNumber(user.PhoneNumber);
+            var masked = MaskPhoneNumber(phoneNumber);
 
             // __ Return Masked Phone Number
             return Result.Success<ForgotPhoneResponseDto>

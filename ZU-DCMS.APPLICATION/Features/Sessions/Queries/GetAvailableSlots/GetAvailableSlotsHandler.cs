@@ -73,12 +73,12 @@ namespace ZU_DCMS.APPLICATION.Features.Sessions.Queries.GetAvailableSlots
                     );
                 }
 
-                // __ Check each session for availability based on booking type __ //
+                // __ Check each session for availability based on booking Type __ //
                 foreach (var session in sessions.OrderBy(s => s.StartTime))
                 {
                     var isAvailable = bookingType == BookingType.New ? !session.IsNewFull : !session.IsFollowUpFull;
 
-                    // __ If this session is not available for the booking type, skip it __ //
+                    // __ If this session is not available for the booking Type, skip it __ //
                     if (!isAvailable) continue;
 
                     // __ Add available slot info to the list __ //

@@ -1,4 +1,5 @@
 ﻿
+using System.ComponentModel.DataAnnotations.Schema;
 using ZU_DCMS.Domain.Common;
 
 namespace ZU_DCMS.Domain.Entities
@@ -41,6 +42,8 @@ namespace ZU_DCMS.Domain.Entities
         /// CRITICAL: This calculation is used to filter eligible students during case assignment.
         /// Students with unsatisfied requirements have priority for new cases.
         /// </summary>
+
+        [NotMapped]
         public bool IsSatisfied =>
             CompletedCount + TransferredCount >= RequiredCount;
 
@@ -55,6 +58,8 @@ namespace ZU_DCMS.Domain.Entities
         /// 
         /// Used by GetAvailableStudentsHandler to sort students by need.
         /// </summary>
+
+        [NotMapped]
         public int Priority =>
             CompletedCount + TransferredCount switch
             {

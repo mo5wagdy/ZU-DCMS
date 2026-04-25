@@ -29,8 +29,8 @@ namespace ZU_DCMS.API.Endpoints.Admin
         {
             var group = app.MapGroup("api/v1/admin")
                            .WithApiVersionSet(versionSet)
-                           .WithTags("Administration")
-                           .RequireAuthorization("AdminPolicy"); // Restrict all these to the Admin policy
+                           .WithTags("Administration");
+                           //.RequireAuthorization("AdminPolicy"); // Restrict all these to the Admin policy
 
             // ==== QUERIES ====
 

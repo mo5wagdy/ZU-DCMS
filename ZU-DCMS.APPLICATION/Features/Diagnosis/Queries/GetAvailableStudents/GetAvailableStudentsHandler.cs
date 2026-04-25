@@ -215,7 +215,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetAvailableStudents
                     // _____________ STEP 7: Get AI-Prioritized Student Order _____________ //
                     /// <summary>
                     /// Call the AI agent to determine optimal student priority based on:
-                    /// - Current case count and type
+                    /// - Current case count and Type
                     /// - Historical performance and completion rate
                     /// - Specialty alignment
                     /// - Other factors determined by the AI algorithm

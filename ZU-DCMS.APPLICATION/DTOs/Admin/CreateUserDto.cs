@@ -12,7 +12,7 @@ namespace ZU_DCMS.APPLICATION.DTOs.Admin
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
-        public UserType type { get; set; } = UserType.Staff;
+        public UserType Type { get; set; } = UserType.Staff;
         public int? AcademicYear { get; set; }
     }
 }

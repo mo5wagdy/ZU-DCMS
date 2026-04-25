@@ -9,7 +9,7 @@ namespace ZU_DCMS.APPLICATION.Validators.Admin
     {
         public CreateUserValidator()
         {
-            RuleFor(x => x.Dto.Username)
+            RuleFor(x => x.dto.Username)
                    .NotEmpty()
                    .WithMessage("اسم المستخدم مطلوب")
                    .MinimumLength(3)
@@ -19,33 +19,33 @@ namespace ZU_DCMS.APPLICATION.Validators.Admin
                    .Matches(@"^[a-zA-Z0-9._-]+$")
                    .WithMessage("يقبل حروف وأرقام و . _ - فقط");
 
-            RuleFor(x => x.Dto.FullName)
+            RuleFor(x => x.dto.FullName)
                    .NotEmpty()
                    .WithMessage("الاسم مطلوب")
                    .MaximumLength(100)
                    .WithMessage("لازم أقل من 100 حرف");
 
-            RuleFor(x => x.Dto.Email)
+            RuleFor(x => x.dto.Email)
                    .NotEmpty()
                    .WithMessage("الإيميل مطلوب")
                    .EmailAddress()
                    .WithMessage("الإيميل غير صحيح");
 
-            RuleFor(x => x.Dto.Password)
+            RuleFor(x => x.dto.Password)
                    .NotEmpty()
                    .WithMessage("كلمة المرور مطلوبه")
                    .Length(8);
 
-            RuleFor(x => x.Dto.Role)
+            RuleFor(x => x.dto.Role)
                    .NotEmpty()
                    .WithMessage("الدور مطلوب")
                    .Must(BeValidStaffRole)
                    .WithMessage("الدور غير صحيح");
 
-            RuleFor(x => x.Dto.AcademicYear)
+            RuleFor(x => x.dto.AcademicYear)
                    .InclusiveBetween(1, 5)
                    .WithMessage("السنة الدراسية لازم تكون بين 1 و 5")
-                   .When(x => x.Dto.Role == UserRoles.Student);
+                   .When(x => x.dto.Role == UserRoles.Student);
 
         }
 

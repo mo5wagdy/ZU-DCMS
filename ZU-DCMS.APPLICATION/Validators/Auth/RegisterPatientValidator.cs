@@ -68,7 +68,7 @@ namespace ZU_DCMS.APPLICATION.Validators.Auth
         // _____________ Custom Validation Methods _____________ //
 
 
-        // __ Validates the identity number based on the selected identity type __ //
+        // __ Validates the identity number based on the selected identity Type __ //
         private bool BeValidIdentityNumber(string number, IdentityType type)
         {
             return type switch

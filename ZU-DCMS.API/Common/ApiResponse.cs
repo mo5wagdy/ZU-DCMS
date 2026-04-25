@@ -4,7 +4,7 @@ namespace ZU_DCMS.API.Common
     /// A standardized generic response wrapper for all API endpoints.
     /// Ensures every response shape is consistent across the application.
     /// </summary>
-    /// <typeparam name="T">The type of the data returned in the response.</typeparam>
+    /// <typeparam name="T">The Type of the data returned in the response.</typeparam>
     public class ApiResponse<T>
     {
         // Indicates whether the request was processed successfully.

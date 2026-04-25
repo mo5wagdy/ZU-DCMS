@@ -1,21 +1,24 @@
 using AutoMapper;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
-using ZU_DCMS.APPLICATION.DTOs.Admin;
-using ZU_DCMS.APPLICATION.DTOs.Auth;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using ZU_DCMS.APPLICATION.Common.Pagination;
 using ZU_DCMS.APPLICATION.Contracts.Auth;
+using ZU_DCMS.APPLICATION.DTOs.Admin;
+using ZU_DCMS.APPLICATION.DTOs.Auth;
 using ZU_DCMS.Domain.Enums;
-using System.Security.Claims;
+using ZU_DCMS.Domain.UserRoles;
+using ZU_DCMS.INFRASTRUCTURE.Persistence;
 
 namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
 {
     public class IdentityService : IIdentityService
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly AppDbContext _context;
         private readonly IMapper _mapper;
 
-        public IdentityService(UserManager<ApplicationUser> userManager, IMapper mapper) {_userManager = userManager; _mapper = mapper;} 
+        public IdentityService(UserManager<ApplicationUser> userManager, AppDbContext context, IMapper mapper) {_userManager = userManager; _context = context; _mapper = mapper;} 
 
         // ________________________ Get ________________________ // 
         public async Task<PagedResult<StaffUsersDto>> GetAllUsersAsync(PagedRequest request, string? role = null)
@@ -24,9 +27,17 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
 
             if (!string.IsNullOrWhiteSpace(role))
             {
-                var usersInRole = await _userManager.GetUsersInRoleAsync(role);
+                //var usersInRole = await _userManager.GetUsersInRoleAsync(role);
 
-                users = usersInRole.AsQueryable();
+                //users = usersInRole.AsQueryable();
+
+                users = users.Where
+                    (
+                        u => _context.UserRoles.Any(ur => ur.UserId == u.Id &&
+                        _context.Roles.Any(r => r.Id == ur.RoleId &&
+                        r.Name == role && 
+                        r.Name != "Patient"))
+                    );
             }
 
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
@@ -64,11 +75,28 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
 
             var totalCount = await users.CountAsync();
 
-            var items = users
+            var items = await users
                         .Skip((request.Page - 1) * request.PageSize)
                         .Take(request.PageSize).ToListAsync();
 
-            var usersDtos = _mapper.Map<List<StaffUsersDto>>(items);
+            var usersDtos = new List<StaffUsersDto>(); 
+            
+            foreach (var i in items)
+            {
+                var userRoles = await _userManager.GetRolesAsync(i);
+
+                usersDtos.Add(new StaffUsersDto
+                {
+                    Id = i.Id,
+                    FullName = i.FullName,
+                    Username = i.UserName ?? string.Empty,
+                    Email = i.Email,
+                    IsActive = i.IsActive,
+                    CreatedAt = i.CreatedAt,
+                    Role = userRoles.FirstOrDefault() ?? string.Empty
+                });
+            }
+
 
             var result = PagedResult<StaffUsersDto>.Create(usersDtos, totalCount, request);
 
@@ -110,7 +138,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
         public async Task<bool> AssignRoleAsync(string userId, string role)
         {
             var user = await _userManager.FindByIdAsync(userId);
-            if (user == null) return false;
+            if (user is null) return false;
 
             var result = await _userManager.AddToRoleAsync(user, role);
             return result.Succeeded;
@@ -119,7 +147,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
         public async Task<IList<string>> GetRolesAsync(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
-            if (user == null) return new List<string>();
+            if (user is null) return new List<string>();
 
             return await _userManager.GetRolesAsync(user);
         }
@@ -128,25 +156,28 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
         public async Task<ApplicationUserDto?> FindByUsernameAsync(string username)
         {
             var user = await _userManager.FindByNameAsync(username.Trim().ToLower());
-            return user == null ? null : MapToDto(user);
+            return user is null ? null : MapToDto(user);
         }
 
         public async Task<ApplicationUserDto?> FindByPhoneAsync(string phone)
         {
-            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == phone);
-            return user == null ? null : MapToDto(user); 
+            if (string.IsNullOrWhiteSpace(phone))
+                return null;
+
+            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == phone && u.IsActive);
+            return user is null ? null : MapToDto(user); 
         }
 
         public async Task<ApplicationUserDto?> FindByEmailAsync(string email)
         {
             var user = await _userManager.FindByEmailAsync(email.Trim().ToLower());
-            return user == null ? null : MapToDto(user);
+            return user is null ? null : MapToDto(user);
         }
 
         public async Task<ApplicationUserDto?> FindByIdAsync(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
-            return user == null ? null : MapToDto(user);
+            return user is null ? null : MapToDto(user);
         }
 
         // _________________________ Validation _________________________ //
@@ -154,7 +185,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
         public async Task<bool> CheckPasswordAsync(string userId, string password)
         {
             var user = await _userManager.FindByIdAsync(userId);
-            if (user == null) return false;
+            if (user is null) return false;
 
             return await _userManager.CheckPasswordAsync(user, password);
         }
@@ -169,7 +200,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
         public async Task<bool> UpdateUsernameAsync(string userId, string newUsername)
         {
             var user = await _userManager.FindByIdAsync(userId);
-            if (user == null) return false;
+            if (user is null) return false;
 
             user.UserName = newUsername.Trim().ToLower();
             var result = await _userManager.UpdateAsync(user);
@@ -187,6 +218,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
             Username = user.UserName ?? string.Empty,
             Email = user.Email,
             FullName = user.FullName,
+            PhoneNumber = user.PhoneNumber ?? string.Empty,
             IsActive = user.IsActive,
             CreatedAt = user.CreatedAt
         };

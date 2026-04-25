@@ -12,7 +12,7 @@ using ZU_DCMS.INFRASTRUCTURE.Persistence;
 namespace ZU_DCMS.INFRASTRUCTURE.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260424120741_Updated password rules with User type detecting")]
+    [Migration("20260424120741_Updated password rules with User Type detecting")]
     partial class UpdatedpasswordruleswithUsertypedetecting
     {
         /// <inheritdoc />

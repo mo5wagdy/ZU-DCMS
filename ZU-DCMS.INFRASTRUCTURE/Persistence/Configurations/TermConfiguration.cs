@@ -1,8 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using ZU_DCMS.Domain.Entities;
 
 namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
@@ -12,6 +9,9 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
         public void Configure(EntityTypeBuilder<Term> builder)
         {
             builder.HasKey(t => t.Id);
+
+            builder.HasIndex(t => new { t.Name, t.StartDate })
+                   .IsUnique();
 
             builder.Property(t => t.Name)
                    .IsRequired()

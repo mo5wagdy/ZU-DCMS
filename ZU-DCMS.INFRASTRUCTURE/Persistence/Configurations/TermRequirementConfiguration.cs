@@ -26,11 +26,6 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                    .HasForeignKey(r => r.StudentId)
                    .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasOne(r => r.Term)
-                   .WithMany(t => t.TermRequirements)
-                   .HasForeignKey(r => r.TermId)
-                   .OnDelete(DeleteBehavior.Restrict);
-
             builder.HasOne(r => r.Clinic)
                    .WithMany(c => c.TermRequirements)
                    .HasForeignKey(r => r.ClinicId)

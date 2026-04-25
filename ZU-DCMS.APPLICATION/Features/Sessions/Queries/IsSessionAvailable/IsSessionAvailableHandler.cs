@@ -18,7 +18,7 @@ namespace ZU_DCMS.APPLICATION.Features.Sessions.Queries.IsSessionAvailable
             _logger = logger;
         }
 
-        // __ This method checks if a specific session is available for booking based on the booking type __ //
+        // __ This method checks if a specific session is available for booking based on the booking Type __ //
         public async Task<Result<bool>> Handle(IsSessionAvailableQuery query, CancellationToken cancellationToken)
         {
             var sessionId = query.SessionId;
@@ -44,7 +44,7 @@ namespace ZU_DCMS.APPLICATION.Features.Sessions.Queries.IsSessionAvailable
                 return Result.Failure<bool>("السكشن غير نشط");
             }
 
-            // __ Determine availability based on booking type __ //
+            // __ Determine availability based on booking Type __ //
             var isAvailable = bookingType == BookingType.New ? !session.IsNewFull : !session.IsFollowUpFull;
 
             _logger.LogInfo("Session availability for SessionId: {SessionId}, BookingType: {BookingType} is {IsAvailable}", sessionId, bookingType, isAvailable);

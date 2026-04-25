@@ -38,7 +38,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
 
         public async Task<Result<StaffUsersDto>> Handle(CreateUserCommand command, CancellationToken cancellationToken)
         {
-            var dto = command.Dto;
+            var dto = command.dto;
 
             // __ Check user email uniqueness __ //
             if (await _identity.EmailExistsAsync(dto.Email))
@@ -53,15 +53,18 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
             }
 
             // __ Chech phone uniqueness __ //
-            var phone = _identity.FindByPhoneAsync(dto.PhoneNumber);
-            
-            if (phone != null)
+            if (!string.IsNullOrWhiteSpace(dto.PhoneNumber)) 
             {
-                return Result.Failure<StaffUsersDto>("رقم الهاتف موجود بالفعل");
+                var phone = _identity.FindByPhoneAsync(dto.PhoneNumber);
+
+                if (phone != null)
+                {
+                    return Result.Failure<StaffUsersDto>("رقم الهاتف موجود بالفعل");
+                }
             }
 
             // __ Patients not allowed __ //
-            if (dto.type != UserType.Staff)
+            if (dto.Type != UserType.Staff)
             {
                 return Result.Failure<StaffUsersDto>("لا يمكن إضافة عيان إلى الطاقم الإداري");
             }
@@ -85,7 +88,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
                         dto.Email,
                         dto.PhoneNumber,
                         dto.FullName,
-                        dto.type,
+                        dto.Type,
                         dto.Password
                     );
 
@@ -96,6 +99,8 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
 
                     return Result.Failure<StaffUsersDto>(error);
                 }
+
+                await _uow.SaveChangesAsync(cancellationToken: cancellationToken);
 
                 // __ Adding to the selected role __ //
                 await _identity.AssignRoleAsync(userId, dto.Role);

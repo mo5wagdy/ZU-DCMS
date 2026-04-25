@@ -47,7 +47,7 @@
 //                return Result.Failure("الحجز غير موجود");
 //            }
 
-//            // __ Get available slots for the booking type __ //
+//            // __ Get available slots for the booking Type __ //
 //           // var slots = await _sessionService.GetAvailableSlotsAsync(booking.BookingType);
 
 //            if (slots.IsFailure || slots.Value.Count == 0)

@@ -89,7 +89,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.DiagnosePatient
                 return Result.Failure<DiagnosisRecordDto>("العيادة غير موجودة أو غير نشطة");
             }
 
-            // __ Validate diagnosis type existence and __ //
+            // __ Validate diagnosis Type existence and __ //
             var diagnosisType = await _uow.Repository<DiagnosisType>()
                 .GetFirstOrDefaultAsync
                 (
@@ -98,10 +98,10 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.DiagnosePatient
                          d.IsActive
                 );
 
-            // __ Log and return failure if diagnosis type not found or inactive __ //
+            // __ Log and return failure if diagnosis Type not found or inactive __ //
             if (diagnosisType is null)
             {
-                _logger.LogWarning("Diagnosis type with Id {DiagnosisTypeId} not found or inactive", dto.DiagnosisTypeId);
+                _logger.LogWarning("Diagnosis Type with Id {DiagnosisTypeId} not found or inactive", dto.DiagnosisTypeId);
                 
                 return Result.Failure<DiagnosisRecordDto>("نوع التشخيص غير موجود");
             }

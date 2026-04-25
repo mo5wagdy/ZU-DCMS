@@ -19,9 +19,9 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.InterfacesImplementations
         }
 
         /* 
-         * Get the repository for the specified entity type.
+         * Get the repository for the specified entity Type.
          * If the repository doesn't exist in the dictionary, create a new instance and add it to the dictionary.
-         * This allows us to reuse the same repository instance for the same entity type throughout the unit of work.
+         * This allows us to reuse the same repository instance for the same entity Type throughout the unit of work.
          */
         public IRepository<T> Repository<T>() where T : BaseEntity
         {
@@ -43,7 +43,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.InterfacesImplementations
         public async Task<int> SaveChangesAsync(string? userId = null, CancellationToken cancellationToken = default)
         {
             // __ Auto-fill Audit fields before saving __ //
-            foreach (var entry in _context.ChangeTracker.Entries<BaseEntity>()) // => Iterate through all tracked entities of type BaseEntity
+            foreach (var entry in _context.ChangeTracker.Entries<BaseEntity>()) // => Iterate through all tracked entities of Type BaseEntity
             {
                 switch (entry.State)
                 {

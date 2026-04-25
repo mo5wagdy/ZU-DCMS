@@ -73,7 +73,7 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CancelBooking
 
                 // __ We will use a raw SQL update to decrement the count atomically and ensure we do not go below zero __ //
 
-                // __ Determine which column to update based on booking type __ //
+                // __ Determine which column to update based on booking Type __ //
                 var column = booking.BookingType == BookingType.New ? nameof(Session.CurrentNewCount) : nameof(Session.CurrentFollowUpCount);
 
                 // __ Construct the SQL query to decrement the count if it is greater than zero and the session is active and not deleted __ //

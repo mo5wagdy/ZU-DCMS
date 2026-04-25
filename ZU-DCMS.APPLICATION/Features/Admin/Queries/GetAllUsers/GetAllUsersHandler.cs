@@ -34,7 +34,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Queries.GetAllUsers
                 async _ => // => If Not Found In Cache Fetch From DB
                 {
                     // __ Build base query from Users table __ //
-                    var appUsers = _identity.GetAllUsersAsync(query.Request, query.Role);
+                    var appUsers = await _identity.GetAllUsersAsync(query.Request, query.Role);
 
                     if (appUsers is null)
                     {
@@ -42,7 +42,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Queries.GetAllUsers
                     }
 
                     // __ Map to StaffUsersDto __ //
-                    return Result.Success<PagedResult<StaffUsersDto>>(appUsers.Result);
+                    return Result.Success(appUsers);
                 },
                 CacheDuration.Medium,
                 cancellationToken

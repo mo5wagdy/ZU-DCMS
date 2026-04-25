@@ -32,7 +32,7 @@ namespace ZU_DCMS.API.Middlewares
 
                 //context.Response.StatusCode = 500;
 
-                //await context.Response.WriteAsync(JsonSerializer.Serialize(new { type = ex.GetType().Name, message = ex.Message, stack = ex.StackTrace }));
+                //await context.Response.WriteAsync(JsonSerializer.Serialize(new { Type = ex.GetType().Name, message = ex.Message, stack = ex.StackTrace }));
 
                 //return;
             }

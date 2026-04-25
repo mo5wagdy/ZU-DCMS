@@ -1,6 +1,5 @@
 using AutoMapper;
 using MediatR;
-using Microsoft.AspNetCore.Http.HttpResults;
 using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.DTOs.Admin;
 using ZU_DCMS.Domain.Entities;

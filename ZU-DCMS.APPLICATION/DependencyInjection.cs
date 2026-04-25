@@ -1,9 +1,7 @@
 ﻿using FluentValidation;
 using MediatR;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using ZiggyCreatures.Caching.Fusion;
-using ZiggyCreatures.Caching.Fusion.Serialization.SystemTextJson;
 using ZU_DCMS.APPLICATION.Background_Jobs.Events;
 using ZU_DCMS.APPLICATION.Common.Cache;
 using ZU_DCMS.APPLICATION.Common.MediatR_Behaviors;
@@ -28,7 +26,7 @@ namespace ZU_DCMS.APPLICATION
             services.AddValidatorsFromAssembly(typeof(ValidationBehavior<,>).Assembly);
 
             // __________ AutoMapper __________ //
-            services.AddAutoMapper(cfg => { }, typeof(DependencyInjection));
+            services.AddAutoMapper(cfg => {}, AppDomain.CurrentDomain.GetAssemblies());
 
             // __________ Event Handlers __________ //
             services.AddScoped<IEventPublisher, HangfireEventPublisher>();
@@ -50,6 +48,8 @@ namespace ZU_DCMS.APPLICATION
 
 
             // __________ Caching Registerations __________ // 
+            services.AddMemoryCache();
+
             services.AddFusionCacheStackExchangeRedisBackplane(o =>
             {
                 o.Configuration = "localhost:6379";
@@ -63,8 +63,8 @@ namespace ZU_DCMS.APPLICATION
                         Duration = CacheDuration.Short,
                         IsFailSafeEnabled = true,
                         FailSafeMaxDuration = CacheDuration.Medium
-                    })
-                    .WithDistributedCache(sp => sp.GetRequiredService<IDistributedCache>(), new FusionCacheSystemTextJsonSerializer());
+                    });
+                    //.WithDistributedCache(sp => sp.GetRequiredService<IDistributedCache>(), new FusionCacheSystemTextJsonSerializer());
 
             // __________ Common Services Registrations __________ //
             services.AddScoped<ITokenService, TokenService>();

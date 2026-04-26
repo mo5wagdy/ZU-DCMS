@@ -1,3 +1,4 @@
+using MediatR;
 using Microsoft.Extensions.Logging;
 using ZiggyCreatures.Caching.Fusion;
 using ZU_DCMS.APPLICATION.Common;
@@ -7,7 +8,7 @@ using ZU_DCMS.Domain.Interfaces;
 
 namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.SetStudentRequirements
 {
-    public class SetStudentRequirementsHandler
+    public class SetStudentRequirementsHandler : IRequestHandler<SetStudentRequirementsCommand, Result>
     {
         private readonly IUnitOfWork _uow;
         private readonly IFusionCache _cache;
@@ -25,7 +26,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.SetStudentRequirements
             _logger = logger;
         }
 
-        public async Task<Result> Handle(SetStudentRequirementsCommand command)
+        public async Task<Result> Handle(SetStudentRequirementsCommand command, CancellationToken cancellationToken)
         {
             // __ Verify student exists __ //
             var student = await _uow.Repository<Student>().GetByIdAsync(command.StudentId);
@@ -46,6 +47,21 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.SetStudentRequirements
 
             if (clinics.Count != clinicIds.Distinct().Count())
                 return Result.Failure("بعض العيادات غير موجودة أو غير نشطة");
+
+            // __ Block Diagnosis Clinic (ID: 1) from having student requirements __ //
+            if (clinicIds.Contains(1))
+                return Result.Failure("لا يمكن إضافة متطلبات لعيادة التشخيص");
+
+            // __ Validate Student's Academic Year against each Clinic's constraints __ //
+            foreach (var reqDto in command.Requirements)
+            {
+                var clinic = clinics.FirstOrDefault(c => c.Id == reqDto.ClinicId);
+                
+                if (clinic != null && (student.AcademicYear < clinic.MinAcademicYear || student.AcademicYear > clinic.MaxAcademicYear))
+                {
+                    return Result.Failure($"العيادة '{clinic.Name}' غير متاحة لطلاب السنة {student.AcademicYear} (المطلوب: {clinic.MinAcademicYear}-{clinic.MaxAcademicYear})");
+                }
+            }
 
             await _uow.BeginTransactionAsync();
 

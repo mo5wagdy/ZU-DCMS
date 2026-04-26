@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -26,8 +26,16 @@ namespace ZU_DCMS.APPLICATION.Mapping
             // => TermRequirement → StudentRequirementDto
             CreateMap<TermRequirement, StudentRequirementDto>()
                      .ForMember(d => d.ClinicName, o => o.MapFrom(s => s.Clinic.Name))
-
-                      // => Calculate completion percentage with safe division and rounding
+                     .ForMember(d => d.RequirementTypeName, o => o.MapFrom(s =>
+                        s.Clinic.Code == "REST" ? "حشوات (Fillings)" :
+                        s.Clinic.Code == "SURG" ? "خلع (Extractions)" :
+                        s.Clinic.Code == "PERIO" ? "تنظيف (Cleanings)" :
+                        s.Clinic.Code == "ENDO" ? "حشو عصب (Root Canals)" :
+                        s.Clinic.Code == "PED" ? "أطفال (Pediatrics)" :
+                        s.Clinic.Code == "FIX" ? "تركيبات ثابتة (Fixed)" :
+                        s.Clinic.Code == "REM" ? "تركيبات متحركة (Removable)" :
+                        s.Clinic.Name))
+                     // => Calculate completion percentage with safe division and rounding
                      .ForMember(d => d.CompletionPercentage, o => o.MapFrom(s => s.RequiredCount == 0 ? 0 : Math.Round((double)(s.CompletedCount + s.TransferredCount) / s.RequiredCount * 100, 1)));
         }
     }

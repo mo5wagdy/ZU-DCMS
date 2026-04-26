@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
@@ -82,7 +82,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                     Name = "عيادات حشو العصب", 
                     Code = "ENDO", 
                     MaxDailyPatients = 50,
-                    MinAcademicYear = 2,
+                    MinAcademicYear = 4,
                     MaxAcademicYear = 4,
                     MaxCasesPerStudent = 3,
                     CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) 
@@ -104,7 +104,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                     Name = "عيادات طب الفم واللثة", 
                     Code = "PERIO", 
                     MaxDailyPatients = 50,
-                    MinAcademicYear = 2,
+                    MinAcademicYear = 3,
                     MaxAcademicYear = 4,
                     MaxCasesPerStudent = 3,
                     CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) 
@@ -115,7 +115,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                     Name = "عيادات الحشو العادي", 
                     Code = "REST", 
                     MaxDailyPatients = 50,
-                    MinAcademicYear = 1,
+                    MinAcademicYear = 3,
                     MaxAcademicYear = 4,
                     MaxCasesPerStudent = 3,  // Foundational, allows more
                     CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) 
@@ -126,7 +126,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                     Name = "عيادات الأطفال", 
                     Code = "PED", 
                     MaxDailyPatients = 50,
-                    MinAcademicYear = 1,
+                    MinAcademicYear = 4,
                     MaxAcademicYear = 4,
                     MaxCasesPerStudent = 3,  // Foundational
                     CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) 
@@ -137,7 +137,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                     Name = "التركيبات الثابتة", 
                     Code = "FIX", 
                     MaxDailyPatients = 50,
-                    MinAcademicYear = 2,
+                    MinAcademicYear = 4,
                     MaxAcademicYear = 4,
                     MaxCasesPerStudent = 3,
                     CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) 
@@ -148,7 +148,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                     Name = "التركيبات المتحركة", 
                     Code = "REM", 
                     MaxDailyPatients = 50,
-                    MinAcademicYear = 2,
+                    MinAcademicYear = 4,
                     MaxAcademicYear = 4,
                     MaxCasesPerStudent = 3,
                     CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) 

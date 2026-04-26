@@ -11,6 +11,7 @@ using ZU_DCMS.API.Endpoints.Sessions;
 using ZU_DCMS.API.Endpoints.Patients;
 using ZU_DCMS.API.Endpoints.Bookings;
 using ZU_DCMS.API.Endpoints.Cases;
+using ZU_DCMS.API.Endpoints.Lookups;
 
 namespace ZU_DCMS.API
 {
@@ -86,6 +87,7 @@ namespace ZU_DCMS.API
             app.MapPatientEndpoints(apiVersionSet);
             app.MapBookingEndpoints(apiVersionSet);
             app.MapCaseEndpoints(apiVersionSet);
+            app.MapLookupEndpoints(apiVersionSet);
 
             app.Run();
         }

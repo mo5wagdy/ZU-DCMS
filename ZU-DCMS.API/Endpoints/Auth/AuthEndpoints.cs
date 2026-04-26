@@ -7,6 +7,7 @@ using ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient;
 using ZU_DCMS.APPLICATION.Features.Auth.Commands.StaffLogin;
 using ZU_DCMS.APPLICATION.DTOs.Auth;
 using ZU_DCMS.APPLICATION.Features.Auth.Commands.ForgotPhone;
+using ZU_DCMS.APPLICATION.Features.Auth.Commands.RefreshToken;
 
 namespace ZU_DCMS.API.Endpoints.Auth
 {
@@ -78,6 +79,20 @@ namespace ZU_DCMS.API.Endpoints.Auth
             .WithSummary("Handles forgot phone requests via identity number")
             .Produces<ApiResponse<ForgotPhoneResponseDto>>(StatusCodes.Status200OK)
             .Produces<ApiResponse<ForgotPhoneResponseDto>>(StatusCodes.Status400BadRequest);
+
+            // 5. Refresh Token
+            group.MapPost("/refresh", async ([FromServices] ISender sender, [FromBody] RefreshTokenCommand command) =>
+            {
+                var result = await sender.Send(command);
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<AuthDto>.Success(result.Value, "Token refreshed."))
+                    : Results.Unauthorized(); // 401 if refresh failed
+            })
+            .AllowAnonymous()
+            .WithName("RefreshToken")
+            .WithSummary("Refreshes the access token using a valid refresh token")
+            .Produces<ApiResponse<AuthDto>>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status401Unauthorized);
         }
     }
 }

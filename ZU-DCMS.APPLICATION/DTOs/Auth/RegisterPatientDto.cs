@@ -14,7 +14,7 @@ namespace ZU_DCMS.APPLICATION.DTOs.Auth
         public string? Email { get; set; }
         public DateTime DateOfBirth { get; set; }
         public Gender Gender { get; set; }
-        public UserType type { get; set; } = UserType.Patient;
+        public UserType Type { get; set; } = UserType.Patient;
         public ChronicCondition ChronicConditions { get; set; }
         public string? OtherConditions { get; set; }
     }

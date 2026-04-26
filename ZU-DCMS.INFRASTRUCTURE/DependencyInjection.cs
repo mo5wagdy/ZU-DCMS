@@ -58,7 +58,7 @@ namespace ZU_DCMS.INFRASTRUCTURE
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
 
                 // __ User settings - require unique email addresses __ //
-                options.User.RequireUniqueEmail = true;
+                options.User.RequireUniqueEmail = false;
             })
             // __ Use our AppDbContext for Identity __ //
             .AddEntityFrameworkStores<AppDbContext>()

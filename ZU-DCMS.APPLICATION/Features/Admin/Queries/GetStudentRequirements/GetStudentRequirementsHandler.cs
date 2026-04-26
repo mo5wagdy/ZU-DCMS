@@ -43,8 +43,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Queries.GetStudentRequirements
                             r.StudentId == query.StudentId &&
                             r.TermId == query.TermId,
                             false,
-                            r => r.Clinic,
-                            r => r.CompletedCount
+                            r => r.Clinic
                         );
 
                     // __ Map to DTO __ //

@@ -1,5 +1,4 @@
 ﻿using FluentValidation;
-using ZU_DCMS.APPLICATION.DTOs.Auth;
 using ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient;
 using ZU_DCMS.APPLICATION.Validators.Shared;
 using ZU_DCMS.Domain.Enums;
@@ -30,7 +29,7 @@ namespace ZU_DCMS.APPLICATION.Validators.Auth
 
             RuleFor(x => x.Dto.Email)
                    .EmailAddress().WithMessage("الإيميل غير صحيح")
-                   .When(x => !string.IsNullOrEmpty(x.Dto.Email));
+                   .When(x => !string.IsNullOrWhiteSpace(x.Dto.Email), ApplyConditionTo.CurrentValidator);
 
             RuleFor(x => x.Dto.IdentityType)
                    .IsInEnum()

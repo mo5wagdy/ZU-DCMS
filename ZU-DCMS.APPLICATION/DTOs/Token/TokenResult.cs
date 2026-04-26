@@ -15,6 +15,7 @@ namespace ZU_DCMS.APPLICATION.DTOs.Token
     // _________________________ Token Data _________________________ //
     public class TokenData
     {
+        public string UserId { get; set; } = string.Empty;
         public string AccessToken { get; set; } = string.Empty;
         public string RefreshToken { get; set; } = string.Empty;
     }

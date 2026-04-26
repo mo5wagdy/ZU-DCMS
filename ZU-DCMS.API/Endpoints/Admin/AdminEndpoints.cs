@@ -10,6 +10,7 @@ using ZU_DCMS.APPLICATION.Features.Admin.Commands.SetStudentRequirements;
 using ZU_DCMS.APPLICATION.Features.Admin.Commands.UpdateConfig;
 using ZU_DCMS.APPLICATION.Features.Admin.Commands.UpdateTerm;
 using ZU_DCMS.APPLICATION.Features.Admin.Queries.GetAllConfigs;
+using ZU_DCMS.APPLICATION.Features.Admin.Queries.GetAllClinics;
 using ZU_DCMS.APPLICATION.Features.Admin.Queries.GetAllTerms;
 using ZU_DCMS.APPLICATION.Features.Admin.Queries.GetAllUsers;
 using ZU_DCMS.APPLICATION.Features.Admin.Queries.GetStudentRequirements;
@@ -29,8 +30,8 @@ namespace ZU_DCMS.API.Endpoints.Admin
         {
             var group = app.MapGroup("api/v1/admin")
                            .WithApiVersionSet(versionSet)
-                           .WithTags("Administration");
-                           //.RequireAuthorization("AdminPolicy"); // Restrict all these to the Admin policy
+                           .WithTags("Administration")
+                           .RequireAuthorization("AdminPolicy"); // Restrict all these to the Admin policy
 
             // ==== QUERIES ====
 
@@ -45,6 +46,18 @@ namespace ZU_DCMS.API.Endpoints.Admin
             .WithSummary("Retrieves all system configurations")
             .Produces<ApiResponse<List<SystemConfigDto>>>(StatusCodes.Status200OK)
             .Produces<ApiResponse<List<SystemConfigDto>>>(StatusCodes.Status400BadRequest);
+            
+            group.MapGet("/clinics", async ([FromServices] ISender sender) =>
+            {
+                var result = await sender.Send(new GetAllClinicsQuery());
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<List<ClinicDto>>.Success(result.Value, "Clinics retrieved."))
+                    : Results.BadRequest(ApiResponse<List<ClinicDto>>.Failure(result.Errors, "Failed to retrieve clinics."));
+            })
+            .WithName("GetAllClinics")
+            .WithSummary("Retrieves all clinics for requirement setting")
+            .Produces<ApiResponse<List<ClinicDto>>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<List<ClinicDto>>>(StatusCodes.Status400BadRequest);
 
             group.MapGet("/terms", async ([FromServices] ISender sender) =>
             {

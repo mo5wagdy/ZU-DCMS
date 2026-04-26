@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using ZU_DCMS.APPLICATION.Contracts.Auth;
 using ZU_DCMS.APPLICATION.DTOs.Token;
 using ZU_DCMS.Domain.Entities;
@@ -12,6 +12,7 @@ namespace ZU_DCMS.APPLICATION.Common.Token
         private readonly IJWTService _jwt;
         private readonly IUnitOfWork _uow;
         private readonly IIdentityService _identity;
+
         public TokenService(IJWTService jwt, IUnitOfWork uow, IIdentityService identity)
         {
             _jwt = jwt;
@@ -44,6 +45,17 @@ namespace ZU_DCMS.APPLICATION.Common.Token
             // __ Generate the JWT access token and a new refresh token, then store the refresh token in the database with an expiration date __ //
             var accessToken = _jwt.GenerateAccessToken(claims);
             var refreshToken = _jwt.GenerateRefreshToken();
+
+            var tokenEntity = new RefreshToken
+            {
+                UserId = userId,
+                Token = refreshToken,
+                ExpiresAt = DateTime.UtcNow.AddDays(7), // Default 7 days
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _uow.Repository<RefreshToken>().AddAsync(tokenEntity);
+            // Note: Caller must SaveChanges unless this is part of RefreshAsync which handles it.
 
             // __ Return the generated access token and refresh token __ //
             return TokenResult.Success(new TokenData

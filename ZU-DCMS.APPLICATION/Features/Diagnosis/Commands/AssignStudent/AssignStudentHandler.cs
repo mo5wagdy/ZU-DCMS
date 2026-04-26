@@ -115,6 +115,14 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
                 return Result.Failure<CaseAssignmentDto>("العيادة غير صالحة");
             }
 
+            // _____________ VALIDATION STEP 2.1: Block Diagnosis Clinic (ID 1) _____________ //
+            if (clinicId == 1)
+            {
+                _logger.LogWarning($"Attempted to assign student {dto.StudentId} to Diagnosis Clinic (ID 1)");
+                
+                return Result.Failure<CaseAssignmentDto>("لا يمكن تعيين الطلاب في عيادة التشخيص");
+            }
+
             // _____________ VALIDATION STEP 3: Validate InternDoctor _____________ //
             /// <summary>
             /// Verify that the intern doctor making the assignment exists and is valid.

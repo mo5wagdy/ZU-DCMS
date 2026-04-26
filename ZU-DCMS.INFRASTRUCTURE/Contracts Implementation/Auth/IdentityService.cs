@@ -117,7 +117,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
             var user = new ApplicationUser
             {
                 UserName = username.Trim().ToLower(),
-                Email = email?.Trim().ToLower(),
+                Email = email?.Trim().ToLower() ?? null,
                 PhoneNumber = phoneNumber?.Trim(),
                 PhoneNumberConfirmed = true,
                 FullName = fullName.Trim(),

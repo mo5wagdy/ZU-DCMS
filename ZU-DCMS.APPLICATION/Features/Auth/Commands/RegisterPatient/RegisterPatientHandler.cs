@@ -72,7 +72,14 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient
                 return Result.Failure<AuthDto>("رقم الهاتف مسجل بالفعل");
             }
 
-            if (dto.type != UserType.Patient)
+            if (!string.IsNullOrWhiteSpace(dto.Email) && await _identity.EmailExistsAsync(dto.Email))
+            {
+                _logger.LogWarning("Email already exists: {Email}", dto.Email);
+
+                return Result.Failure<AuthDto>("الإيميل مسجل بالفعل");
+            }
+
+            if (dto.Type != UserType.Patient)
             {
                 _logger.LogWarning("Attempt Registering With Different Type Which Is Not Allowed");
 
@@ -91,9 +98,9 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient
                 (
                    username: dto.Username,
                     phoneNumber: dto.PhoneNumber,
-                    email: dto.Email,
+                    email: dto.Email ?? null,
                     fullName: dto.FullName,
-                    type : dto.type,
+                    type : dto.Type,
                     password : dto.IdentityNumber
                 );
 
@@ -129,13 +136,6 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient
                     
                     return Result.Failure<AuthDto>(tokens.Error);
                 }
-
-                await _uow.Repository<RefreshToken>().AddAsync(new RefreshToken
-                {
-                    Token = tokens.Value.RefreshToken,
-                    UserId = userId,
-                    ExpiresAt = DateTime.UtcNow.AddDays(_settings.RefreshTokenExpiryDays)
-                });
 
                 await _uow.SaveChangesAsync(cancellationToken: cancellationToken);
                 

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
@@ -23,6 +23,11 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
             builder.HasOne(s => s.Student)
                    .WithMany()
                    .HasForeignKey(s => s.StudentId)
+                   .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(s => s.Clinic)
+                   .WithMany(c => c.CaseSessions)
+                   .HasForeignKey(s => s.ClinicId)
                    .OnDelete(DeleteBehavior.Restrict);
         }
     }

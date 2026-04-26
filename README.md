@@ -1,4 +1,4 @@
-# 🏥 UD-CMS — University Dental Clinic Management System
+# 🏥 ZU-DCMS — Zagazig University Dental Clinic Management System
 
 > From chaos… to clarity.  
 > From manual struggle… to intelligent orchestration.
@@ -16,13 +16,13 @@ Admins rely on spreadsheets… and hope.
 
 Everything works — but nothing flows.
 
-That’s where **UD-CMS** was born.
+That’s where **ZU-DCMS** was born.
 
 ---
 
 ## 💡 The Vision
 
-UD-CMS is not just a management system.
+ZU-DCMS is not just a management system.
 
 It’s a **smart orchestration engine** that connects:
 - Patients

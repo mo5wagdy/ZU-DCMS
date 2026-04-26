@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using ZU_DCMS.Domain.Common;
@@ -47,5 +47,6 @@ namespace ZU_DCMS.Domain.Entities
         public ICollection<TermRequirement> TermRequirements { get; set; } = new List<TermRequirement>();
         public ICollection<DiagnosisType> DiagnosisTypes { get; set; } = new List<DiagnosisType>();
         public ICollection<Procedure> Procedures { get; set; } = new List<Procedure>();
+        public ICollection<CaseSession> CaseSessions { get; set; } = new List<CaseSession>();
     }
 }

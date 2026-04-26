@@ -124,6 +124,7 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
                 {
                     CaseAssignmentId = dto.CaseAssignmentId,
                     StudentId = studentId,
+                    ClinicId = assignment.ClinicId,
                     IsCompleted = dto.IsCompleted,
                     HasFollowUp = dto.HasFollowUp,
                     Notes = dto.Notes?.Trim(),

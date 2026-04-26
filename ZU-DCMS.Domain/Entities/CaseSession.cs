@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using ZU_DCMS.Domain.Common;
@@ -18,10 +18,12 @@ namespace ZU_DCMS.Domain.Entities
         // _____________ Foreign Keys _____________ //
         public int CaseAssignmentId { get; set; }
         public int StudentId { get; set; }
+        public int ClinicId { get; set; }
 
         // _____________ Navigation _____________ //
         public CaseAssignment CaseAssignment { get; set; } = null!;
         public Student Student { get; set; } = null!;
+        public Clinic Clinic { get; set; } = null!;
         public ICollection<CaseSessionProcedure> Procedures { get; set; } = new List<CaseSessionProcedure>();
     }
 }

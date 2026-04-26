@@ -38,7 +38,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.Unique_Validations
                 if (!password?.Any(char.IsUpper) ?? true)
                     errors.Add(new IdentityError { Description = "يجب وجود حرف كبير (Uppercase)" });
 
-                if (!password?.Any(char.IsSymbol) ?? true)
+                if (!password?.Any(char.IsLetterOrDigit) ?? true)
                     errors.Add(new IdentityError { Description = "يجب وجود رمز خاص على الأقل (@#$)" });
 
                 // __ Return the validation result based on whether there are any errors. __ //

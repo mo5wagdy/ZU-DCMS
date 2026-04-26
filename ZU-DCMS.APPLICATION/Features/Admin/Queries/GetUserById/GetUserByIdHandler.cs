@@ -37,14 +37,29 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Queries.GetUserById
                 async _ => // => If Not Found In Cache Fetch From DB
                 {
                     // __ Fetch user by Id __ //
-                    var user = _identity.FindByIdAsync(query.UserId);
+                    var user = await _identity.FindByIdAsync(query.UserId);
 
                     // __ If null → return null __ //
                     if (user is null)
                         return Result.Failure<StaffUsersDto>("المستخدم غير موجود");
 
+                    var roles = await _identity.GetRolesAsync(query.UserId);
+
+                    var userRoles = roles.FirstOrDefault();
+
+                    var result = new StaffUsersDto
+                    {
+                        Id = user.Id,
+                        FullName = user.FullName,
+                        Username = user.Username,
+                        Email = user.Email,
+                        Role = userRoles ?? string.Empty,
+                        IsActive = true,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
                     // __ Return DTO __ //
-                    return Result.Success<StaffUsersDto>(_mapper.Map<StaffUsersDto>(user));
+                    return Result.Success(result);
                 },
                 CacheDuration.Short,
                 cancellationToken

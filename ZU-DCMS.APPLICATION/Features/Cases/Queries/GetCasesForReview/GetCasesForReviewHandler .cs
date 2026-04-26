@@ -22,9 +22,23 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Queries.GetCasesForReview
 
         public async Task<Result<List<CaseAssignmentDto>>> Handle(GetCasesForReviewQuery query, CancellationToken cancellationToken)
         {
-            // Get only pending cases
-            var cases = await _uow.Repository<CaseAssignment>().GetListAsync(c => c.Status == CaseStatus.PendingReview);
+            var activeTerm = await _uow.Repository<Term>().GetFirstOrDefaultAsync(t => t.IsActive);
 
+            if (activeTerm == null)
+                return Result.Failure<List<CaseAssignmentDto>>("لا يوجد ترم نشط");
+
+            // __ Get only pending cases __ //
+            var cases = await _uow.Repository<CaseAssignment>().GetListAsync
+            (
+                c => c.Status == CaseStatus.PendingReview && c.TermId == activeTerm.Id,
+                false,
+                c => c.DiagnosisRecord.Booking.Patient,
+                c => c.DiagnosisRecord.DiagnosisType,
+                c => c.Clinic,
+                c => c.Student,
+                c => c.Sessions
+            );
+            
             var dtos = _mapper.Map<List<CaseAssignmentDto>>(cases);
 
             return Result.Success(dtos);

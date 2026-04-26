@@ -2,16 +2,15 @@
 
 namespace ZU_DCMS.Domain.Entities
 {
-    public class InternDoctor : BaseEntity
+    public class TeachingAssistant : BaseEntity
     {
         // _____________ Main Properties _____________ //
         public string ApplicationUserId { get; set; } = string.Empty;
-        public string DoctorCode { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
+        public string TACode { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
 
         // _____________ Navigation _____________ //
-        public ICollection<DiagnosisRecord> DiagnosisRecords { get; set; } = new List<DiagnosisRecord>();
-        public ICollection<CaseAssignment> CaseAssignments { get; set; } = new List<CaseAssignment>();
+        public ICollection<CaseReview> CaseReviews { get; set; } = new List<CaseReview>();
     }
 }

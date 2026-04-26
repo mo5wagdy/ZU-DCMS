@@ -129,7 +129,10 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
 
             var result = await _userManager.CreateAsync(user, password);
 
-            await _userManager.AddClaimAsync(user, new Claim("UserType", type.ToString()));
+            if (result.Succeeded)
+            {
+                await _userManager.AddClaimAsync(user, new Claim("UserType", type.ToString()));
+            }
 
             return result.Succeeded ? (true, user.Id, string.Empty) : (false, string.Empty, result.Errors.First().Description);
         }
@@ -164,8 +167,16 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
             if (string.IsNullOrWhiteSpace(phone))
                 return null;
 
-            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == phone && u.IsActive);
-            return user is null ? null : MapToDto(user); 
+            var userExsist = await _userManager.Users.AsNoTracking().FirstOrDefaultAsync
+                (
+                    u => u.Id != null &&
+                    u.PhoneNumber == phone.Trim() &&
+                    u.IsActive &&
+                    u.PhoneNumber != null &&
+                    u.PhoneNumber != ""
+                );
+
+            return userExsist is null ? null : MapToDto(userExsist); 
         }
 
         public async Task<ApplicationUserDto?> FindByEmailAsync(string email)
@@ -212,15 +223,22 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
         public async Task<bool> EmailExistsAsync(string email) => await _userManager.FindByEmailAsync(email.Trim().ToLower()) != null;
 
         // _________________________ Private Helpers _________________________ //
-        private static ApplicationUserDto MapToDto(ApplicationUser user) => new()
+        private static ApplicationUserDto MapToDto(ApplicationUser user, string? role = null)
         {
-            Id = user.Id,
-            Username = user.UserName ?? string.Empty,
-            Email = user.Email,
-            FullName = user.FullName,
-            PhoneNumber = user.PhoneNumber ?? string.Empty,
-            IsActive = user.IsActive,
-            CreatedAt = user.CreatedAt
-        };
+            if (user is null)
+                return null!;
+
+            return new()
+            {
+                Id = user.Id,
+                Username = user.UserName ?? string.Empty,
+                Email = user.Email,
+                FullName = user.FullName,
+                PhoneNumber = user.PhoneNumber ?? string.Empty,
+                Role = role ?? string.Empty,
+                IsActive = user.IsActive,
+                CreatedAt = user.CreatedAt
+            };
+        }
     }
 }

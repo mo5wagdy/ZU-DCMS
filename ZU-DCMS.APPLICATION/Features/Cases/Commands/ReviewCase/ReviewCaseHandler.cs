@@ -38,77 +38,118 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.ReviewCase
 
         public async Task<Result> Handle(ReviewCaseCommand command, CancellationToken cancellationToken)
         {
+            _logger.LogInfo("Creating a Review");
+
             var dto = command.dto;
 
-            // 1. Validate TA role
+            // Load Teaching Assistant
+            var ta = await _uow.Repository<TeachingAssistant>().GetFirstOrDefaultAsync
+                (
+                    t => t.ApplicationUserId == command.TeachingAssistantId
+                );
+
+            if (ta is null)
+            {
+                _logger.LogWarning("TA Not Found");
+
+                return Result.Failure("المعيد غير موجود");
+            }
+
+            // __ Validate TA role __ //
             var roles = await _identity.GetRolesAsync(command.TeachingAssistantId);
 
             if (!roles.Contains("TeachingAssistant"))
-                return Result.Failure("المعيد فقط هو المسؤول عن مراجعة الحاله");
+            {
+                _logger.LogWarning("Cannot Review a Case By Anyone Except The TA");
 
-            // 2. Fetch case
+                return Result.Failure("المعيد فقط هو المسؤول عن مراجعة الحاله");
+            }
+
+            // __ Fetch case __ //
             var caseAssignment = await _uow.Repository<CaseAssignment>().GetByIdAsync(dto.CaseAssignmentId);
 
             if (caseAssignment is null) 
                 return Result.Failure("الحاله غير موجوده");
 
-            // 3. Ensure case is pending review
+            // __ Ensure case is pending review __ //
             if (caseAssignment.Status != CaseStatus.PendingReview)
                 return Result.Failure("الحاله لم تكتمل بعد");
 
-            // 4. Create review entity
-            var review = new CaseReview
+            await _uow.BeginTransactionAsync();
+
+            try
             {
-                CaseAssignmentId = dto.CaseAssignmentId,
-                TeachingAssistantId = command.TeachingAssistantId,
-                Status = dto.IsApproved ? ReviewStatus.Approved : ReviewStatus.Rejected,
-                Notes = dto.Notes,
-                ReviewedAt = DateTime.UtcNow
-            };
 
-            await _uow.Repository<CaseReview>().AddAsync(review);
-
-            // 5. Update case status
-            if (dto.IsApproved)
-            {
-                caseAssignment.Status = CaseStatus.Approved;
-
-                _logger.LogInfo("Incrementing requirement for student {StudentId}", caseAssignment.StudentId);
-
-                // __ Atomically Increamenting student requirement for the assigned case __ //
-                var sql = @"
-                UPDATE TermRequirements
-                SET CompletedCount = CompletedCount + 1
-                WHERE StudentId = @StudentId
-                AND ClinicId = @ClinicId
-                AND TermId = @TermId";
-
-                var rows = await _sql.ExecuteAsync(sql, new { caseAssignment.StudentId, caseAssignment.ClinicId, caseAssignment.TermId });
-
-                // __ If no changes rollback and return failure __ //
-                if (rows == 0)
+                // __ Create review entity __ //
+                var review = new CaseReview
                 {
-                    _logger.LogWarning("No Rows Affected");
+                    CaseAssignmentId = dto.CaseAssignmentId,
+                    TeachingAssistantId = ta.Id,
+                    Status = dto.IsApproved ? ReviewStatus.Approved : ReviewStatus.Rejected,
+                    Notes = dto.Notes,
+                    ReviewedAt = DateTime.UtcNow,
+                    CreatedAt = DateTime.UtcNow
+                };
 
-                    await _uow.RollbackTransactionAsync();
+                await _uow.Repository<CaseReview>().AddAsync(review);
 
-                    return Result.Failure<CaseSessionDto>("حدث خطأ أثناء إتمام الحاله");
+                // __ Update case status __ //
+                if (dto.IsApproved)
+                {
+                    caseAssignment.Status = CaseStatus.Approved;
+
+                    _uow.Repository<CaseAssignment>().Update(caseAssignment);
+
+                    _logger.LogInfo("Incrementing requirement for student {StudentId}", caseAssignment.StudentId);
+
+                    // __ Atomically Increamenting student requirement for the assigned case __ //
+                    var sql = @"
+                    UPDATE TermRequirements
+                    SET CompletedCount = CompletedCount + 1
+                    WHERE StudentId = @StudentId
+                    AND ClinicId = @ClinicId
+                    AND TermId = @TermId";
+
+                    var rows = await _sql.ExecuteAsync(sql, new { caseAssignment.StudentId, caseAssignment.ClinicId, caseAssignment.TermId });
+
+                    // __ If no changes rollback and return failure __ //
+                    if (rows == 0)
+                    {
+                        _logger.LogWarning("No Rows Affected");
+
+                        await _uow.RollbackTransactionAsync();
+
+                        return Result.Failure<CaseSessionDto>("حدث خطأ أثناء إتمام الحاله");
+                    }
                 }
+                else
+                {
+                    caseAssignment.Status = CaseStatus.InProgress;
+
+                    _uow.Repository<CaseAssignment>().Update(caseAssignment);
+
+                    _logger.LogInfo("Student's Case Not Approved And He Will Start Again");
+                }
+
+                // __ Save all changes in one transaction __ //
+                await _uow.CommitTransactionAsync(command.TeachingAssistantId);
+
+                // __ Invalidating The Cache __ //
+                await _cache.RemoveAsync(CacheKeys.StudentProgress(caseAssignment.StudentId, caseAssignment.TermId));
+                await _cache.RemoveAsync(CacheKeys.StudentRequirements(caseAssignment.StudentId, caseAssignment.TermId));
+
+                return Result.Success();
             }
-            else
+
+            // __ If Failed
+            catch (Exception ex)
             {
-                caseAssignment.Status = CaseStatus.InProgress;
+                _logger.LogError("Error reviewing case {CaseId}", ex, dto.CaseAssignmentId);
+                
+                await _uow.RollbackTransactionAsync();
+                
+                return Result.Failure("حدث خطأ أثناء المراجعة");
             }
-
-            _uow.Repository<CaseAssignment>().Update(caseAssignment);
-
-            // 6. Save all changes in one transaction
-            await _uow.SaveChangesAsync(cancellationToken: cancellationToken);
-
-            await _cache.RemoveAsync(CacheKeys.StudentProgress(caseAssignment.StudentId, caseAssignment.TermId));
-            await _cache.RemoveAsync(CacheKeys.StudentRequirements(caseAssignment.StudentId, caseAssignment.TermId));
-
-            return Result.Success();
         }
     }
 }

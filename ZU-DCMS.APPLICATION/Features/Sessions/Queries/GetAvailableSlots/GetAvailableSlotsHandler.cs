@@ -11,7 +11,7 @@ namespace ZU_DCMS.APPLICATION.Features.Sessions.Queries.GetAvailableSlots
 {
     public class GetAvailableSlotsHandler : IRequestHandler<GetAvailableSlotsQuery, Result<List<AvailableSlotDto>>>
     {
-        private const int MaxLookAheadDays = 14;
+        private const int MaxLookAheadDays = 5;
 
         private readonly IUnitOfWork _uow;
         private readonly IMediator _mediator;

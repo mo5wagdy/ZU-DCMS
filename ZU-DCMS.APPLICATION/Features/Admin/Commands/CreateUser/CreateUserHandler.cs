@@ -38,7 +38,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
 
         public async Task<Result<StaffUsersDto>> Handle(CreateUserCommand command, CancellationToken cancellationToken)
         {
-            var dto = command.dto;
+            var dto = command.Dto;
 
             // __ Check user email uniqueness __ //
             if (await _identity.EmailExistsAsync(dto.Email))
@@ -53,14 +53,16 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
             }
 
             // __ Chech phone uniqueness __ //
-            if (!string.IsNullOrWhiteSpace(dto.PhoneNumber)) 
+            if (string.IsNullOrWhiteSpace(dto.PhoneNumber)) 
             {
-                var phone = _identity.FindByPhoneAsync(dto.PhoneNumber);
+                return Result.Failure<StaffUsersDto>("رقم الهاتف مطلوب");
+            }
 
-                if (phone != null)
-                {
-                    return Result.Failure<StaffUsersDto>("رقم الهاتف موجود بالفعل");
-                }
+            var phone = await _identity.FindByPhoneAsync(dto.PhoneNumber);
+
+            if (phone != null)
+            {
+                return Result.Failure<StaffUsersDto>("رقم الهاتف موجود بالفعل");
             }
 
             // __ Patients not allowed __ //
@@ -84,12 +86,12 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
                 // __ Create Identity user __ //
                 var (success, userId, error) = await _identity.CreateUserAsync
                     (
-                        dto.Username,
-                        dto.Email,
-                        dto.PhoneNumber,
-                        dto.FullName,
-                        dto.Type,
-                        dto.Password
+                       username: dto.Username,
+                       email: dto.Email,
+                       phoneNumber: dto.PhoneNumber,
+                       fullName: dto.FullName,
+                       type: dto.Type,
+                       password: dto.Password
                     );
 
                 // __ If failed to create
@@ -97,10 +99,8 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
                 {
                     await _uow.RollbackTransactionAsync();
 
-                    return Result.Failure<StaffUsersDto>(error);
+                    return Result.Failure<StaffUsersDto>(error ?? "فشل إنشاء المستخدم");
                 }
-
-                await _uow.SaveChangesAsync(cancellationToken: cancellationToken);
 
                 // __ Adding to the selected role __ //
                 await _identity.AssignRoleAsync(userId, dto.Role);
@@ -127,13 +127,28 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
                     var intern = new InternDoctor
                     {
                         ApplicationUserId = userId,
-                        DoctorCode = await _codeGen.GenerateAsync("IND", "InternDoctorCodeSeq"),
+                        DoctorCode = await _codeGen.GenerateAsync("IND", "DoctorCodeSeq"),
                         FullName = dto.FullName.Trim(),
                         IsActive = true,
                         CreatedAt = DateTime.UtcNow
                     };
 
                     await _uow.Repository<InternDoctor>().AddAsync(intern);
+                }
+
+                // __ If the user is teaching assistant __ //
+                else if (dto.Role == UserRoles.TeachingAssistant)
+                {
+                    var ta = new TeachingAssistant
+                    {
+                        ApplicationUserId = userId,
+                        TACode = await _codeGen.GenerateAsync("TEA", "TACodeSeq"),
+                        FullName = dto.FullName.Trim(),
+                        IsActive = true,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    await _uow.Repository<TeachingAssistant>().AddAsync(ta);
                 }
 
                 await _uow.CommitTransactionAsync(userId);
@@ -150,6 +165,8 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
                 };
+                result.Role = dto.Role;
+
 
                 //notify & email
 

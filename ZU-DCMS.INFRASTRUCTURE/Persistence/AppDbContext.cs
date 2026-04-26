@@ -16,6 +16,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence
         public DbSet<Patient> Patients => Set<Patient>();
         public DbSet<InternDoctor> InternDoctors => Set<InternDoctor>();
         public DbSet<Student> Students => Set<Student>();
+        public DbSet<TeachingAssistant> TeachingAssistants => Set<TeachingAssistant>();
 
         // __________ Authentication-related entity __________ //
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();

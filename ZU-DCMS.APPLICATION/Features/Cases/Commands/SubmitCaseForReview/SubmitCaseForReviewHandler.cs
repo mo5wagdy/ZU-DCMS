@@ -17,26 +17,27 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.SubmitCaseForReview
 
         public async Task<Result> Handle(SubmitCaseForReviewCommand command, CancellationToken cancellationToken)
         {
-            // 1. Fetch case assignment
+            // __ Fetch case assignment __ //
             var caseAssignment = await _uow.Repository<CaseAssignment>().GetByIdAsync(command.CaseAssignmentId);
 
-            // 2. Validate existence
+            // __ Validate existence __ //
             if (caseAssignment is null)
                 return Result.Failure("الحاله غير موجوده");
 
-            // 3. Ensure this student owns the case
+            // __ Ensure this student owns the case __ //
             if (caseAssignment.StudentId != command.StudentId)
-                return Result.Failure("غير مصرح");
+                return Result.Failure("ليس لديك صلاحية");
 
-            // 4. Ensure case is in progress
+            // __ Ensure case is in progress __ //
             if (caseAssignment.Status != CaseStatus.InProgress)
                 return Result.Failure("الحاله ليست قيد العمل");
 
-            // 5. Move case to PendingReview
+            // __ Move case to PendingReview __ //
             caseAssignment.Status = CaseStatus.PendingReview;
 
-            // 6. Save changes
+            // __ Save changes __ //
             _uow.Repository<CaseAssignment>().Update(caseAssignment);
+            
             await _uow.SaveChangesAsync(cancellationToken: cancellationToken);
 
             return Result.Success();

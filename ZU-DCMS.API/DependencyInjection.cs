@@ -95,7 +95,10 @@ namespace ZU_DCMS.API
 
                 options.AddPolicy("ZU-DCMS-React", policy =>
                 {
-                    policy.WithOrigins("https://localhost:8080");
+                    policy.WithOrigins("http://localhost:3000", "http://localhost:5173", "https://localhost:8080")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials();
                 });
             });
 

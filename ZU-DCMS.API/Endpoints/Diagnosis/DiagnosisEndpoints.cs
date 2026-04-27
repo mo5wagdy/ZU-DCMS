@@ -2,14 +2,17 @@ using Asp.Versioning.Builder;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using ZU_DCMS.API.Common;
+using ZU_DCMS.APPLICATION.Common.Pagination;
+using ZU_DCMS.APPLICATION.DTOs.Case;
+using ZU_DCMS.APPLICATION.DTOs.Diagnosis;
+using ZU_DCMS.APPLICATION.DTOs.Student;
 using ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent;
 using ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.DiagnosePatient;
 using ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetAvailableStudents;
-using ZU_DCMS.APPLICATION.DTOs.Diagnosis;
-using ZU_DCMS.APPLICATION.DTOs.Case;
-using ZU_DCMS.APPLICATION.DTOs.Student;
+using ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetSessionPatients;
 using ZU_DCMS.APPLICATION.Features.Lookups.Queries.GetDiagnosisTypes;
 using ZU_DCMS.APPLICATION.Features.Lookups.Queries.GetProcedures;
+using ZU_DCMS.Domain.Entities;
 
 namespace ZU_DCMS.API.Endpoints.Diagnosis
 {

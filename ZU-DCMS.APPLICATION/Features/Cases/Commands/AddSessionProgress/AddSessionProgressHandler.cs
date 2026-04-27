@@ -1,4 +1,3 @@
-using AutoMapper;
 using MediatR;
 using ZiggyCreatures.Caching.Fusion;
 using ZU_DCMS.APPLICATION.Background_Jobs.Events;
@@ -19,7 +18,6 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
         private readonly IRawSqlExecutor _sql;
         private readonly IEventPublisher _eventPublisher;
         private readonly IFusionCache _cache;
-        private readonly IMapper _mapper;
         private readonly IAppLogger<AddSessionProgressHandler> _logger;
 
         public AddSessionProgressHandler
@@ -28,7 +26,6 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
             IRawSqlExecutor sql,
             IEventPublisher eventPublisher,
             IFusionCache cache,
-            IMapper mapper,
             IAppLogger<AddSessionProgressHandler> logger
         )
         {
@@ -36,7 +33,6 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
             _sql = sql;
             _eventPublisher = eventPublisher;
             _cache = cache;
-            _mapper = mapper;
             _logger = logger;
         }
 
@@ -167,24 +163,39 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
                 await _uow.CommitTransactionAsync();
 
                 // __ Handle post-session business rules and notifications __ //
-                if (dto.IsCompleted)
-                {
-                    //await _eventPublisher.PublishAsync(new CaseCompletedEvent(studentId, assignment.Id, assignment.ClinicId));
-                }
+                //if (dto.IsCompleted)
+                //{
+                //    //await _eventPublisher.PublishAsync(new CaseCompletedEvent(studentId, assignment.Id, assignment.ClinicId));
+                //}
 
-                if (dto.HasFollowUp)
-                {
-                   // await _eventPublisher.PublishAsync(new CasePartiallyCompletedEvent(studentId, assignment.Id, assignment.ClinicId));
-                }
+                //if (dto.HasFollowUp)
+                //{
+                //   // await _eventPublisher.PublishAsync(new CasePartiallyCompletedEvent(studentId, assignment.Id, assignment.ClinicId));
+                //}
 
                 // __ Cache Invalidation For Data Consistency __ //
                 await _cache.RemoveAsync(CacheKeys.StudentCases(studentId));
                 await _cache.RemoveAsync(CacheKeys.CaseById(assignment.Id));
                 await _cache.RemoveAsync(CacheKeys.AvailableStudents(assignment.ClinicId));
 
+                // __ Fetch procedure names safely from the database instead of relying on unloaded EF navigations __ //
+                var procedures = await _uow.Repository<Procedure>()
+                    .GetListAsync(p => dto.ProcedureIds.Contains(p.Id));
+
+                var resultDto = new CaseSessionDto
+                {
+                    Id = session.Id,
+                    ClinicId = session.ClinicId,
+                    IsCompleted = session.IsCompleted,
+                    HasFollowUp = session.HasFollowUp,
+                    Notes = session.Notes,
+                    SessionDate = session.SessionDate,
+                    ProceduresNames = procedures.Select(p => p.NameAr).ToList()
+                };
+
                 _logger.LogInfo("Successfully added session progress for student ID: {StudentId} on case assignment ID: {CaseAssignmentId}", studentId, dto.CaseAssignmentId);
 
-                return Result.Success(_mapper.Map<CaseSessionDto>(session));
+                return Result.Success(resultDto);
             }
 
             // __ Rollback the transaction in case of any exceptions to maintain data integrity __ //

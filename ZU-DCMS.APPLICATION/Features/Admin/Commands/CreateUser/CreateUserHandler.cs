@@ -79,6 +79,13 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
                 return Result.Failure<StaffUsersDto>("لا يمكن إضافه عيان إلى الأعضاء المسؤولين");
             }
 
+            // __ Prevent assigning student role to more than 5 academic years __ //
+            if (dto.AcademicYear > 5)
+            {
+                return Result.Failure<StaffUsersDto>("عدد السنوات الأكاديمية الرسمية 5 سنوات");
+            }
+
+
             await _uow.BeginTransactionAsync();
 
             try

@@ -51,7 +51,7 @@ namespace ZU_DCMS.API.Endpoints.Patients
             .Produces<ApiResponse<PagedResult<PatientDto>>>(StatusCodes.Status200OK)
             .Produces<ApiResponse<PagedResult<PatientDto>>>(StatusCodes.Status400BadRequest);
 
-            // 3. Drilldown to specific Identity string
+            // 3. Drilldown to specific patient
             group.MapGet("/{id}", async ([FromServices] ISender sender, [AsParameters] GetPatientByIdQuery query) =>
             {
                 var result = await sender.Send(query);
@@ -59,9 +59,9 @@ namespace ZU_DCMS.API.Endpoints.Patients
                     ? Results.Ok(ApiResponse<PatientDto>.Success(result.Value, "Patient metrics retrieved."))
                     : Results.NotFound(ApiResponse<PatientDto>.Failure(result.Errors, "Patient not found."));
             })
-            .RequireAuthorization("StaffViewPolicy")
+            //.RequireAuthorization("StaffViewPolicy")
             .WithName("GetPatientById")
-            .WithSummary("Pulls patient base identity using their absolute Database ID")
+            .WithSummary("Pulls patient base using their absolute Database ID")
             .Produces<ApiResponse<PatientDto>>(StatusCodes.Status200OK)
             .Produces<ApiResponse<PatientDto>>(StatusCodes.Status404NotFound);
 

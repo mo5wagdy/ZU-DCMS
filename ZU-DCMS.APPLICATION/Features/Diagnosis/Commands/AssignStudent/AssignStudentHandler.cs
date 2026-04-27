@@ -270,10 +270,10 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
                 {
                     DiagnosisRecordId = dto.DiagnosisRecordId,
                     StudentId = dto.StudentId,
-                    ClinicId = clinicId,  // ✅ Auto-populated from DiagnosisRecord
-                    TermId = student.ActiveTermId.Value,  // ✅ Auto-populated from Student.ActiveTermId
+                    ClinicId = clinicId, 
+                    TermId = student.ActiveTermId.Value, 
                     AssignedByInternId = intern.Id,
-                    Status = CaseStatus.InProgress,  // Student will start working immediately
+                    Status = CaseStatus.InProgress, 
                     Notes = dto.Notes?.Trim(),
                     AssignedAt = DateTime.UtcNow,
                     CreatedAt = DateTime.UtcNow

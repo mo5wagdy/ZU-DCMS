@@ -143,7 +143,7 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
                     PatientId = patientId,
                     SessionId = session.Id,
                     BookingType = dto.BookingType,
-                    Status = BookingStatus.Pending,
+                    Status = BookingStatus.Confirmed,
                     PreliminaryComplaint = dto.PreliminaryComplaint?.Trim(),
                     CreatedAt = DateTime.UtcNow
                 };

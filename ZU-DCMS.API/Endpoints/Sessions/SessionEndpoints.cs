@@ -2,11 +2,14 @@ using Asp.Versioning.Builder;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using ZU_DCMS.API.Common;
+using ZU_DCMS.APPLICATION.Common.Pagination;
+using ZU_DCMS.APPLICATION.DTOs.Diagnosis;
+using ZU_DCMS.APPLICATION.DTOs.Session;
+using ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetSessionPatients;
 using ZU_DCMS.APPLICATION.Features.Sessions.Commands.GenerateSessions;
 using ZU_DCMS.APPLICATION.Features.Sessions.Queries.FindSession;
 using ZU_DCMS.APPLICATION.Features.Sessions.Queries.GetAvailableSlots;
 using ZU_DCMS.APPLICATION.Features.Sessions.Queries.IsSessionAvailable;
-using ZU_DCMS.APPLICATION.DTOs.Session;
 
 namespace ZU_DCMS.API.Endpoints.Sessions
 {
@@ -76,6 +79,20 @@ namespace ZU_DCMS.API.Endpoints.Sessions
             .WithSummary("Bulk generates routine clinic sessions in advance for the layout")
             .Produces<ApiResponse<List<SessionDto>>>(StatusCodes.Status200OK)
             .Produces<ApiResponse<List<SessionDto>>>(StatusCodes.Status400BadRequest);
+
+
+            // 5. Get Patients for session
+            group.MapGet("/patients", async ([FromServices] ISender sender, [FromQuery] int SessionId, [FromQuery] string InternDcotorId) =>
+            {
+                var result = await sender.Send(new GetSessionPatientsQuery(SessionId, InternDcotorId));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<PagedResult<BookingForDiagnosisDto>>.Success(result.Value, "Patients retriedved."))
+                    : Results.BadRequest(ApiResponse<PagedResult<BookingForDiagnosisDto>>.Failure(result.Errors, "Failed to retrieve patients"));
+            })
+            .WithName("Get Session Patients")
+            .WithSummary("Retrieves patients paginated")
+            .Produces<ApiResponse<PagedResult<BookingForDiagnosisDto>>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<PagedResult<BookingForDiagnosisDto>>>(StatusCodes.Status400BadRequest);
         }
     }
 }

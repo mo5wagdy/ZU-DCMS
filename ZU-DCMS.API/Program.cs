@@ -59,7 +59,7 @@ namespace ZU_DCMS.API
             app.UseHttpsRedirection();
 
             // Use CORS policy
-            app.UseCors("AllowAllOrigins");
+            app.UseCors("ZU-DCMS-React");
 
             // Use Rate Limiting
             app.UseRateLimiter();

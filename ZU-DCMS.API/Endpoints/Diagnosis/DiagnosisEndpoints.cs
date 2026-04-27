@@ -20,9 +20,9 @@ namespace ZU_DCMS.API.Endpoints.Diagnosis
         {
             var group = app.MapGroup("api/v1/diagnosis")
                            .WithApiVersionSet(versionSet)
-                           .WithTags("Diagnosis")
+                           .WithTags("Diagnosis");
                            // Protect via Clinical Core Policy (InternDoctor, Receptionist, Admin)
-                           .RequireAuthorization("ClinicalCorePolicy"); 
+                           //.RequireAuthorization("ClinicalCorePolicy"); 
 
             // 1. Log a diagnosis
             group.MapPost("/", async ([FromServices] ISender sender, [FromBody] DiagnosePatientCommand command) =>

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using System.Data;
 using ZU_DCMS.APPLICATION.Contracts;
 
@@ -32,6 +33,31 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.ContractImplementation
 
             // __ Execute the SQL command with the provided parameters. __ //
             return await _context.Database.ExecuteSqlRawAsync(sql, sqlParams);
+        }
+
+        public async Task<T> GetScalarAsync<T>(string sequenceName)
+        {
+            // __ ADO.NET Call __ //
+            var connection = _context.Database.GetDbConnection();
+
+            using var command = connection.CreateCommand();
+
+            command.CommandText = $"SELECT NEXT VALUE FOR {sequenceName}";
+
+            // __ Making the command use the currently opening transaction __ //
+            command.Transaction = _context.Database.CurrentTransaction?.GetDbTransaction();
+
+            if (connection.State != ConnectionState.Open)
+                await connection.OpenAsync();
+
+            var result = await command.ExecuteScalarAsync();
+
+            if(result is null || result == DBNull.Value)
+            {
+                throw new InvalidOperationException($"Coud not get next value for sequence {sequenceName}");
+            }
+
+            return (T)Convert.ChangeType(result, typeof(T));
         }
     }
 }

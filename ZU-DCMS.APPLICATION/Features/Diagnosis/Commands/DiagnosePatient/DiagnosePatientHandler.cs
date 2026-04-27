@@ -109,7 +109,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.DiagnosePatient
             {
                 BookingId = dto.BookingId,
                 InternDoctorId = intern.Id,
-                ClinicId = diagnosisType.ClinicId, // ✅ Securely inferred from DiagnosisType
+                ClinicId = diagnosisType.ClinicId, // Securely inferred from DiagnosisType
                 DiagnosisTypeId = dto.DiagnosisTypeId,
                 Complaint = dto.Complaint.Trim(),
                 Notes = dto.Notes?.Trim(),

@@ -13,7 +13,7 @@ namespace ZU_DCMS.APPLICATION.Validators.Diagnosis
                 .WithMessage("معرف الطبيب مطلوب");
 
             RuleFor(x => x.Dto.DiagnosisTypeId)
-                   .IsInEnum()
+                   .NotEmpty()
                    .WithMessage("نوع التشخيص غير صحيح");
 
             RuleFor(x => x.Dto.Complaint)

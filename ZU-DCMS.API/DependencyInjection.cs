@@ -92,6 +92,11 @@ namespace ZU_DCMS.API
                           .AllowAnyMethod()
                           .AllowAnyHeader();
                 });
+
+                options.AddPolicy("ZU-DCMS-React", policy =>
+                {
+                    policy.WithOrigins("https://localhost:8080");
+                });
             });
 
             // __ Configure Rate Limiting (Basic fixed window limiter) __ //

@@ -45,9 +45,7 @@ namespace ZU_DCMS.Domain.Entities
         public ICollection<DiagnosisRecord> DiagnosisRecords { get; set; } = new List<DiagnosisRecord>();
         public ICollection<CaseAssignment> CaseAssignments { get; set; } = new List<CaseAssignment>();
         public ICollection<TermRequirement> TermRequirements { get; set; } = new List<TermRequirement>();
-        public ICollection<DiagnosisType> DiagnosisTypes { get; set; } = new List<DiagnosisType>();
         public ICollection<ClinicDiagnosisType> DiagnosisTypeLinks { get; set; } = new List<ClinicDiagnosisType>();
-        public ICollection<Procedure> Procedures { get; set; } = new List<Procedure>();
         public ICollection<ClinicProcedure> ProcedureLinks { get; set; } = new List<ClinicProcedure>();
         public ICollection<CaseSession> CaseSessions { get; set; } = new List<CaseSession>();
     }

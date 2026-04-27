@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ZU_DCMS.Domain.Entities;
 
@@ -17,8 +17,8 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                    .IsRequired()
                    .HasColumnType("date");
 
-            // __ Unique index on StartTime to prevent overlapping sessions __ //
-            builder.HasIndex(s => s.StartTime).IsUnique();
+            // __ Unique index on Date and StartTime to prevent overlapping sessions on the same day __ //
+            builder.HasIndex(s => new { s.Date, s.StartTime }).IsUnique();
 
             // __ Global Query Filter to exclude soft-deleted __ //
             builder.HasQueryFilter(s => !s.IsDeleted);

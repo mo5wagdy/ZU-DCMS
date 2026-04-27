@@ -25,7 +25,8 @@ namespace ZU_DCMS.APPLICATION.Common.MediatR_Behaviors
                 var context = new ValidationContext<TRequest>(request);
 
                 // __ Excute All Validators And Collect All Non Null Validation Errors __ //
-                var failures = _validators.Select(v => v.Validate(context))
+                var failures = _validators.Select(v => 
+                v.Validate(context))
                                           .SelectMany(r => r.Errors)
                                           .Where(r => r != null)
                                           .ToList();

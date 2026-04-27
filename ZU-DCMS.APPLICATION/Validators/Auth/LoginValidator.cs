@@ -15,7 +15,8 @@ namespace ZU_DCMS.APPLICATION.Validators.Auth
 
             RuleFor(x => x.Dto.IdentityNumber)
                    .NotEmpty()
-                   .WithMessage("رقم الهوية مطلوب");
+                   .WithMessage("رقم الهوية مطلوب")
+                   .When(x => x.Dto != null);
         }
     }
 }

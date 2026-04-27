@@ -69,6 +69,9 @@ namespace ZU_DCMS.Domain.Entities
                 _ => 4       // Lowest priority: 3+ cases done
             };
 
+        // => measure by time to finish
+        // => filter by all requirements progress in all clinics
+
         // _____________ Foreign Keys _____________ //
         /// <summary>
         /// Reference to the Student who must fulfill this requirement.

@@ -1,4 +1,4 @@
-﻿namespace ZU_DCMS.APPLICATION.Common.Cache
+namespace ZU_DCMS.APPLICATION.Common.Cache
 {
     // __ This class defines standardized cache keys for various types of data in the application. __ //
     public static class CacheKeys
@@ -24,6 +24,8 @@
         
         // __ Diagnosis Related __ //
         public static string AvailableStudents(int clinicId) => $"students:available:{clinicId}";
+        public static string DiagnosisTypes(int clinicId) => $"clinic:diagnosis_types:{clinicId}";
+        public static string Procedures(int clinicId) => $"clinic:procedures:{clinicId}";
        
         // __ Booking Related __ //
         public static string PatientBookings(int patientId) => $"patient:bookings:{patientId}";

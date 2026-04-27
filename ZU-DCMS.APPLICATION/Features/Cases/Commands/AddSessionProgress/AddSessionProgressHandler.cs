@@ -99,9 +99,9 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
             }
 
             // __ Validates that all selected procedures are valid and belong to the clinic associated with the case assignment __ //
-            var validCount = await _uow.Repository<Procedure>().CountAsync
+            var validCount = await _uow.Repository<ClinicProcedure>().CountAsync
                 (
-                    p => dto.ProcedureIds.Contains(p.Id) &&
+                    p => dto.ProcedureIds.Contains(p.ProcedureId) &&
                     p.ClinicId == assignment.ClinicId &&
                     p.IsActive
                 );

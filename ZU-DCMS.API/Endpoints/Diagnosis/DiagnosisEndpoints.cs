@@ -8,6 +8,8 @@ using ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetAvailableStudents;
 using ZU_DCMS.APPLICATION.DTOs.Diagnosis;
 using ZU_DCMS.APPLICATION.DTOs.Case;
 using ZU_DCMS.APPLICATION.DTOs.Student;
+using ZU_DCMS.APPLICATION.Features.Lookups.Queries.GetDiagnosisTypes;
+using ZU_DCMS.APPLICATION.Features.Lookups.Queries.GetProcedures;
 
 namespace ZU_DCMS.API.Endpoints.Diagnosis
 {
@@ -62,6 +64,32 @@ namespace ZU_DCMS.API.Endpoints.Diagnosis
             .WithSummary("Binds a clinical case to a specific student that needed it")
             .Produces<ApiResponse<CaseAssignmentDto>>(StatusCodes.Status200OK)
             .Produces<ApiResponse<CaseAssignmentDto>>(StatusCodes.Status400BadRequest);
+
+            // 4. Get Diagnosis Types
+            group.MapGet("/types", async ([FromServices] ISender sender, [FromQuery] int? clinicId) =>
+            {
+                var result = await sender.Send(new GetDiagnosisTypesQuery(clinicId));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<List<DiagnosisTypeDto>>.Success(result.Value, "Diagnosis types retrieved."))
+                    : Results.BadRequest(ApiResponse<List<DiagnosisTypeDto>>.Failure(result.Errors, "Failed to retrieve diagnosis types."));
+            })
+            .WithName("GetDiagnosisTypes")
+            .WithSummary("Retrieves diagnosis types, optionally filtered by clinic ID")
+            .Produces<ApiResponse<List<DiagnosisTypeDto>>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<List<DiagnosisTypeDto>>>(StatusCodes.Status400BadRequest);
+
+            // 5. Get Procedures
+            group.MapGet("/procedures", async ([FromServices] ISender sender, [FromQuery] int? clinicId) =>
+            {
+                var result = await sender.Send(new GetProceduresQuery(clinicId));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<List<ProcedureDto>>.Success(result.Value, "Procedures retrieved."))
+                    : Results.BadRequest(ApiResponse<List<ProcedureDto>>.Failure(result.Errors, "Failed to retrieve procedures."));
+            })
+            .WithName("GetProcedures")
+            .WithSummary("Retrieves procedures, optionally filtered by clinic ID")
+            .Produces<ApiResponse<List<ProcedureDto>>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<List<ProcedureDto>>>(StatusCodes.Status400BadRequest);
         }
     }
 }

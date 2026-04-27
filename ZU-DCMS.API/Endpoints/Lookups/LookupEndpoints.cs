@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using ZU_DCMS.API.Common;
 using ZU_DCMS.APPLICATION.DTOs.Admin;
+using ZU_DCMS.APPLICATION.DTOs.Diagnosis;
 using ZU_DCMS.APPLICATION.Features.Admin.Queries.GetAllClinics;
 using ZU_DCMS.APPLICATION.Features.Lookups.Queries.GetDiagnosisTypes;
 
@@ -14,7 +15,8 @@ namespace ZU_DCMS.API.Endpoints.Lookups
         {
             var group = app.MapGroup("api/v1/lookups")
                            .WithApiVersionSet(versionSet)
-                           .WithTags("Lookups");
+                           .WithTags("Lookups")
+                           .RequireAuthorization("ClinicCorePolicy");
 
             group.MapGet("/clinics", async ([FromServices] ISender sender) =>
             {

@@ -1,8 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using ZU_DCMS.Domain.Entities;
 
 namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
@@ -28,30 +27,32 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                    .IsRequired()
                    .HasMaxLength(100);
 
-            builder.HasData(GetSeedData());
-
-            // __ Global Query Filter to exclude soft-deleted records __ //
             builder.HasQueryFilter(d => !d.IsDeleted);
 
-            // ____________ Relationships ____________ //
-            builder.HasOne(d => d.Clinic)
-                   .WithMany(c => c.DiagnosisTypes)
-                   .HasForeignKey(d => d.ClinicId)
-                   .OnDelete(DeleteBehavior.Restrict);
-
+            builder.HasData(GetSeedData());
         }
 
-        // __ Seed data for DiagnosisType __ //
-        private static IEnumerable<DiagnosisType> GetSeedData() =>
-        [
-            new() { Id=1,  ClinicId=1, Code="CARIES",    NameAr="تسوس",               NameEn="Caries",             CreatedAt=new DateTime(2024,1,1,0,0,0,DateTimeKind.Utc) },
-            new() { Id=2,  ClinicId=1, Code="PULPITIS",  NameAr="التهاب لب",          NameEn="Pulpitis",           CreatedAt=new DateTime(2024,1,1,0,0,0,DateTimeKind.Utc) },
-            new() { Id=3,  ClinicId=1, Code="PERIO_D",   NameAr="أمراض اللثة",        NameEn="Periodontal Disease",CreatedAt=new DateTime(2024,1,1,0,0,0,DateTimeKind.Utc) },
-            new() { Id=4,  ClinicId=1, Code="ABSCESS",   NameAr="خراج",               NameEn="Abscess",            CreatedAt=new DateTime(2024,1,1,0,0,0,DateTimeKind.Utc) },
-            new() { Id=5,  ClinicId=1, Code="FRACTURE",  NameAr="كسر في السن",        NameEn="Tooth Fracture",     CreatedAt=new DateTime(2024,1,1,0,0,0,DateTimeKind.Utc) },
-            new() { Id=6,  ClinicId=1, Code="MISSING",   NameAr="سن مفقود",           NameEn="Missing Tooth",      CreatedAt=new DateTime(2024,1,1,0,0,0,DateTimeKind.Utc) },
-            new() { Id=7,  ClinicId=1, Code="IMPACTED",  NameAr="سن معشم",            NameEn="Impacted Tooth",     CreatedAt=new DateTime(2024,1,1,0,0,0,DateTimeKind.Utc) },
-            new() { Id=8,  ClinicId=1, Code="ORTHO_N",   NameAr="تقويم مطلوب",        NameEn="Orthodontic Need",   CreatedAt=new DateTime(2024,1,1,0,0,0,DateTimeKind.Utc) },
-        ];
+        private static IEnumerable<DiagnosisType> GetSeedData()
+        {
+            var dt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            return new DiagnosisType[]
+            {
+                new() { Id=1,  Code="CARIES",     NameAr="تسوس",                NameEn="Dental Caries",           CreatedAt=dt },
+                new() { Id=2,  Code="PULPITIS",   NameAr="التهاب لب",           NameEn="Pulpitis",                CreatedAt=dt },
+                new() { Id=3,  Code="PULP_NEC",   NameAr="نخر اللب",            NameEn="Pulp Necrosis",           CreatedAt=dt },
+                new() { Id=4,  Code="PERI_ABS",   NameAr="خراج ذروي",           NameEn="Periapical Abscess",      CreatedAt=dt },
+                new() { Id=5,  Code="GINGIVITIS", NameAr="التهاب لثة",          NameEn="Gingivitis",              CreatedAt=dt },
+                new() { Id=6,  Code="PERIODONT",  NameAr="أمراض اللثة",         NameEn="Periodontitis",           CreatedAt=dt },
+                new() { Id=7,  Code="IMPACTED",   NameAr="سن معشم",             NameEn="Impacted Tooth",          CreatedAt=dt },
+                new() { Id=8,  Code="ROOT_REM",   NameAr="بقايا جذر",           NameEn="Root Remnants",           CreatedAt=dt },
+                new() { Id=9,  Code="ABSCESS",    NameAr="خراج",                NameEn="Abscess",                 CreatedAt=dt },
+                new() { Id=10, Code="FRACTURE",   NameAr="كسر في السن",         NameEn="Tooth Fracture",          CreatedAt=dt },
+                new() { Id=11, Code="MISSING",    NameAr="سن مفقود",            NameEn="Missing Tooth",           CreatedAt=dt },
+                new() { Id=12, Code="MALOCCLUS",  NameAr="سوء الإطباق",         NameEn="Malocclusion",            CreatedAt=dt },
+                new() { Id=13, Code="EARLY_CAR",  NameAr="تسوس مبكر للأطفال",   NameEn="Early Childhood Caries",  CreatedAt=dt },
+                new() { Id=14, Code="GINGIVAL_H", NameAr="تضخم اللثة",          NameEn="Gingival Hyperplasia",    CreatedAt=dt },
+                new() { Id=15, Code="MOBILITY",   NameAr="تحرك الأسنان",        NameEn="Tooth Mobility",          CreatedAt=dt },
+            };
+        }
     }
 }

@@ -85,22 +85,33 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.DiagnosePatient
                     d => d.Id == dto.DiagnosisTypeId && d.IsActive
                 );
 
-            // __ Log and return failure if diagnosis Type not found or inactive __ //
             if (diagnosisType is null)
             {
                 _logger.LogWarning("Diagnosis Type with Id {DiagnosisTypeId} not found or inactive", dto.DiagnosisTypeId);
-                
                 return Result.Failure<DiagnosisRecordDto>("نوع التشخيص غير موجود");
             }
 
-            // __ Validate clinic existence and active status via DiagnosisType.ClinicId __ //
-            var clinic = await _uow.Repository<Clinic>().GetByIdAsync(diagnosisType.ClinicId);
+            var isValidLink = await _uow.Repository<ClinicDiagnosisType>().ExistsAsync
+                (
+                    x =>
+                        x.ClinicId        == dto.ClinicId &&
+                        x.DiagnosisTypeId == dto.DiagnosisTypeId &&
+                        x.IsActive
+                );
 
-            // __ Log and return failure if clinic not found or inactive __ //
+            if (!isValidLink)
+            {
+                _logger.LogWarning("Diagnosis Type {DiagnosisTypeId} is not linked to Clinic {ClinicId}", dto.DiagnosisTypeId, dto.ClinicId);
+                
+                return Result.Failure<DiagnosisRecordDto>("نوع التشخيص لا ينتمي لهذه العيادة");
+            }
+
+            // __ Validate clinic existence and active status __ //
+            var clinic = await _uow.Repository<Clinic>().GetByIdAsync(dto.ClinicId);
+
             if (clinic is null || !clinic.IsActive)
             {
-                _logger.LogWarning("Clinic with Id {ClinicId} (from DiagnosisType {DiagnosisTypeId}) not found or inactive", diagnosisType.ClinicId, dto.DiagnosisTypeId);
-               
+                _logger.LogWarning("Clinic with Id {ClinicId} not found or inactive", dto.ClinicId);
                 return Result.Failure<DiagnosisRecordDto>("العيادة غير موجودة أو غير نشطة");
             }
 
@@ -109,7 +120,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.DiagnosePatient
             {
                 BookingId = dto.BookingId,
                 InternDoctorId = intern.Id,
-                ClinicId = diagnosisType.ClinicId, // Securely inferred from DiagnosisType
+                ClinicId = dto.ClinicId,
                 DiagnosisTypeId = dto.DiagnosisTypeId,
                 Complaint = dto.Complaint.Trim(),
                 Notes = dto.Notes?.Trim(),

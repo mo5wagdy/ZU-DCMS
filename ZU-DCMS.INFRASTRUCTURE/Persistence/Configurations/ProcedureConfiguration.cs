@@ -1,8 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using ZU_DCMS.Domain.Entities;
 
 namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
@@ -28,35 +26,53 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                    .IsRequired()
                    .HasMaxLength(100);
 
-            builder.HasData(GetSeedData());
-
-            // __ Global Query Filter to exclude soft-deleted records __ //
-
             builder.HasQueryFilter(p => !p.IsDeleted);
 
-            // ____________ Relationships ____________ //
-            builder.HasOne(p => p.Clinic)
-                   .WithMany(c => c.Procedures)
-                   .HasForeignKey(p => p.ClinicId)
-                   .OnDelete(DeleteBehavior.Restrict);
-
+            builder.HasData(GetSeedData());
         }
 
-        // __ Seed data for Procedure __ //
-        private static IEnumerable<Procedure> GetSeedData() =>
-        [
-            // حشو عادي
-            new() { Id=1, ClinicId=5, Code="COMP_FILL",  NameAr="حشو كومبوزيت",    NameEn="Composite Filling",  CreatedAt=new DateTime(2024,1,1,0,0,0,DateTimeKind.Utc) },
-            new() { Id=2, ClinicId=5, Code="AMAL_FILL",  NameAr="حشو أملغم",       NameEn="Amalgam Filling",    CreatedAt=new DateTime(2024,1,1,0,0,0,DateTimeKind.Utc) },
-            // حشو عصب
-            new() { Id=3, ClinicId=2, Code="RCT",        NameAr="حشو عصب",         NameEn="Root Canal",         CreatedAt=new DateTime(2024,1,1,0,0,0,DateTimeKind.Utc) },
-            new() { Id=4, ClinicId=2, Code="PULPOTOMY",  NameAr="بتر لب",          NameEn="Pulpotomy",          CreatedAt=new DateTime(2024,1,1,0,0,0,DateTimeKind.Utc) },
-            // جراحة
-            new() { Id=5, ClinicId=3, Code="EXTRACT",    NameAr="خلع سن",          NameEn="Extraction",         CreatedAt=new DateTime(2024,1,1,0,0,0,DateTimeKind.Utc) },
-            new() { Id=6, ClinicId=3, Code="SURG_EXT",   NameAr="خلع جراحي",       NameEn="Surgical Extraction",CreatedAt=new DateTime(2024,1,1,0,0,0,DateTimeKind.Utc) },
-            // فم ولثة
-            new() { Id=7, ClinicId=4, Code="SCALING",    NameAr="تنظيف جير",       NameEn="Scaling",            CreatedAt=new DateTime(2024,1,1,0,0,0,DateTimeKind.Utc) },
-            new() { Id=8, ClinicId=4, Code="ROOT_PLAN",  NameAr="تنعيم جذور",      NameEn="Root Planing",       CreatedAt=new DateTime(2024,1,1,0,0,0,DateTimeKind.Utc) },
-        ];
+        private static IEnumerable<Procedure> GetSeedData()
+        {
+            var dt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            return new Procedure[]
+            {
+                // REST (5)
+                new() { Id=1,  Code="COMP_FILL",  NameAr="حشو كومبوزيت",         NameEn="Composite Filling",      CreatedAt=dt },
+                new() { Id=2,  Code="GIC_FILL",   NameAr="حشو زجاجي",            NameEn="GIC Filling",            CreatedAt=dt },
+                new() { Id=3,  Code="AMAL_FILL",  NameAr="حشو أملغم",            NameEn="Amalgam Filling",        CreatedAt=dt },
+
+                // ENDO (2)
+                new() { Id=4,  Code="RCT",        NameAr="حشو عصب",              NameEn="Root Canal Treatment",   CreatedAt=dt },
+                new() { Id=5,  Code="PULPECT",    NameAr="استئصال لب",           NameEn="Pulpectomy",             CreatedAt=dt },
+                new() { Id=6,  Code="RETREATM",   NameAr="إعادة حشو عصب",        NameEn="RCT Retreatment",        CreatedAt=dt },
+
+                // OS (3)
+                new() { Id=7,  Code="EXTRACT",    NameAr="خلع سن",               NameEn="Extraction",             CreatedAt=dt },
+                new() { Id=8,  Code="SURG_EXT",   NameAr="خلع جراحي",            NameEn="Surgical Extraction",    CreatedAt=dt },
+                new() { Id=9,  Code="INC_DRAIN",  NameAr="فتح وتصريف خراج",      NameEn="Incision & Drainage",    CreatedAt=dt },
+                new() { Id=10, Code="BIOPSY",     NameAr="خزعة",                 NameEn="Biopsy",                 CreatedAt=dt },
+
+                // PERIO (4)
+                new() { Id=11, Code="SCALING",    NameAr="تنظيف جير",            NameEn="Scaling",                CreatedAt=dt },
+                new() { Id=12, Code="ROOT_PLAN",  NameAr="تنعيم جذور",           NameEn="Root Planing",           CreatedAt=dt },
+                new() { Id=13, Code="GINGIVECT",  NameAr="استئصال لثة",          NameEn="Gingivectomy",           CreatedAt=dt },
+
+                // PEDO (6)
+                new() { Id=14, Code="PULPOTOMY",  NameAr="بتر لب",               NameEn="Pulpotomy",              CreatedAt=dt },
+                new() { Id=15, Code="SSC_CROWN",  NameAr="تاج فولاذي للأطفال",   NameEn="Stainless Steel Crown",  CreatedAt=dt },
+                new() { Id=16, Code="FLUORIDE",   NameAr="فلورايد",              NameEn="Fluoride Application",   CreatedAt=dt },
+                new() { Id=17, Code="SEALANT",    NameAr="حماية أسنان",          NameEn="Fissure Sealant",        CreatedAt=dt },
+
+                // FPD (7)
+                new() { Id=18, Code="CROWN_PREP", NameAr="تحضير تاج",            NameEn="Crown Preparation",      CreatedAt=dt },
+                new() { Id=19, Code="BRIDGE",     NameAr="جسر أسنان",            NameEn="Bridge",                 CreatedAt=dt },
+                new() { Id=20, Code="CEMENT",     NameAr="تثبيت تركيبة",         NameEn="Cementation",            CreatedAt=dt },
+
+                // RPD (8)
+                new() { Id=21, Code="COMP_DEN",   NameAr="طقم أسنان كامل",       NameEn="Complete Denture",       CreatedAt=dt },
+                new() { Id=22, Code="PART_DEN",   NameAr="طقم أسنان جزئي",       NameEn="Partial Denture",        CreatedAt=dt },
+                new() { Id=23, Code="DEN_ADJ",    NameAr="تعديل طقم",            NameEn="Denture Adjustment",     CreatedAt=dt },
+            };
+        }
     }
 }

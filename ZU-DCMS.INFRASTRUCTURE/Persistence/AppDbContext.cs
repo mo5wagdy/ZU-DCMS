@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using ZU_DCMS.Domain.Entities;
 using ZU_DCMS.INFRASTRUCTURE.Identity;
@@ -35,6 +35,8 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence
         // __ Entities for managing diagnoses and procedures __ //
         public DbSet<DiagnosisType> DiagnosisTypes => Set<DiagnosisType>();
         public DbSet<Procedure> Procedures => Set<Procedure>();
+        public DbSet<ClinicDiagnosisType> ClinicDiagnosisTypes => Set<ClinicDiagnosisType>();
+        public DbSet<ClinicProcedure> ClinicProcedures => Set<ClinicProcedure>();
         public DbSet<CaseSessionProcedure> CaseSessionProcedures => Set<CaseSessionProcedure>();
 
         // __ Academic entities to manage terms, requirements, and related information __ //

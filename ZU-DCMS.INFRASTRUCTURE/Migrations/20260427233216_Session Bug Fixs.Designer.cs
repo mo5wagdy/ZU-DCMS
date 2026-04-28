@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ZU_DCMS.INFRASTRUCTURE.Persistence;
 
@@ -11,9 +12,11 @@ using ZU_DCMS.INFRASTRUCTURE.Persistence;
 namespace ZU_DCMS.INFRASTRUCTURE.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260427233216_Session Bug Fixs")]
+    partial class SessionBugFixs
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -172,12 +175,6 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("CaseAssignmentId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ClinicId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -218,10 +215,6 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
 
                     b.HasIndex("BookingCode")
                         .IsUnique();
-
-                    b.HasIndex("CaseAssignmentId");
-
-                    b.HasIndex("ClinicId");
 
                     b.HasIndex("PatientId");
 
@@ -2540,15 +2533,6 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
 
             modelBuilder.Entity("ZU_DCMS.Domain.Entities.Booking", b =>
                 {
-                    b.HasOne("ZU_DCMS.Domain.Entities.CaseAssignment", "CaseAssignment")
-                        .WithMany()
-                        .HasForeignKey("CaseAssignmentId");
-
-                    b.HasOne("ZU_DCMS.Domain.Entities.Clinic", "Clinic")
-                        .WithMany()
-                        .HasForeignKey("ClinicId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("ZU_DCMS.Domain.Entities.Patient", "Patient")
                         .WithMany("Bookings")
                         .HasForeignKey("PatientId")
@@ -2560,10 +2544,6 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                         .HasForeignKey("SessionId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("CaseAssignment");
-
-                    b.Navigation("Clinic");
 
                     b.Navigation("Patient");
 

@@ -102,6 +102,8 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.Login
                 {
                     AccessToken = tokens.Value.AccessToken,
                     RefreshToken = tokens.Value.RefreshToken,
+                    UserId = user.Id,
+                    FullName = user.FullName,
                     Role = UserRoles.Patient,
                     RedirectUrl = RedirectUrls.GetByRole(UserRoles.Patient)
                 });

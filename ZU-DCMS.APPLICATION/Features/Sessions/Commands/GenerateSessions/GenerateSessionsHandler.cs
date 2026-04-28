@@ -32,59 +32,66 @@ namespace ZU_DCMS.APPLICATION.Features.Sessions.Commands.GenerateSessions
         // __________ Generate Sessions __________ //
         public async Task<Result<List<SessionDto>>> Handle(GenerateSessionsCommand command, CancellationToken cancellationToken)
         {
-            var date = command.Date;
+            var startDate = command.StartDate;
+            var daysCount = command.DaysCount;
+            var allCreatedSessions = new List<Session>();
 
-            _logger.LogInfo("Generating sessions for {Date}", date);
+            _logger.LogInfo("Generating sessions starting from {StartDate} for {DaysCount} days", startDate, daysCount);
 
-            // __ Prevent generating sessions on Fridays __ //
-            if (date.DayOfWeek == DayOfWeek.Friday)
-            {
-                _logger.LogWarning("Attempt to generate sessions on Friday {Date}", date);
-                
-                return Result.Failure<List<SessionDto>>("الجمعة إجازة"); 
-            }
-
-            // __ Check if sessions already exist for the date __ //
-            var exists = await _uow.Repository<Session>().ExistsAsync(s => s.Date.Date == date.Date);
-
-            if (exists)
-            {
-                _logger.LogWarning("Sessions already exist for {Date}", date);
-              
-                return Result.Failure<List<SessionDto>>("السكاشن موجودة بالفعل");
-            }
-
-            // __ Get session configuration __ //
+            // __ Get session configuration once __ //
             var config = await GetSessionConfigAsync();
             
             if (config is null)
             {
                 _logger.LogError("Session configuration is missing");
-               
                 return Result.Failure<List<SessionDto>>("إعدادات السكاشن غير موجودة");
             }
 
-            // __ Create sessions based on configuration __ //
-            var sessions = config.SessionTimes.Select(time => new Session
+            for (int i = 0; i < daysCount; i++)
             {
-                Date = date.Date,
-                StartTime = time,
-                EndTime = time.Add(TimeSpan.FromHours(2)),
-                MaxNewPatients = config.MaxNewPerSession,
-                MaxFollowUpPatients = config.MaxFollowUpPerSession,
-                CurrentNewCount = 0,
-                CurrentFollowUpCount = 0,
-                IsActive = true
-            }).ToList();
+                var currentDate = startDate.AddDays(i);
 
-            // __ Save sessions to database __ //
-            await _uow.Repository<Session>().AddRangeAsync(sessions);
-            
-            await _uow.SaveChangesAsync(cancellationToken: cancellationToken);
+                // __ Prevent generating sessions on Fridays __ //
+                if (currentDate.DayOfWeek == DayOfWeek.Friday)
+                {
+                    _logger.LogInfo("Skipping Friday {Date}", currentDate);
+                    continue;
+                }
 
-            _logger.LogInfo("Sessions created successfully for {Date} Count: {Count}", date, sessions.Count);
+                // __ Check if sessions already exist for the date __ //
+                var exists = await _uow.Repository<Session>().ExistsAsync(s => s.Date.Date == currentDate.Date);
+
+                if (exists)
+                {
+                    _logger.LogInfo("Sessions already exist for {Date}, skipping", currentDate);
+                    continue;
+                }
+
+                // __ Create sessions for this day based on configuration __ //
+                var daySessions = config.SessionTimes.Select(time => new Session
+                {
+                    Date = currentDate.Date,
+                    StartTime = time,
+                    EndTime = time.Add(TimeSpan.FromHours(2)),
+                    MaxNewPatients = config.MaxNewPerSession,
+                    MaxFollowUpPatients = config.MaxFollowUpPerSession,
+                    CurrentNewCount = 0,
+                    CurrentFollowUpCount = 0,
+                    IsActive = true
+                }).ToList();
+
+                allCreatedSessions.AddRange(daySessions);
+            }
+
+            if (allCreatedSessions.Any())
+            {
+                // __ Save all sessions to database __ //
+                await _uow.Repository<Session>().AddRangeAsync(allCreatedSessions);
+                await _uow.SaveChangesAsync(cancellationToken: cancellationToken);
+                _logger.LogInfo("Total sessions created: {Count}", allCreatedSessions.Count);
+            }
             
-            return Result.Success(_mapper.Map<List<SessionDto>>(sessions));
+            return Result.Success(_mapper.Map<List<SessionDto>>(allCreatedSessions));
         }
 
         // __________ Private Helpers __________ //

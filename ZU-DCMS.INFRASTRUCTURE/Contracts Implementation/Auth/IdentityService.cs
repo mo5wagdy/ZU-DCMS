@@ -236,6 +236,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
                 FullName = user.FullName,
                 PhoneNumber = user.PhoneNumber ?? string.Empty,
                 Role = role ?? string.Empty,
+                UserType = user.UserType.ToString(),
                 IsActive = user.IsActive,
                 CreatedAt = user.CreatedAt
             };

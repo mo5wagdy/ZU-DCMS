@@ -1,4 +1,4 @@
-﻿
+
 namespace ZU_DCMS.APPLICATION.DTOs.Auth
 {
     // __ This class represents a Data Transfer Object for application user information. __ //
@@ -10,6 +10,7 @@ namespace ZU_DCMS.APPLICATION.DTOs.Auth
         public string? Email { get; set; }
         public string FullName { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
+        public string UserType { get; set; } = string.Empty;
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
     }

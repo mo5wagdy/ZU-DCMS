@@ -59,7 +59,7 @@ namespace ZU_DCMS.API.Endpoints.Patients
                     ? Results.Ok(ApiResponse<PatientDto>.Success(result.Value, "Patient metrics retrieved."))
                     : Results.NotFound(ApiResponse<PatientDto>.Failure(result.Errors, "Patient not found."));
             })
-            //.RequireAuthorization("StaffViewPolicy")
+            .RequireAuthorization("StaffViewPolicy")
             .WithName("GetPatientById")
             .WithSummary("Pulls patient base using their absolute Database ID")
             .Produces<ApiResponse<PatientDto>>(StatusCodes.Status200OK)

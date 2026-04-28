@@ -1,4 +1,4 @@
-﻿
+
 using ZU_DCMS.Domain.Common;
 using ZU_DCMS.Domain.Enums;
 
@@ -17,10 +17,14 @@ namespace ZU_DCMS.Domain.Entities
         // _____________ Foreign Keys _____________ //
         public int PatientId { get; set; }
         public int SessionId { get; set; }
+        public int? ClinicId { get; set; }
+        public int? CaseAssignmentId { get; set; }
 
         // _____________ Navigation _____________ //
         public Patient Patient { get; set; } = null!;
         public Session Session { get; set; } = null!;
+        public Clinic? Clinic { get; set; }
+        public CaseAssignment? CaseAssignment { get; set; }
         public DiagnosisRecord? DiagnosisRecord { get; set; }
     }
 }

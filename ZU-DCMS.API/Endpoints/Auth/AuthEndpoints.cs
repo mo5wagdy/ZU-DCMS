@@ -93,6 +93,23 @@ namespace ZU_DCMS.API.Endpoints.Auth
             .WithSummary("Refreshes the access token using a valid refresh token")
             .Produces<ApiResponse<AuthDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status401Unauthorized);
+
+            // 6. Logout / Revoke Token
+            group.MapPost("/logout", async ([FromServices] ISender sender, [FromBody] LogoutRequestDto request) =>
+            {
+                var command = new ZU_DCMS.APPLICATION.Features.Auth.Commands.Logout.LogoutCommand(request.RefreshToken);
+                var result = await sender.Send(command);
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<string>.Success(result.Value, "Logged out successfully."))
+                    : Results.BadRequest(ApiResponse<string>.Failure(result.Errors, "Logout failed."));
+            })
+            .RequireAuthorization() // Should be authenticated to logout
+            .WithName("Logout")
+            .WithSummary("Revokes the refresh token and logs the user out")
+            .Produces<ApiResponse<string>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<string>>(StatusCodes.Status400BadRequest);
         }
     }
+
+    public record LogoutRequestDto(string RefreshToken);
 }

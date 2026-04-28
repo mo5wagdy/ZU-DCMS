@@ -39,8 +39,8 @@ namespace ZU_DCMS.APPLICATION.Features.Sessions.Queries.GetAvailableSlots
 
             _logger.LogInfo("Fetching available slots for {BookingType}", bookingType);
 
-            // __ Loop through upcoming days until we find 4 available slots or reach the look-ahead limit __ //
-            while (slots.Count < 4 && daysChecked < MaxLookAheadDays)
+            // __ Loop through all upcoming days within the look-ahead limit __ //
+            while (daysChecked < MaxLookAheadDays)
             {
                 // __ Skip Fridays __ //
                 if (currentDate.DayOfWeek == DayOfWeek.Friday)
@@ -92,9 +92,6 @@ namespace ZU_DCMS.APPLICATION.Features.Sessions.Queries.GetAvailableSlots
                         AvailableFollowUpSlots = session.MaxFollowUpPatients - session.CurrentFollowUpCount,
                         IsAvailable = true
                     });
-
-                    // __ If we have found 4 available slots, we can stop looking further __ //
-                    if (slots.Count >= 4) break;
                 }
 
                 // __ Move to the next day __ //

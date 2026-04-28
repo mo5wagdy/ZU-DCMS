@@ -36,7 +36,8 @@ namespace ZU_DCMS.APPLICATION.Common.Token
                 new (ClaimTypes.NameIdentifier, userId),
                 new (ClaimTypes.Name, user?.Username ?? ""),
                 new (ClaimTypes.Email, user?.Email     ?? string.Empty),
-                new ("fullName",       user?.FullName  ?? string.Empty)
+                new ("fullName",       user?.FullName  ?? string.Empty),
+                new ("UserType",       user?.UserType  ?? string.Empty)
             };
 
             foreach (var role in roles)
@@ -129,6 +130,15 @@ namespace ZU_DCMS.APPLICATION.Common.Token
 
             // __ Note: Caller must call SaveChanges to persist the revocation __ //
             return Task.CompletedTask;
+        }
+
+        public async Task<bool> RevokeByTokenAsync(string token)
+        {
+            var stored = await _uow.Repository<RefreshToken>().GetFirstOrDefaultAsync(t => t.Token == token);
+            if (stored == null || !stored.IsActive) return false;
+
+            await RevokeAsync(stored);
+            return await _uow.SaveChangesAsync() > 0;
         }
     }
 }

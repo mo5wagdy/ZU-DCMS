@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
@@ -52,6 +52,15 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                    .WithOne(d => d.Booking)
                    .HasForeignKey<DiagnosisRecord>(d => d.BookingId)
                    .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Property(b => b.ClinicId)
+                   .IsRequired(false);
+
+            builder.HasOne(b => b.Clinic)
+                   .WithMany()
+                   .HasForeignKey(b => b.ClinicId)
+                   .OnDelete(DeleteBehavior.Restrict)
+                   .IsRequired(false);
         }
     }
 }

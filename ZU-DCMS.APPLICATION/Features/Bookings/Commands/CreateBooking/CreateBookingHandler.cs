@@ -72,6 +72,33 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
                 return Result.Failure<BookingDto>("لديك حجز نشط بالفعل");
             }
 
+            int? followUpClinicId = null;
+
+            CaseAssignment? lastCase = null;
+            CaseSession? lastSession = null;
+
+            if (dto.BookingType == BookingType.FollowUp)
+            {
+                // Find last active CaseAssignment for this patient
+                lastCase = await _uow.Repository<CaseAssignment>()
+                    .GetFirstOrDefaultAsync(
+                        c => c.DiagnosisRecord.Booking.PatientId == patientId &&
+                             c.Status != CaseStatus.Completed, 
+                             includes: c => c.Sessions);
+
+                if (lastCase == null)
+                    return Result.Failure<BookingDto>("لا يمكن حجز متابعة بدون حالة علاجية مسبقة");
+
+                lastSession = lastCase.Sessions
+                    .OrderByDescending(s => s.SessionDate)
+                    .FirstOrDefault();
+
+                if (lastSession == null || !lastSession.HasFollowUp)
+                    return Result.Failure<BookingDto>("لا توجد متابعة مطلوبة لحالتك الحالية");
+
+                followUpClinicId = lastCase.ClinicId;
+            }
+
             // __ Validate time slot format __ //
             if (!TimeSpan.TryParse(dto.PreferredTimeSlot, out var time))
                 return Result.Failure<BookingDto>("صيغة الوقت غير صحيحة");
@@ -142,6 +169,8 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
                     BookingCode = await _codeGen.GenerateAsync("BKN", "BookingCodeSeq"),
                     PatientId = patientId,
                     SessionId = session.Id,
+                    ClinicId = followUpClinicId,
+                    CaseAssignmentId = lastCase?.Id,
                     BookingType = dto.BookingType,
                     Status = BookingStatus.Confirmed,
                     PreliminaryComplaint = dto.PreliminaryComplaint?.Trim(),
@@ -165,7 +194,8 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
                     b => b.Id == booking.Id,
                     false,
                     b => b.Patient,
-                    b => b.Session
+                    b => b.Session,
+                    b => b.Clinic!
                  );
 
                 return Result.Success(_mapper.Map<BookingDto>(full!));

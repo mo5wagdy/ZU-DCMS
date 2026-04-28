@@ -1,4 +1,4 @@
-﻿using ZU_DCMS.Domain.Enums;
+using ZU_DCMS.Domain.Enums;
 
 namespace ZU_DCMS.APPLICATION.DTOs.Booking
 {
@@ -13,5 +13,6 @@ namespace ZU_DCMS.APPLICATION.DTOs.Booking
         public string? PreliminaryComplaint { get; set; }
         public DateTime SessionDate { get; set; }
         public string SessionTime { get; set; } = string.Empty;
+        public string? ClinicName { get; set; }
     }
 }

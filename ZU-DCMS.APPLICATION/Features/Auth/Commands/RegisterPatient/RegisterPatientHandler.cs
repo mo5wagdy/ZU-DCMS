@@ -147,6 +147,8 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient
                 {
                     AccessToken = tokens.Value.AccessToken,
                     RefreshToken = tokens.Value.RefreshToken,
+                    UserId = userId,
+                    FullName = dto.FullName,
                     Role = UserRoles.Patient,
                     RedirectUrl = RedirectUrls.GetByRole(UserRoles.Patient)
                 });

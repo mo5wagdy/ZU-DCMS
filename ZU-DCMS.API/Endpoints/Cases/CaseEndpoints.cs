@@ -36,7 +36,7 @@ namespace ZU_DCMS.API.Endpoints.Cases
                     ? Results.Ok(ApiResponse<CaseSessionDto>.Success(result.Value, "Session case progress strictly logged."))
                     : Results.BadRequest(ApiResponse<CaseSessionDto>.Failure(result.Errors, "Failed to log case progress."));
             })
-            //.RequireAuthorization("StudentPolicy") // Prevents anyone else from messing with the sequence
+            .RequireAuthorization("StudentPolicy") // Prevents anyone else from messing with the sequence
             .WithName("AddSessionProgress")
             .WithSummary("Records iterative steps/progress metrics for an ongoing clinical case operation")
             .Produces<ApiResponse<CaseSessionDto>>(StatusCodes.Status200OK)
@@ -50,7 +50,7 @@ namespace ZU_DCMS.API.Endpoints.Cases
                     ? Results.Ok(ApiResponse<string>.Success(string.Empty, "Case successfully submitted for formal review."))
                     : Results.BadRequest(ApiResponse<string>.Failure(result.Errors, "Failed to submit case."));
             })
-            //.RequireAuthorization("StudentPolicy")
+            .RequireAuthorization("StudentPolicy")
             .WithName("SubmitCaseForReview")
             .WithSummary("Ends the workflow sequence and pushes the case to the pending evaluator review queue")
             .Produces<ApiResponse<string>>(StatusCodes.Status200OK)
@@ -64,11 +64,26 @@ namespace ZU_DCMS.API.Endpoints.Cases
                     ? Results.Ok(ApiResponse<StudentProgressDto>.Success(result.Value, "Student progress stats parsed perfectly."))
                     : Results.BadRequest(ApiResponse<StudentProgressDto>.Failure(result.Errors, "Failed to get progress stats."));
             })
-            //.RequireAuthorization("StudentPolicy")
+            .RequireAuthorization("StudentPolicy")
             .WithName("GetStudentProgress")
             .WithSummary("Retrieves the general clinical progress overview constraints for the authorized student")
             .Produces<ApiResponse<StudentProgressDto>>(StatusCodes.Status200OK)
             .Produces<ApiResponse<StudentProgressDto>>(StatusCodes.Status400BadRequest);
+
+            group.MapGet("/today-patients", async ([FromServices] ISender sender, string userId) =>
+            {
+                var query = new ZU_DCMS.APPLICATION.Features.Cases.Queries.GetStudentTodayPatients.GetStudentTodayPatientsQuery(userId);
+                var result = await sender.Send(query);
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<List<CaseAssignmentDto>>.Success(result.Value, "Today's patients retrieved."))
+                    : Results.BadRequest(ApiResponse<List<CaseAssignmentDto>>.Failure(result.Errors, "Failed to retrieve today's patients."));
+            })
+            .RequireAuthorization("StudentPolicy")
+            .WithName("GetStudentTodayPatients")
+            .WithSummary("Retrieves assigned cases that have a confirmed booking for today")
+            .Produces<ApiResponse<List<CaseAssignmentDto>>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<List<CaseAssignmentDto>>>(StatusCodes.Status400BadRequest);
+
 
 
             // ==== STAFF / INSTRUCTOR ACTIONS ====
@@ -81,7 +96,7 @@ namespace ZU_DCMS.API.Endpoints.Cases
                     ? Results.Ok(ApiResponse<string>.Success(string.Empty, "The system registered the formal review evaluation securely."))
                     : Results.BadRequest(ApiResponse<string>.Failure(result.Errors, "Failed to register review evaluation."));
             })
-            //.RequireAuthorization("StaffReviewPolicy") // Only for High level staff: Instructors, Dean, ViceDean, Professor Role structures
+            .RequireAuthorization("StaffReviewPolicy") // Only for High level staff: Instructors, Dean, ViceDean, Professor Role structures
             .WithName("ReviewCase")
             .WithSummary("Registers a formal grade and detailed review footprint for a submitted student case")
             .Produces<ApiResponse<string>>(StatusCodes.Status200OK)
@@ -96,7 +111,7 @@ namespace ZU_DCMS.API.Endpoints.Cases
                     ? Results.Ok(ApiResponse<List<CaseAssignmentDto>>.Success(result.Value, "Incoming queue of submission cases successfully mapped."))
                     : Results.BadRequest(ApiResponse<List<CaseAssignmentDto>>.Failure(result.Errors, "Failed to map submission cases."));
             })
-            //.RequireAuthorization("StaffReviewPolicy")
+            .RequireAuthorization("StaffReviewPolicy")
             .WithName("GetCasesForReview")
             .WithSummary("Retrieves all submitted procedural cases currently pending instructor validation")
             .Produces<ApiResponse<List<CaseAssignmentDto>>>(StatusCodes.Status200OK)

@@ -20,7 +20,7 @@ namespace ZU_DCMS.API
             .AddJwtBearer(options =>
             {
                 var jwtSettings = configuration.GetSection("JwtSettings");
-                var secretKey = jwtSettings["SecretKey"] ?? "DefaultSecretKeyFallbackToBeReplaced";
+                var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey is missing from configuration.");
 
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -40,14 +40,11 @@ namespace ZU_DCMS.API
                 o.AddPolicy("PatientPolicy", policy => policy.RequireClaim("UserType", "Patient").RequireRole("Patient"));
                 o.AddPolicy("AdminPolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("Admin"));
                 o.AddPolicy("StudentPolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("Student"));
-                o.AddPolicy("StaffReviewPolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("TeachingAssistant"));
-                o.AddPolicy("ClinicalCorePolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("InternDoctor"));
-                o.AddPolicy("PublicViewPolicy", policy => policy.RequireClaim("UserType", "Staff"));
-                o.AddPolicy("PublicViewPolicy", policy => policy.RequireClaim("UserType", "Patient"));
-                o.AddPolicy("StaffViewPolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("InternDoctor"));
-                o.AddPolicy("StaffViewPolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("Dean"));
-                o.AddPolicy("StaffViewPolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("ViceDean"));
-                o.AddPolicy("StaffViewPolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("Professor"));
+                o.AddPolicy("StaffReviewPolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("TeachingAssistant", "Dean", "ViceDean", "Professor", "Admin"));
+                o.AddPolicy("ClinicalCorePolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("InternDoctor", "Admin"));
+                o.AddPolicy("PublicViewPolicy", policy => policy.RequireAssertion(context => 
+                    context.User.HasClaim("UserType", "Staff") || context.User.HasClaim("UserType", "Patient")));
+                o.AddPolicy("StaffViewPolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("InternDoctor", "Dean", "ViceDean", "Professor", "Admin"));
             });
 
             // __ Configure API Versioning (Defaults to V1) __ //

@@ -1,81 +1,39 @@
-﻿
+
 using ZU_DCMS.Domain.Common;
 using ZU_DCMS.Domain.Enums;
 
 namespace ZU_DCMS.Domain.Entities
 {
-    /// <summary>
-    /// CaseAssignment represents the assignment of a diagnosed patient case to a student.
-    /// 
-    /// Key Responsibilities:
-    /// - Links a diagnosis to a specific student for treatment
-    /// - Tracks case completion status and sessions
-    /// - Maintains data integrity by storing TermId, ClinicId, and StudentId atomically
-    /// - Enables academic year and clinic-specific validations
-    /// 
-    /// Workflow:
-    /// 1. Doctor diagnoses a patient (creates DiagnosisRecord)
-    /// 2. System or doctor assigns case to eligible student (creates CaseAssignment)
-    /// 3. Student attends sessions (creates CaseSession records)
-    /// 4. Case is marked as Completed or Transferred
-    /// 5. TermRequirement is updated to reflect progress
-    /// </summary>
+        // __ CaseAssignment represents the assignment of a diagnosed patient case to a student. __ //
     public class CaseAssignment : BaseEntity
     {
         // _____________ Main Properties _____________ //
-        /// <summary>
-        /// Current status of the case assignment.
-        /// 
-        /// Status Flow:
-        /// - Active: Case just assigned, student hasn't started sessions
-        /// - InProgress: Student has started working on the case
-        /// - Completed: Case work is finished, meets all requirements
-        /// - Transferred: Case transferred to another student or clinic
-        /// - Cancelled: Assignment was cancelled
-        /// </summary>
+        // __ Current status of the case assignment. __ //
         public CaseStatus Status { get; set; } = CaseStatus.InProgress;
 
-        /// <summary>
-        /// Timestamp when this case was assigned to the student.
-        /// Used for audit trail and workload distribution analysis.
-        /// </summary>
+        // __ Timestamp when this case was assigned to the student. __ //
         public DateTime AssignedAt { get; set; } = DateTime.UtcNow;
 
-        /// <summary>
-        /// Optional notes about the assignment (e.g., special instructions, constraints).
-        /// </summary>
+        // __ Timestamp when this case was successfully completed and approved by the TA. __ //
+        public DateTime? CompletedAt { get; set; }
+
+        // __ Optional notes about the assignment (e.g., special instructions, constraints). __ //
         public string? Notes { get; set; }
 
         // _____________ Foreign Keys _____________ //
-        /// <summary>
-        /// The InternDoctor who assigned this case.
-        /// Required for audit trail and permission validation.
-        /// </summary>
+        // __ The InternDoctor who assigned this case. __ //
         public int AssignedByInternId { get; set; }
 
-        /// <summary>
-        /// Reference to the DiagnosisRecord (the case to be treated).
-        /// Links the assignment to the original diagnosis.
-        /// </summary>
+        // __ Reference to the DiagnosisRecord (the case to be treated). __ //
         public int DiagnosisRecordId { get; set; }
 
-        /// <summary>
-        /// Reference to the Student assigned to treat this case.
-        /// </summary>
+        // __ Reference to the Student assigned to treat this case. __ //
         public int StudentId { get; set; }
 
-        /// <summary>
-        /// Reference to the Term when this case is being handled.
-        /// CRITICAL: Must come from student's ActiveTermId at the time of assignment.
-        /// Used for tracking progress against TermRequirement.
-        /// </summary>
+        // __ Reference to the Term when this case is being handled. __ //
         public int TermId { get; set; }
 
-        /// <summary>
-        /// Reference to the Clinic where the case will be handled.
-        /// CRITICAL: Auto-retrieved from DiagnosisType's ClinicId.
-        /// Used for validating student's academic year against clinic constraints.
-        /// </summary>
+        // __ Reference to the Clinic where the case will be handled. __ //
         public int ClinicId { get; set; }
 
         // _____________ Navigation _____________ //

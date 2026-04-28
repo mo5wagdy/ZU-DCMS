@@ -90,6 +90,9 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
 
             try
             {
+                // __ Generate a random password if not provided __ //
+                var password = string.IsNullOrWhiteSpace(dto.Password) ? "ZU-DCMS@2026" : dto.Password;
+
                 // __ Create Identity user __ //
                 var (success, userId, error) = await _identity.CreateUserAsync
                     (
@@ -98,7 +101,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
                        phoneNumber: dto.PhoneNumber,
                        fullName: dto.FullName,
                        type: dto.Type,
-                       password: dto.Password
+                       password: password
                     );
 
                 // __ If failed to create

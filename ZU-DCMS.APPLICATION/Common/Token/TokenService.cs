@@ -31,13 +31,19 @@ namespace ZU_DCMS.APPLICATION.Common.Token
             var roles = await _identity.GetRolesAsync(userId);
 
             // __ Create claims for the JWT access token, including user ID, username, email, full name, and roles __ //
+            var userTypeString = user?.UserType ?? string.Empty;
+            if (userTypeString == "0" || string.IsNullOrEmpty(userTypeString))
+            {
+                userTypeString = roles.Contains("Patient") ? "Patient" : "Staff";
+            }
+
             var claims = new List<Claim>
             {
                 new (ClaimTypes.NameIdentifier, userId),
                 new (ClaimTypes.Name, user?.Username ?? ""),
                 new (ClaimTypes.Email, user?.Email     ?? string.Empty),
                 new ("fullName",       user?.FullName  ?? string.Empty),
-                new ("UserType",       user?.UserType  ?? string.Empty)
+                new ("UserType",       userTypeString)
             };
 
             foreach (var role in roles)

@@ -11,24 +11,7 @@ using ZU_DCMS.Domain.Interfaces;
 
 namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetAvailableStudents
 {
-    /// <summary>
-    /// Handles the retrieval of available students for case assignment.
-    /// 
-    /// This query applies strict filtering based on:
-    /// 1. Academic Year Constraints: Student's year must fall within clinic's min/max range
-    /// 2. Unsatisfied Requirements: Student must have an unsatisfied TermRequirement for this clinic
-    /// 3. Workload Limits: Student cannot have more active cases than clinic's max per student
-    /// 4. Priority Ranking: Prioritizes students with highest need (fewer completed cases)
-    /// 
-    /// Workflow:
-    /// 1. Load clinic to get academic year and workload constraints
-    /// 2. Load all TermRequirements for the clinic/term
-    /// 3. Filter students by academic year range
-    /// 4. Filter students by unsatisfied requirements
-    /// 5. Filter students by workload availability
-    /// 6. Order by priority (AI agent or fallback)
-    /// 7. Return ranked list to caller
-    /// </summary>
+                    // __ Handles the retrieval of available students for case assignment. __ //
     public class GetAvailableStudentsHandler : IRequestHandler<GetAvailableStudentsQuery, Result<List<StudentPriorityDto>>>
     {
         private readonly IUnitOfWork _uow;
@@ -50,20 +33,14 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetAvailableStudents
             _logger = logger;
         }
 
-        /// <summary>
-        /// Main handler method for retrieving available students with strict validation.
-        /// </summary>
+                    // __ Main handler method for retrieving available students with strict validation. __ //
         public async Task<Result<List<StudentPriorityDto>>> Handle(GetAvailableStudentsQuery query, CancellationToken cancellationToken)
         {
             var clinicId = query.ClinicId;
             var termId = query.TermId;
 
             // _____________ STEP 1: Validate Clinic Exists & Load Constraints _____________ //
-            /// <summary>
-            /// Load the clinic to access academic year constraints (MinAcademicYear, MaxAcademicYear)
-            /// and workload limit (MaxCasesPerStudent).
-            /// If clinic doesn't exist, return failure immediately.
-            /// </summary>
+                    // __ Load the clinic to access academic year constraints (MinAcademicYear, MaxAcademicYear) __ //
             var clinic = await _uow.Repository<Clinic>().GetByIdAsync(clinicId);
 
             if (clinic is null)
@@ -81,11 +58,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetAvailableStudents
             }
 
             // _____________ STEP 2: Check Cache Before Database Query _____________ //
-            /// <summary>
-            /// Use cache to reduce database calls.
-            /// Cache is keyed by clinic and includes all eligible students.
-            /// Cache duration is SHORT to ensure relatively fresh data.
-            /// </summary>
+                    // __ Use cache to reduce database calls. __ //
             var cacheKey = CacheKeys.AvailableStudents(clinicId);
 
             var result = await _cache.GetOrSetAsync
@@ -94,11 +67,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetAvailableStudents
                 async _ => 
                 {
                     // _____________ STEP 3: Load All Requirements & Students _____________ //
-                    /// <summary>
-                    /// Fetch all TermRequirements for this clinic and term.
-                    /// Include student data via navigation property for quick access.
-                    /// This includes active students with unsatisfied requirements.
-                    /// </summary>
+                    // __ Fetch all TermRequirements for this clinic and term. __ //
                     var requirements = await _uow.Repository<TermRequirement>().GetListAsync
                         (
                             r => r.ClinicId == clinicId && r.TermId == termId,
@@ -115,16 +84,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetAvailableStudents
                     }
 
                     // _____________ STEP 4: Apply Academic Year Validation _____________ //
-                    /// <summary>
-                    /// Filter students based on their academic year.
-                    /// Only students within [MinAcademicYear, MaxAcademicYear] range are eligible.
-                    /// 
-                    /// Example:
-                    /// - Clinic.MinAcademicYear = 2
-                    /// - Clinic.MaxAcademicYear = 4
-                    /// - Only students in years 2, 3, 4 can be assigned
-                    /// - 1st year students are filtered out
-                    /// </summary>
+                    // __ Filter students based on their academic year. __ //
                     var academicYearFiltered = requirements.Where
                     (r => 
                        {
@@ -148,16 +108,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetAvailableStudents
                     }
 
                     // _____________ STEP 5: Filter by Unsatisfied Requirements _____________ //
-                    /// <summary>
-                    /// Only include students with unsatisfied requirements.
-                    /// 
-                    /// Reason: If a student has already satisfied the clinic requirement,
-                    /// they should not be assigned more cases (unless they volunteer for extra).
-                    /// 
-                    /// IsSatisfied = (CompletedCount + TransferredCount) >= RequiredCount
-                    /// If IsSatisfied = true: Skip this student
-                    /// If IsSatisfied = false: Include this student
-                    /// </summary>
+                    // __ Only include students with unsatisfied requirements. __ //
                     var requirementFiltered = academicYearFiltered
                         .Where(r => !r.IsSatisfied)
                         .ToList();
@@ -170,17 +121,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetAvailableStudents
                     }
 
                     // _____________ STEP 6: Apply Workload Check _____________ //
-                    /// <summary>
-                    /// Filter students based on their current active case count in this clinic.
-                    /// A student cannot have more than Clinic.MaxCasesPerStudent active (InProgress) cases.
-                    /// 
-                    /// Process:
-                    /// 1. For each student, count their active CaseAssignments in this clinic
-                    /// 2. If count < MaxCasesPerStudent, they can accept more cases
-                    /// 3. If count >= MaxCasesPerStudent, they are overloaded and cannot accept more
-                    /// 
-                    /// Reason: Prevents student overload and ensures case quality.
-                    /// </summary>
+                    // __ Filter students based on their current active case count in this clinic. __ //
                     var workloadFilteredRequirements = new List<TermRequirement>();
                     
                     foreach (var req in requirementFiltered)
@@ -213,20 +154,8 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetAvailableStudents
                     }
 
                     // _____________ STEP 7: Get AI-Prioritized Student Order _____________ //
-                    /// <summary>
-                    /// Call the AI agent to determine optimal student priority based on:
-                    /// - Current case count and Type
-                    /// - Historical performance and completion rate
-                    /// - Specialty alignment
-                    /// - Other factors determined by the AI algorithm
-                    /// 
-                    /// Fallback: If AI fails, sort by requirement Priority field:
-                    /// - Priority 1 (0 cases): Highest need
-                    /// - Priority 2 (1 case): Medium-high need
-                    /// - Priority 3 (2 cases): Medium need
-                    /// - Priority 4 (3+ cases): Lower need
-                    /// </summary>
-                    IEnumerable<int> prioritizedIds;
+                    // __ Call the AI agent to determine optimal student priority based on: __ //
+                    // IEnumerable<int> prioritizedIds;
 
                     //try
                     //{
@@ -247,39 +176,68 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetAvailableStudents
                     //}
 
 
-                    prioritizedIds = workloadFilteredRequirements
-                        .OrderBy(r => r.Priority)  // Lower priority number = higher need
-                        .ThenBy(r => r.CompletedCount)  // If same priority, fewer completed = higher priority
-                        .Select(r => r.StudentId);
+                    // _____________ STEP 7: Calculate Performance Metrics & Prioritize _____________ //
+                    var studentIds = workloadFilteredRequirements.Select(r => r.StudentId).ToList();
+
+                    // Fetch all approved cases for these students in this term
+                    var completedCases = await _uow.Repository<CaseAssignment>().GetListAsync(c =>
+                        studentIds.Contains(c.StudentId) &&
+                        c.TermId == termId &&
+                        c.Status == CaseStatus.Approved &&
+                        c.CompletedAt != null
+                    );
+
+                    // Calculate metrics per student
+                    var studentMetrics = completedCases
+                        .GroupBy(c => c.StudentId)
+                        .ToDictionary(g => g.Key, g => 
+                        {
+                            double avgDays = g.Average(c => (c.CompletedAt!.Value - c.AssignedAt).TotalDays);
+                            string label = avgDays <= 7 ? "ممتاز" :
+                                           avgDays <= 14 ? "جيد" :
+                                           avgDays <= 21 ? "مقبول" : "بطيء";
+                            
+                            double score = avgDays <= 7 ? -0.3 :
+                                           avgDays <= 14 ? -0.1 :
+                                           avgDays <= 21 ? 0.1 : 0.3;
+                                           
+                            return (AverageDays: avgDays, Label: label, Score: score);
+                        });
+
+                    // Sort students using combined metrics
+                    var prioritizedStudents = workloadFilteredRequirements
+                        .OrderBy(r => 
+                        {
+                            double completionRatio = r.RequiredCount > 0 ? (double)r.CompletedCount / r.RequiredCount : 0;
+                            double performanceScore = studentMetrics.TryGetValue(r.StudentId, out var m) ? m.Score : 0;
+                            return completionRatio + performanceScore;
+                        })
+                        .ThenBy(r => r.Priority) // fallback to requirement priority if scores tie
+                        .ToList();
+
+
+
 
 
                     // _____________ STEP 8: Build Response DTOs _____________ //
-                    /// <summary>
-                    /// Create StudentPriorityDto objects in the order determined by AI/fallback.
-                    /// Each DTO includes:
-                    /// - Student identification (Id, Name, Code)
-                    /// - Progress info (CompletedCases, RequiredCases)
-                    /// - Priority rank (1 = first choice)
-                    /// - Completion status (IsComplete = already satisfied or not)
-                    /// </summary>
-                    var dict = workloadFilteredRequirements.ToDictionary(r => r.StudentId);
-
-                    var dtos = prioritizedIds
-                        .Where(dict.ContainsKey)  // Only include students from filtered list
-                        .Select((studentId, index) =>
+                    // __ Create StudentPriorityDto objects in the order determined by AI/fallback. __ //
+                    var dtos = prioritizedStudents
+                        .Select((req, index) =>
                         {
-                            var req = dict[studentId];
+                            var hasMetrics = studentMetrics.TryGetValue(req.StudentId, out var metrics);
                             return new StudentPriorityDto
                             {
-                                StudentId = studentId,
+                                StudentId = req.StudentId,
                                 FullName = req.Student.FullName,
                                 StudentCode = req.Student.StudentCode,
                                 AcademicYear = req.Student.AcademicYear,
                                 CompletedCases = req.CompletedCount,
                                 RequiredCases = req.RequiredCount,
-                                Priority = index + 1,  // Rank starts at 1 (first choice)
+                                Priority = index + 1,
                                 IsComplete = req.IsSatisfied,
-                                RequirementPriority = req.Priority  // Internal priority for sorting
+                                RequirementPriority = req.Priority,
+                                AverageCompletionDays = hasMetrics ? metrics.AverageDays : null,
+                                PerformanceLabel = hasMetrics ? metrics.Label : "لا يوجد"
                             };
                         })
                         .ToList();

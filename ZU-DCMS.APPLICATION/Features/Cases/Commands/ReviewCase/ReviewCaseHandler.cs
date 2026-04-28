@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using ZiggyCreatures.Caching.Fusion;
 using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Common.Cache;
@@ -97,6 +97,7 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.ReviewCase
                 if (dto.IsApproved)
                 {
                     caseAssignment.Status = CaseStatus.Approved;
+                    caseAssignment.CompletedAt = DateTime.UtcNow;
 
                     _uow.Repository<CaseAssignment>().Update(caseAssignment);
 

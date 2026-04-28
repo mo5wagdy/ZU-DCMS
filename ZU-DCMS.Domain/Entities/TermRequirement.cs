@@ -4,60 +4,28 @@ using ZU_DCMS.Domain.Common;
 
 namespace ZU_DCMS.Domain.Entities
 {
-    /// <summary>
-    /// TermRequirement represents the required number of cases a student must complete 
-    /// in a specific clinic during a specific academic term.
-    /// 
-    /// This entity is crucial for:
-    /// - Tracking student progress toward graduation requirements
-    /// - Determining assignment eligibility (unsatisfied requirements get priority)
-    /// - Academic year and clinic-specific validation
-    /// </summary>
+        // __ TermRequirement represents the required number of cases a student must complete __ //
     public class TermRequirement : BaseEntity
     {
         // _____________ Main Properties _____________ //
-        /// <summary>
-        /// Total number of cases required to be completed in this clinic for this term.
-        /// </summary>
+        // __ Total number of cases required to be completed in this clinic for this term. __ //
         public int RequiredCount { get; set; }
 
-        /// <summary>
-        /// Number of cases the student has completed in this clinic for this term.
-        /// Incremented when a CaseAssignment is marked as Completed.
-        /// </summary>
+        // __ Number of cases the student has completed in this clinic for this term. __ //
         public int CompletedCount { get; set; }
 
-        /// <summary>
-        /// Number of cases transferred/accepted from other clinics toward this requirement.
-        /// Allows flexibility in case distribution across clinics.
-        /// </summary>
+        // __ Number of cases transferred/accepted from other clinics toward this requirement. __ //
         public int TransferredCount { get; set; }
 
         // _____________ Calculated Properties (Not Mapped to Database) _____________ //
 
-        /// <summary>
-        /// Determines if the requirement has been satisfied.
-        /// Satisfied when: CompletedCount + TransferredCount >= RequiredCount
-        /// 
-        /// CRITICAL: This calculation is used to filter eligible students during case assignment.
-        /// Students with unsatisfied requirements have priority for new cases.
-        /// </summary>
+        // __ Determines if the requirement has been satisfied. __ //
 
         [NotMapped]
         public bool IsSatisfied =>
             CompletedCount + TransferredCount >= RequiredCount;
 
-        /// <summary>
-        /// Calculates the priority level for this requirement (1 = highest priority).
-        /// 
-        /// Priority Logic:
-        /// - Priority 1 (0 cases completed): Highest priority - student needs this requirement
-        /// - Priority 2 (1 case completed): Medium-high priority
-        /// - Priority 3 (2 cases completed): Medium-low priority
-        /// - Priority 4 (3+ cases completed): Lowest priority
-        /// 
-        /// Used by GetAvailableStudentsHandler to sort students by need.
-        /// </summary>
+        // __ Calculates the priority level for this requirement (1 = highest priority). __ //
 
         [NotMapped]
         public int Priority =>
@@ -73,20 +41,13 @@ namespace ZU_DCMS.Domain.Entities
         // => filter by all requirements progress in all clinics
 
         // _____________ Foreign Keys _____________ //
-        /// <summary>
-        /// Reference to the Student who must fulfill this requirement.
-        /// </summary>
+        // __ Reference to the Student who must fulfill this requirement. __ //
         public int StudentId { get; set; }
 
-        /// <summary>
-        /// Reference to the academic Term when this requirement applies.
-        /// </summary>
+        // __ Reference to the academic Term when this requirement applies. __ //
         public int TermId { get; set; }
 
-        /// <summary>
-        /// Reference to the Clinic where cases must be completed.
-        /// Combined with StudentId and TermId forms the unique requirement key.
-        /// </summary>
+        // __ Reference to the Clinic where cases must be completed. __ //
         public int ClinicId { get; set; }
 
         // _____________ Navigation _____________ //

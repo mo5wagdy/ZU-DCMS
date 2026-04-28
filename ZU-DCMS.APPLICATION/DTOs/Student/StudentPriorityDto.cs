@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -63,5 +63,17 @@ namespace ZU_DCMS.APPLICATION.DTOs.Student
         /// Lower number = higher need for cases.
         /// </summary>
         public int RequirementPriority { get; set; }
+
+        /// <summary>
+        /// Average days it takes the student to complete a case in this term.
+        /// null if the student hasn't completed any cases yet.
+        /// </summary>
+        public double? AverageCompletionDays { get; set; }
+
+        /// <summary>
+        /// Textual representation of the student's performance based on AverageCompletionDays.
+        /// E.g., "ممتاز", "جيد", "مقبول", "بطيء", "لا يوجد"
+        /// </summary>
+        public string PerformanceLabel { get; set; } = string.Empty;
     }
 }

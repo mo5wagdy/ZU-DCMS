@@ -1,17 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 using ZU_DCMS.Domain.Common;
 
 namespace ZU_DCMS.Domain.Entities
 {
-    /// <summary>
-    /// Clinic entity representing a dental clinic specialization.
-    /// 
-    /// Academic Year Constraints:
-    /// Clinics are restricted to specific academic year ranges (e.g., Clinic A accepts students from 2nd to 4th year).
-    /// This ensures proper student progression and skill-level alignment with clinic complexity.
-    /// </summary>
+        // __ Clinic entity representing a dental clinic specialization. __ //
     public class Clinic : BaseEntity
     {
         // _____________ Main Properties _____________ //
@@ -21,24 +13,14 @@ namespace ZU_DCMS.Domain.Entities
         public int MaxDailyPatients { get; set; }
 
         // _____________ Academic Year Constraints _____________ //
-        /// <summary>
-        /// Minimum academic year allowed for students in this clinic.
-        /// Example: 2 means only 2nd year and above can be assigned to this clinic.
-        /// </summary>
+        // __ Minimum academic year allowed for students in this clinic. __ //
         public int MinAcademicYear { get; set; } = 1;
 
-        /// <summary>
-        /// Maximum academic year allowed for students in this clinic.
-        /// Example: 4 means only up to 4th year students can be assigned to this clinic.
-        /// </summary>
+        // __ Maximum academic year allowed for students in this clinic. __ //
         public int MaxAcademicYear { get; set; } = 4;
 
         // _____________ Workload Constraints _____________ //
-        /// <summary>
-        /// Maximum number of active (InProgress) cases a student can have in this clinic simultaneously.
-        /// Prevents student overload and ensures case quality.
-        /// Default: 3 cases maximum per student per clinic.
-        /// </summary>
+        // __ Maximum number of active (InProgress) cases a student can have in this clinic simultaneously. __ //
         public int MaxCasesPerStudent { get; set; } = 3;
 
         // _____________ Navigation _____________ //

@@ -10,29 +10,7 @@ using ZU_DCMS.Domain.Interfaces;
 
 namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
 {
-    /// <summary>
-    /// Handles the assignment of a student to a diagnosed case (DiagnosisRecord).
-    /// 
-    /// This handler implements strict validation based on:
-    /// 1. Academic Year Constraints: Student's year must match clinic's min/max range
-    /// 2. Unsatisfied Requirements: Student must have an unsatisfied TermRequirement for this clinic
-    /// 3. Workload Limits: Student cannot exceed the clinic's max cases per student
-    /// 4. Auto-Clinic Selection: ClinicId is retrieved from DiagnosisRecord, not the request
-    /// 5. Data Integrity: TermId comes from student's ActiveTermId
-    /// 
-    /// Workflow:
-    /// 1. Load and validate DiagnosisRecord
-    /// 2. Load clinic details and constraints (MinAcademicYear, MaxAcademicYear, MaxCasesPerStudent)
-    /// 3. Validate student eligibility:
-    ///    - Student exists and is active
-    ///    - Student's academic year within clinic range
-    ///    - Student has unsatisfied requirement for this clinic
-    ///    - Student has capacity for more cases
-    /// 4. Create CaseAssignment within transaction (atomic operation)
-    /// 5. Mark DiagnosisRecord as assigned
-    /// 6. Publish event for background processing
-    /// 7. Return confirmation to caller
-    /// </summary>
+        // __ Handles the assignment of a student to a diagnosed case (DiagnosisRecord). __ //
     public class AssignStudentHandler : IRequestHandler<AssignStudentCommand, Result<CaseAssignmentDto>>
     {
         private readonly IUnitOfWork _uow;
@@ -52,23 +30,14 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
             _logger = logger;
         }
 
-        /// <summary>
-        /// Main handler method for assigning a student to a case.
-        /// Implements strict academic year and workload validation.
-        /// </summary>
+        // __ Main handler method for assigning a student to a case. __ //
         public async Task<Result<CaseAssignmentDto>> Handle(AssignStudentCommand command, CancellationToken cancellationToken)
         {
             var internDoctorId = command.InternDoctorId;
             var dto = command.Dto;
 
             // _____________ VALIDATION STEP 1: Validate DiagnosisRecord _____________ //
-            /// <summary>
-            /// Load the DiagnosisRecord and its related data.
-            /// Check that:
-            /// - Record exists
-            /// - Record is not already assigned
-            /// - Clinic and DiagnosisType are loaded
-            /// </summary>
+        // __ Load the DiagnosisRecord and its related data. __ //
             var diagnosis = await _uow.Repository<DiagnosisRecord>().GetFirstOrDefaultAsync
                 (
                     d => d.Id == dto.DiagnosisRecordId,
@@ -94,17 +63,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
             }
 
             // _____________ AUTO-CLINIC SELECTION STEP 2: Extract ClinicId from DiagnosisRecord _____________ //
-            /// <summary>
-            /// CRITICAL: ClinicId is NOT provided in the request.
-            /// Instead, it is automatically retrieved from the DiagnosisRecord.
-            /// 
-            /// Reason for Auto-Population:
-            /// - Ensures data consistency: Case is assigned in the same clinic where diagnosis was made
-            /// - Prevents mismatches: Prevents assigning a case to a student from a different clinic
-            /// - Simplifies API: Client doesn't need to know clinic ID
-            /// 
-            /// The ClinicId links to clinic-specific constraints (academic year range, workload limits).
-            /// </summary>
+        // __ CRITICAL: ClinicId is NOT provided in the request. __ //
             var clinicId = diagnosis.ClinicId;
             var clinic = diagnosis.Clinic;
 
@@ -124,9 +83,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
             }
 
             // _____________ VALIDATION STEP 3: Validate InternDoctor _____________ //
-            /// <summary>
-            /// Verify that the intern doctor making the assignment exists and is valid.
-            /// </summary>
+        // __ Verify that the intern doctor making the assignment exists and is valid. __ //
             var intern = await _uow.Repository<InternDoctor>().GetFirstOrDefaultAsync(i => i.ApplicationUserId == internDoctorId);
 
             if (intern is null)
@@ -137,12 +94,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
             }
 
             // _____________ VALIDATION STEP 4: Validate Student Basic Requirements _____________ //
-            /// <summary>
-            /// Load student and check:
-            /// - Student exists in database
-            /// - Student is marked as active (not suspended/deleted)
-            /// - Student has an active term (required for case assignment)
-            /// </summary>
+        // __ Load student and check: __ //
             var student = await _uow.Repository<Student>().GetByIdAsync(dto.StudentId);
 
             if (student is null || !student.IsActive)
@@ -160,16 +112,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
             }
 
             // _____________ VALIDATION STEP 5: Academic Year Constraint _____________ //
-            /// <summary>
-            /// Validate that student's academic year falls within the clinic's allowed range.
-            /// 
-            /// Example Scenario:
-            /// - Surgery clinic: MinAcademicYear = 3, MaxAcademicYear = 4
-            /// - Student.AcademicYear = 2
-            /// - Result: FAIL - Student is too junior for this clinic
-            /// 
-            /// This constraint ensures students have appropriate skills for clinic complexity.
-            /// </summary>
+        // __ Validate that student's academic year falls within the clinic's allowed range. __ //
             if (student.AcademicYear < clinic.MinAcademicYear || student.AcademicYear > clinic.MaxAcademicYear)
             {
                 _logger.LogWarning($"Student {dto.StudentId} academic year {student.AcademicYear} outside clinic range [{clinic.MinAcademicYear}-{clinic.MaxAcademicYear}]");
@@ -178,20 +121,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
             }
 
             // _____________ VALIDATION STEP 6: Unsatisfied TermRequirement Check _____________ //
-            /// <summary>
-            /// Verify that the student has an unsatisfied TermRequirement for this clinic.
-            /// 
-            /// This check ensures:
-            /// - Student is enrolled in this clinic for current term
-            /// - Student still needs to complete cases (requirement not yet satisfied)
-            /// - Student can receive more case assignments
-            /// 
-            /// Query details:
-            /// - StudentId = the student being assigned
-            /// - TermId = student's ActiveTermId
-            /// - ClinicId = auto-selected from DiagnosisRecord
-            /// - IsSatisfied = false (only unsatisfied requirements)
-            /// </summary>
+        // __ Verify that the student has an unsatisfied TermRequirement for this clinic. __ //
             var termRequirement = await _uow.Repository<TermRequirement>().GetFirstOrDefaultAsync
                 (
                     r => r.StudentId == dto.StudentId &&
@@ -215,20 +145,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
             }
 
             // _____________ VALIDATION STEP 7: Workload Check - Student Capacity _____________ //
-            /// <summary>
-            /// Count the number of active (InProgress) cases the student currently has in this clinic.
-            /// If count >= clinic's MaxCasesPerStudent, the student is at capacity and cannot accept more.
-            /// 
-            /// Example:
-            /// - Clinic.MaxCasesPerStudent = 3
-            /// - Student already has 3 active cases in this clinic
-            /// - Result: FAIL - Student is at capacity
-            /// 
-            /// This prevents student overload and ensures case quality through focused attention.
-            /// 
-            /// Status Condition:
-            /// Only count cases that are Active or InProgress (Completed/Transferred don't take up capacity).
-            /// </summary>
+        // __ Count the number of active (InProgress) cases the student currently has in this clinic. __ //
             var activeCasesCount = await _uow.Repository<CaseAssignment>().CountAsync
                 (
                     ca => ca.StudentId == dto.StudentId &&
@@ -244,28 +161,13 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
             }
 
             // _____________ TRANSACTION BEGIN: All-or-Nothing Operation _____________ //
-            /// <summary>
-            /// Start a database transaction to ensure that both operations succeed or both fail:
-            /// 1. Create CaseAssignment record
-            /// 2. Mark DiagnosisRecord as assigned
-            /// 
-            /// If either operation fails, BOTH are rolled back to maintain consistency.
-            /// </summary>
+        // __ Start a database transaction to ensure that both operations succeed or both fail: __ //
             await _uow.BeginTransactionAsync();
 
             try
             {
                 // _____________ CREATE CaseAssignment _____________ //
-                /// <summary>
-                /// Create a new CaseAssignment with:
-                /// - DiagnosisRecordId: Links to the diagnosed case
-                /// - StudentId: The student assigned to treat the case
-                /// - ClinicId: Auto-retrieved from DiagnosisRecord (NOT from client input)
-                /// - TermId: Auto-retrieved from student's ActiveTermId (ensures data consistency)
-                /// - AssignedByInternId: The doctor who made the assignment
-                /// - Status: Initially set to InProgress (student will begin treatment)
-                /// - AssignedAt: Current timestamp for audit trail
-                /// </summary>
+        // __ Create a new CaseAssignment with: __ //
                 var assignment = new CaseAssignment
                 {
                     DiagnosisRecordId = dto.DiagnosisRecordId,
@@ -283,30 +185,19 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
                 await _uow.Repository<CaseAssignment>().AddAsync(assignment);
 
                 // _____________ UPDATE DiagnosisRecord _____________ //
-                /// <summary>
-                /// Mark the DiagnosisRecord as assigned to prevent duplicate assignments.
-                /// This flag is critical for preventing one case being assigned to multiple students.
-                /// </summary>
+        // __ Mark the DiagnosisRecord as assigned to prevent duplicate assignments. __ //
                 diagnosis.IsAssigned = true;
                 _uow.Repository<DiagnosisRecord>().Update(diagnosis);
 
                 // _____________ SAVE & COMMIT TRANSACTION _____________ //
-                /// <summary>
-                /// Persist both changes in a single transaction.
-                /// If any error occurs, the entire transaction is rolled back.
-                /// </summary>
+        // __ Persist both changes in a single transaction. __ //
                 await _uow.SaveChangesAsync(internDoctorId);
                 await _uow.CommitTransactionAsync();
 
                 _logger.LogInfo($"Case assignment successful: Diagnosis {dto.DiagnosisRecordId} -> Student {dto.StudentId} in Clinic {clinicId}");
 
                 // _____________ PUBLISH EVENT _____________ //
-                /// <summary>
-                /// Emit a CaseAssignedEvent for background processing:
-                /// - Send notification to student about new assignment
-                /// - Update dashboards in real-time (via SignalR if available)
-                /// - Trigger any async workflows (e.g., email notifications)
-                /// </summary>
+        // __ Emit a CaseAssignedEvent for background processing: __ //
                // await _eventPublisher.PublishAsync(new CaseAssignedEvent
                 //(
                 //    assignment.Id,
@@ -315,10 +206,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
                 //));
 
                 // _____________ LOAD FULL RECORD FOR RESPONSE _____________ //
-                /// <summary>
-                /// Retrieve the complete CaseAssignment with all related data for the response.
-                /// This ensures the client has all information needed.
-                /// </summary>
+        // __ Retrieve the complete CaseAssignment with all related data for the response. __ //
                 var full = await _uow.Repository<CaseAssignment>()
                     .GetFirstOrDefaultAsync
                     (
@@ -337,12 +225,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
             }
 
             // _____________ ERROR HANDLING _____________ //
-            /// <summary>
-            /// If any error occurs during the transaction:
-            /// 1. Rollback transaction to undo partial changes
-            /// 2. Log the error for investigation
-            /// 3. Return failure result to client
-            /// </summary>
+        // __ If any error occurs during the transaction: __ //
             catch (Exception ex)
             {
                 await _uow.RollbackTransactionAsync();

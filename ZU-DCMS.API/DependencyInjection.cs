@@ -41,10 +41,11 @@ namespace ZU_DCMS.API
                 o.AddPolicy("AdminPolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("Admin"));
                 o.AddPolicy("StudentPolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("Student"));
                 o.AddPolicy("StaffReviewPolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("TeachingAssistant", "Dean", "ViceDean", "Professor", "Admin"));
+                o.AddPolicy("StaffCaseAccessPolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("Student", "TeachingAssistant", "Dean", "ViceDean", "Professor", "Admin"));
                 o.AddPolicy("ClinicalCorePolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("InternDoctor", "Admin"));
                 o.AddPolicy("PublicViewPolicy", policy => policy.RequireAssertion(context => 
                     context.User.HasClaim("UserType", "Staff") || context.User.HasClaim("UserType", "Patient")));
-                o.AddPolicy("StaffViewPolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("InternDoctor", "Dean", "ViceDean", "Professor", "Admin"));
+                o.AddPolicy("StaffViewPolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("InternDoctor", "TeachingAssistant", "Dean", "ViceDean", "Professor", "Admin"));
             });
 
             // __ Configure API Versioning (Defaults to V1) __ //

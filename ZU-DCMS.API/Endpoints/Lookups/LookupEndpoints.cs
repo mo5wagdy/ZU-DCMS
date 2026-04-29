@@ -16,7 +16,7 @@ namespace ZU_DCMS.API.Endpoints.Lookups
             var group = app.MapGroup("api/v1/lookups")
                            .WithApiVersionSet(versionSet)
                            .WithTags("Lookups")
-                           .RequireAuthorization("ClinicCorePolicy");
+                           .RequireAuthorization("PublicViewPolicy");
 
             group.MapGet("/clinics", async ([FromServices] ISender sender) =>
             {

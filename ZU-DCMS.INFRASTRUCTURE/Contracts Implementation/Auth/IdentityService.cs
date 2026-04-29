@@ -1,4 +1,3 @@
-using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -7,7 +6,6 @@ using ZU_DCMS.APPLICATION.Contracts.Auth;
 using ZU_DCMS.APPLICATION.DTOs.Admin;
 using ZU_DCMS.APPLICATION.DTOs.Auth;
 using ZU_DCMS.Domain.Enums;
-using ZU_DCMS.Domain.UserRoles;
 using ZU_DCMS.INFRASTRUCTURE.Persistence;
 
 namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
@@ -16,9 +14,8 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly AppDbContext _context;
-        private readonly IMapper _mapper;
 
-        public IdentityService(UserManager<ApplicationUser> userManager, AppDbContext context, IMapper mapper) {_userManager = userManager; _context = context; _mapper = mapper;} 
+        public IdentityService(UserManager<ApplicationUser> userManager, AppDbContext context) {_userManager = userManager; _context = context;} 
 
         // ________________________ Get ________________________ // 
         public async Task<PagedResult<StaffUsersDto>> GetAllUsersAsync(PagedRequest request, string? role = null)

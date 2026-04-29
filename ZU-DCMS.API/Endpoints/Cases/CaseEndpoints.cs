@@ -64,7 +64,7 @@ namespace ZU_DCMS.API.Endpoints.Cases
                     ? Results.Ok(ApiResponse<StudentProgressDto>.Success(result.Value, "Student progress stats parsed perfectly."))
                     : Results.BadRequest(ApiResponse<StudentProgressDto>.Failure(result.Errors, "Failed to get progress stats."));
             })
-            .RequireAuthorization("StudentPolicy")
+            .RequireAuthorization("StaffCaseAccessPolicy")
             .WithName("GetStudentProgress")
             .WithSummary("Retrieves the general clinical progress overview constraints for the authorized student")
             .Produces<ApiResponse<StudentProgressDto>>(StatusCodes.Status200OK)
@@ -78,7 +78,7 @@ namespace ZU_DCMS.API.Endpoints.Cases
                     ? Results.Ok(ApiResponse<List<CaseAssignmentDto>>.Success(result.Value, "Today's patients retrieved."))
                     : Results.BadRequest(ApiResponse<List<CaseAssignmentDto>>.Failure(result.Errors, "Failed to retrieve today's patients."));
             })
-            .RequireAuthorization("StudentPolicy")
+            .RequireAuthorization("StaffCaseAccessPolicy")
             .WithName("GetStudentTodayPatients")
             .WithSummary("Retrieves assigned cases that have a confirmed booking for today")
             .Produces<ApiResponse<List<CaseAssignmentDto>>>(StatusCodes.Status200OK)
@@ -140,7 +140,7 @@ namespace ZU_DCMS.API.Endpoints.Cases
                     ? Results.Ok(ApiResponse<List<CaseAssignmentDto>>.Success(result.Value, "Retrived Student Cases Successfully"))
                     : Results.NotFound(ApiResponse<List<CaseAssignmentDto>>.Failure(result.Errors, "Student Cases not found"));
             })
-            .RequireAuthorization("StaffReviewPolicy") // Authorized structure allows owner tracking or staff inspection internally mapped
+            .RequireAuthorization("StaffCaseAccessPolicy") // Authorized structure allows owner tracking or staff inspection internally mapped
             .WithName("GetStudentCases")
             .WithSummary("Retrieves all student cases")
             .Produces<ApiResponse<List<CaseAssignmentDto>>>(StatusCodes.Status200OK)
@@ -154,7 +154,7 @@ namespace ZU_DCMS.API.Endpoints.Cases
                     ? Results.Ok(ApiResponse<List<ReviewCaseDto>>.Success(result.Value, "Retrived All Cases Reviews Successfully"))
                     : Results.NotFound(ApiResponse<List<ReviewCaseDto>>.Failure(result.Errors, "Cases Reviews Not Found"));
             })
-            .RequireAuthorization("StaffReviewPolicy") // Authorized structure allows owner tracking or staff inspection internally mapped
+            .RequireAuthorization("StaffCaseAccessPolicy") // Authorized structure allows owner tracking or staff inspection internally mapped
             .WithName("GetCasesReviews")
             .WithSummary("Retrieves all cases reviews")
             .Produces<ApiResponse<List<ReviewCaseDto>>>(StatusCodes.Status200OK)

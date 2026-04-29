@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser;
 using ZU_DCMS.Domain.UserRoles;
 
@@ -34,7 +34,8 @@ namespace ZU_DCMS.APPLICATION.Validators.Admin
             RuleFor(x => x.Dto.Password)
                    .NotEmpty()
                    .WithMessage("كلمة المرور مطلوبه")
-                   .Length(8);
+                   .MinimumLength(8)
+                   .WithMessage("لازم 8 حروف على الأقل");
 
             RuleFor(x => x.Dto.Role)
                    .NotEmpty()

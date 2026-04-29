@@ -71,10 +71,10 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
                 return Result.Failure<StaffUsersDto>("لا يمكن إضافة عيان إلى الطاقم الإداري");
             }
 
-            // __ Check Roles must not be patient __ //
-            var roles = await _identity.GetRolesAsync(dto.Role);
+            // __ We don't need to check roles here since we trust dto.Role string from CreatableRoles __ //
+            var selectedRole = dto.Role;
 
-            if (roles.Contains(UserRoles.Patient))
+            if (selectedRole == UserRoles.Patient)
             {
                 return Result.Failure<StaffUsersDto>("لا يمكن إضافه عيان إلى الأعضاء المسؤولين");
             }
@@ -171,7 +171,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
                     FullName = dto.FullName,
                     Username = dto.Username,
                     Email = dto.Email,
-                    Role = roles.FirstOrDefault() ?? string.Empty,
+                    Role = dto.Role,
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
                 };

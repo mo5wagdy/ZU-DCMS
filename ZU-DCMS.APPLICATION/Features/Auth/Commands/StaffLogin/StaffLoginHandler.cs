@@ -93,7 +93,11 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.StaffLogin
                 
                 await _uow.CommitTransactionAsync();
 
-                var role = roles.FirstOrDefault() ?? string.Empty;
+                // __ Pick the most relevant role for redirection and frontend state __ //
+                var role = roles.Contains(UserRoles.Admin) ? UserRoles.Admin 
+                         : roles.Contains(UserRoles.TeachingAssistant) ? UserRoles.TeachingAssistant
+                         : roles.Contains(UserRoles.Student) ? UserRoles.Student
+                         : roles.FirstOrDefault() ?? string.Empty;
 
                 _logger.LogInfo("Staff login successful: {Email}, Role: {Role}", dto.Email, role);
 

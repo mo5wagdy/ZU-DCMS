@@ -31,12 +31,19 @@ namespace ZU_DCMS.APPLICATION.Common.Token
             var roles = await _identity.GetRolesAsync(userId);
 
             // __ Create claims for the JWT access token, including user ID, username, email, full name, and roles __ //
-            var userTypeString = user?.UserType ?? string.Empty;
-            if (userTypeString == "0" || string.IsNullOrEmpty(userTypeString))
+            // __ Resolve UserType string (Staff or Patient) __ //
+            var userTypeString = user?.UserType;
+            if (string.IsNullOrEmpty(userTypeString) || userTypeString == "0")
             {
                 userTypeString = roles.Contains("Patient") ? "Patient" : "Staff";
             }
-
+            else if (userTypeString != "Staff" && userTypeString != "Patient")
+            {
+                // If it's a numeric string or something else, map it
+                userTypeString = roles.Contains("Patient") ? "Patient" : "Staff";
+            }
+            
+            // __ Claims identity __ //
             var claims = new List<Claim>
             {
                 new (ClaimTypes.NameIdentifier, userId),
@@ -46,8 +53,11 @@ namespace ZU_DCMS.APPLICATION.Common.Token
                 new ("UserType",       userTypeString)
             };
 
+            // __ Add all roles as claims __ //
             foreach (var role in roles)
+            {
                 claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
             // __ Generate the JWT access token and a new refresh token, then store the refresh token in the database with an expiration date __ //
             var accessToken = _jwt.GenerateAccessToken(claims);

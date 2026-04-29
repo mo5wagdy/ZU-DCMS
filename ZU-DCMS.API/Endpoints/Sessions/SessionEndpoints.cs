@@ -8,6 +8,7 @@ using ZU_DCMS.APPLICATION.DTOs.Session;
 using ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetSessionPatients;
 using ZU_DCMS.APPLICATION.Features.Sessions.Commands.GenerateSessions;
 using ZU_DCMS.APPLICATION.Features.Sessions.Queries.FindSession;
+using ZU_DCMS.APPLICATION.Features.Sessions.Queries.GetTodaySessions;
 using ZU_DCMS.APPLICATION.Features.Sessions.Queries.GetAvailableSlots;
 using ZU_DCMS.APPLICATION.Features.Sessions.Queries.IsSessionAvailable;
 
@@ -94,6 +95,19 @@ namespace ZU_DCMS.API.Endpoints.Sessions
             .Produces<ApiResponse<PagedResult<BookingForDiagnosisDto>>>(StatusCodes.Status200OK)
             .Produces<ApiResponse<PagedResult<BookingForDiagnosisDto>>>(StatusCodes.Status400BadRequest)
             .RequireAuthorization("ClinicalCorePolicy");
+
+            // 6. Get Today's Sessions (for Intern Dashboard)
+            group.MapGet("/today", async ([FromServices] ISender sender) =>
+            {
+                var result = await sender.Send(new GetTodaySessionsQuery());
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<List<SessionDto>>.Success(result.Value, "Today's sessions retrieved."))
+                    : Results.BadRequest(ApiResponse<List<SessionDto>>.Failure(result.Errors, "Failed to retrieve today's sessions."));
+            })
+            .RequireAuthorization("ClinicalCorePolicy")
+            .WithName("GetTodaySessions")
+            .WithSummary("Retrieves all clinical sessions scheduled for the current date")
+            .Produces<ApiResponse<List<SessionDto>>>(StatusCodes.Status200OK);
         }
     }
 }

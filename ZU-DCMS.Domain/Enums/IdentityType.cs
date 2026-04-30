@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace ZU_DCMS.Domain.Enums
 {
     // __ This enum represents the type of identity document, such as National ID, Passport, or Residence Permit. __ //

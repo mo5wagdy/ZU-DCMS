@@ -28,12 +28,63 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetSessionPatients
             _logger = logger;
         }
 
-        // __ This method is called by the intern doctor when they access the diagnosis page for a session. It checks if the session is valid and returns the list of patients booked for that session. __
+        // __ This method is called by the intern doctor when they access the diagnosis page for a session. It checks if the session is valid and returns the list of patients booked for that session. __ //
         public async Task<Result<PagedResult<BookingForDiagnosisDto>>> Handle(GetSessionPatientsQuery query, CancellationToken cancellationToken)
         {
             var sessionId = query.SessionId;
             
             var internDoctorId = query.InternDoctorId;
+
+            // __ Re-queue overdue confirmed patients from earlier sessions today __ //
+            var nowTime = DateTime.Now.TimeOfDay;
+            var todayDate = DateTime.Today;
+
+            var overdueBookings = await _uow.Repository<Booking>().GetListAsync(
+                b => b.Session.Date == todayDate &&
+                     b.Status == BookingStatus.Confirmed &&
+                     b.Session.EndTime < nowTime,
+                     includes : b => b.Session
+            );
+
+            if (overdueBookings.Any())
+            {
+                _logger.LogInfo("Found {Count} overdue bookings to re-queue", overdueBookings.Count);
+                
+                var futureSessions = await _uow.Repository<Session>().GetListAsync
+                    (
+                        s => s.Date == todayDate &&
+                        s.EndTime > nowTime &&
+                        s.IsActive
+                    );
+
+                foreach (var booking in overdueBookings)
+                {
+                    var targetSession = futureSessions
+                        .OrderBy(s => s.StartTime).FirstOrDefault
+                        (s => 
+                            (booking.BookingType == BookingType.New && s.CurrentNewCount < s.MaxNewPatients) ||
+                            (booking.BookingType == BookingType.FollowUp && s.CurrentFollowUpCount < s.MaxFollowUpPatients)
+                        );
+
+                    if (targetSession != null)
+                    {
+                        booking.SessionId = targetSession.Id;
+                        booking.Status = BookingStatus.Delayed; 
+                        _uow.Repository<Booking>().Update(booking);
+                        
+                        if (booking.BookingType == BookingType.New) targetSession.CurrentNewCount++;
+                        else targetSession.CurrentFollowUpCount++;
+                        _uow.Repository<Session>().Update(targetSession);
+                    }
+                    else
+                    {
+                        booking.Status = BookingStatus.Cancelled;
+                        booking.PostponeReason = "تم الإلغاء لعدم الحضور وعدم وجود مواعيد أخرى متاحة اليوم";
+                        _uow.Repository<Booking>().Update(booking);
+                    }
+                }
+                await _uow.SaveChangesAsync();
+            }
 
             // __ Validate session existence and access __ //
             var session = await _uow.Repository<Session>().GetByIdAsync(sessionId);

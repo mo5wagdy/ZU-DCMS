@@ -83,9 +83,9 @@ namespace ZU_DCMS.API.Endpoints.Sessions
 
 
             // 5. Get Patients for session
-            group.MapGet("/patients", async ([FromServices] ISender sender, [FromQuery] int SessionId, [FromQuery] string InternDcotorId) =>
+            group.MapGet("/patients", async ([FromServices] ISender sender, [FromQuery] int SessionId, [FromQuery] string InternDoctorId) =>
             {
-                var result = await sender.Send(new GetSessionPatientsQuery(SessionId, InternDcotorId));
+                var result = await sender.Send(new GetSessionPatientsQuery(SessionId, InternDoctorId));
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<PagedResult<BookingForDiagnosisDto>>.Success(result.Value, "Patients retriedved."))
                     : Results.BadRequest(ApiResponse<PagedResult<BookingForDiagnosisDto>>.Failure(result.Errors, "Failed to retrieve patients"));

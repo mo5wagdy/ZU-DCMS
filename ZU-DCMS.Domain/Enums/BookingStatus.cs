@@ -1,4 +1,4 @@
-﻿
+
 namespace ZU_DCMS.Domain.Enums
 {
     // __ This enum represents the various statuses that a booking can have in the system. __ //
@@ -8,6 +8,7 @@ namespace ZU_DCMS.Domain.Enums
         Confirmed = 2,
         Cancelled = 3,
         Postponed = 4,
-        Completed = 5
+        Completed = 5,
+        Delayed = 6
     }
 }

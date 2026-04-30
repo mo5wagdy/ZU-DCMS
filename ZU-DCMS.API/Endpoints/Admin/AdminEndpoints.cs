@@ -18,6 +18,7 @@ using ZU_DCMS.APPLICATION.Features.Admin.Queries.GetTermById;
 using ZU_DCMS.APPLICATION.Features.Admin.Queries.GetUserById;
 using ZU_DCMS.APPLICATION.DTOs.Admin;
 using ZU_DCMS.APPLICATION.DTOs.Student;
+using ZU_DCMS.APPLICATION.Features.Admin.Queries.Dashboard;
 
 namespace ZU_DCMS.API.Endpoints.Admin
 {
@@ -33,7 +34,21 @@ namespace ZU_DCMS.API.Endpoints.Admin
                            .WithTags("Administration")
                            .RequireAuthorization("AdminPolicy"); // Restrict all these to the Admin policy
 
-            // ==== QUERIES ====
+            // __ Management Dashboard (Dean / Vice Dean / Professor / Admin) __ //
+            group.MapGet("/dashboard/daily-metrics", async ([FromServices] ISender sender) =>
+            {
+                var result = await sender.Send(new GetDailyMetricsQuery());
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<DailyMetricsDto>.Success(result.Value, "Daily metrics retrieved."))
+                    : Results.BadRequest(ApiResponse<DailyMetricsDto>.Failure(result.Errors, "Failed to retrieve daily metrics."));
+            })
+            .RequireAuthorization("ManagementPolicy")
+            .WithName("GetDailyMetrics")
+            .WithSummary("Returns aggregated daily clinical statistics for management roles")
+            .Produces<ApiResponse<DailyMetricsDto>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<DailyMetricsDto>>(StatusCodes.Status400BadRequest);
+
+            // ==== ADMIN ONLY QUERIES ====
 
             group.MapGet("/configs", async ([FromServices] ISender sender) =>
             {
@@ -46,7 +61,7 @@ namespace ZU_DCMS.API.Endpoints.Admin
             .WithSummary("Retrieves all system configurations")
             .Produces<ApiResponse<List<SystemConfigDto>>>(StatusCodes.Status200OK)
             .Produces<ApiResponse<List<SystemConfigDto>>>(StatusCodes.Status400BadRequest);
-            
+
             group.MapGet("/clinics", async ([FromServices] ISender sender) =>
             {
                 var result = await sender.Send(new GetAllClinicsQuery());

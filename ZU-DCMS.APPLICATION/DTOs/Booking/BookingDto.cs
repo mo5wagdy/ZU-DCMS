@@ -12,7 +12,8 @@ namespace ZU_DCMS.APPLICATION.DTOs.Booking
         public BookingStatus Status { get; set; }
         public string? PreliminaryComplaint { get; set; }
         public DateTime SessionDate { get; set; }
-        public string SessionTime { get; set; } = string.Empty;
+        public TimeSpan SessionStartTime { get; set; }
+        public TimeSpan SessionEndTime { get; set; }
         public string? ClinicName { get; set; }
     }
 }

@@ -59,8 +59,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetSessionPatients
 
                 foreach (var booking in overdueBookings)
                 {
-                    var targetSession = futureSessions
-                        .OrderBy(s => s.StartTime).FirstOrDefault
+                    var targetSession = futureSessions.OrderBy(s => s.StartTime).FirstOrDefault
                         (s => 
                             (booking.BookingType == BookingType.New && s.CurrentNewCount < s.MaxNewPatients) ||
                             (booking.BookingType == BookingType.FollowUp && s.CurrentFollowUpCount < s.MaxFollowUpPatients)
@@ -83,7 +82,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetSessionPatients
                         _uow.Repository<Booking>().Update(booking);
                     }
                 }
-                await _uow.SaveChangesAsync();
+                await _uow.SaveChangesAsync(cancellationToken: cancellationToken); 
             }
 
             // __ Validate session existence and access __ //

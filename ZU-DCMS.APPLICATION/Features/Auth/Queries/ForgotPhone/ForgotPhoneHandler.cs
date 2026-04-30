@@ -6,9 +6,9 @@ using ZU_DCMS.APPLICATION.DTOs.Auth;
 using ZU_DCMS.Domain.Entities;
 using ZU_DCMS.Domain.Interfaces;
 
-namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.ForgotPhone
+namespace ZU_DCMS.APPLICATION.Features.Auth.Queries.ForgotPhone
 {
-    public class ForgotPhoneHandler : IRequestHandler<ForgotPhoneCommand, Result<ForgotPhoneResponseDto>>
+    public class ForgotPhoneHandler : IRequestHandler<ForgotPhoneQuery, Result<ForgotPhoneResponseDto>>
     {
         private readonly IUnitOfWork _uow;
         private readonly IIdentityService _identity;
@@ -22,9 +22,9 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.ForgotPhone
             _identity = identity;
         }
 
-        public async Task<Result<ForgotPhoneResponseDto>> Handle(ForgotPhoneCommand command, CancellationToken cancellationToken)
+        public async Task<Result<ForgotPhoneResponseDto>> Handle(ForgotPhoneQuery request, CancellationToken cancellationToken)
         {
-            var nationalId = command.NationalId.Trim();
+            var nationalId = request.NationalId.Trim();
 
             // __ Fetching Patient From DB According to His NID __ //
             var patient = await _uow.Repository<Patient>().GetFirstOrDefaultAsync(p => p.IdentityNumber == nationalId);

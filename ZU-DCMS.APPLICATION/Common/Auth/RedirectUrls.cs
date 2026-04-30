@@ -1,4 +1,4 @@
-﻿using ZU_DCMS.Domain.UserRoles;
+using ZU_DCMS.Domain.UserRoles;
 
 namespace ZU_DCMS.APPLICATION.Common.Auth
 {
@@ -12,6 +12,10 @@ namespace ZU_DCMS.APPLICATION.Common.Auth
             [UserRoles.Admin] = "/admin/dashboard",
             [UserRoles.InternDoctor] = "/intern/dashboard",
             [UserRoles.Student] = "/student/dashboard",
+            [UserRoles.Dean] = "/view/dashboard",
+            [UserRoles.ViceDean] = "/view/dashboard",
+            [UserRoles.Professor] = "/view/dashboard",
+            [UserRoles.TeachingAssistant] = "/ta/dashboard",
         };
 
         // __ Retrieves the dashboard URL based on the provided user role. If the role is not found, it defaults to the root URL ("/"). __ //

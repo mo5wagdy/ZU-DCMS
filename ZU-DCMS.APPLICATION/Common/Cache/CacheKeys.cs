@@ -28,7 +28,11 @@ namespace ZU_DCMS.APPLICATION.Common.Cache
         public static string Procedures(int clinicId) => $"clinic:procedures:{clinicId}";
        
         // __ Booking Related __ //
-        public static string PatientBookings(int patientId) => $"patient:bookings:{patientId}";
+        public static string PatientBookingsPage(int patientId, int page, int size, int version) => $"patient:bookings:{patientId}:{page}:{size}:{version}";
+        public static string PatientBookingsVersion(int patientId) => $"patient:bookings:version:{patientId}";
+
+        // __ Dashboard Related __ //
+        public const string DailyMetrics = "dashboard:daily_metrics";
 
         // __ Staff Related __ //
         public static string StaffUserByUserId(string userId) => $"staff:user:{userId}";

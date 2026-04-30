@@ -6,7 +6,7 @@ using ZU_DCMS.APPLICATION.Features.Auth.Commands.Login;
 using ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient;
 using ZU_DCMS.APPLICATION.Features.Auth.Commands.StaffLogin;
 using ZU_DCMS.APPLICATION.DTOs.Auth;
-using ZU_DCMS.APPLICATION.Features.Auth.Commands.ForgotPhone;
+using ZU_DCMS.APPLICATION.Features.Auth.Queries.ForgotPhone;
 using ZU_DCMS.APPLICATION.Features.Auth.Commands.RefreshToken;
 
 namespace ZU_DCMS.API.Endpoints.Auth
@@ -68,7 +68,7 @@ namespace ZU_DCMS.API.Endpoints.Auth
             // 4. Forgot Phone Password / Reset Flow
             group.MapGet("/forgot-phone", async ([FromServices] ISender sender, [FromQuery] string nationalId) =>
             {
-                var command = new ForgotPhoneCommand(nationalId);
+                var command = new ForgotPhoneQuery(nationalId);
                 var result = await sender.Send(command);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<ForgotPhoneResponseDto>.Success(result.Value, "Phone reset request processed."))

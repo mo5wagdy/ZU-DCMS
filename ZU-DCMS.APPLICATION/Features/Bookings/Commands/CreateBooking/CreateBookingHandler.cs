@@ -1,7 +1,10 @@
 using AutoMapper;
 using MediatR;
+using ZiggyCreatures.Caching.Fusion;
 using ZU_DCMS.APPLICATION.Background_Jobs.Events;
 using ZU_DCMS.APPLICATION.Common;
+using ZU_DCMS.APPLICATION.Common.Cache;
+using ZU_DCMS.APPLICATION.Common.Pagination;
 using ZU_DCMS.APPLICATION.Contracts;
 using ZU_DCMS.APPLICATION.Contracts.Logger;
 using ZU_DCMS.APPLICATION.DTOs.Booking;
@@ -17,6 +20,7 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
         private readonly IRawSqlExecutor _sql;
         private readonly IEventPublisher _eventPublisher;
         private readonly IUserCodeGenerator _codeGen;
+        private readonly IFusionCache _cache;
         private readonly IMapper _mapper;
         private readonly IAppLogger<CreateBookingHandler> _logger;
 
@@ -25,6 +29,7 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
             IRawSqlExecutor sql,
             IEventPublisher eventPublisher,
             IUserCodeGenerator codeGen,
+            IFusionCache cache,
             IMapper mapper,
             IAppLogger<CreateBookingHandler> logger)
         {
@@ -32,6 +37,7 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
             _sql = sql;
             _eventPublisher = eventPublisher;
             _codeGen = codeGen;
+            _cache = cache;
             _mapper = mapper;
             _logger = logger;
         }
@@ -70,6 +76,19 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
                 _logger.LogWarning("Patient {PatientId} already has an active booking", patientId);
                 
                 return Result.Failure<BookingDto>("لديك حجز نشط بالفعل");
+            }
+
+            // __ Prevent New booking if patient has an active case __ //
+            if (dto.BookingType == BookingType.New)
+            {
+                var hasActiveCase = await _uow.Repository<CaseAssignment>().ExistsAsync(
+                    c => c.DiagnosisRecord.Booking.PatientId == patientId &&
+                         c.Status != CaseStatus.Completed);
+                         
+                if (hasActiveCase)
+                {
+                    return Result.Failure<BookingDto>("لديك حالة قيد العلاج، يجب حجز موعد متابعة بدلاً من حجز جديد");
+                }
             }
 
             int? followUpClinicId = null;
@@ -112,12 +131,12 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
                    !s.IsDeleted
                 );
 
-            // __ If no session found for the preferred date and time slot, return failure __ //
-            if (sessionResult is null)
+            // __ If no session found for the preferred date and time slot, or it has ended today __ //
+            if (sessionResult is null || (sessionResult.Date.Date == DateTime.Today && sessionResult.EndTime <= DateTime.Now.TimeOfDay))
             {
-                _logger.LogWarning("Session not found for PreferredDate: {PreferredDate} and TimeSlot: {TimeSlot}", dto.PreferredDate, dto.PreferredTimeSlot);
+                _logger.LogWarning("Session not found or ended for PreferredDate: {PreferredDate} and TimeSlot: {TimeSlot}", dto.PreferredDate, dto.PreferredTimeSlot);
                 
-                return Result.Failure<BookingDto>("الميعاد غير متاح");
+                return Result.Failure<BookingDto>("الميعاد غير متاح أو انتهى وقته");
             }
 
             // __ Session found, proceed with booking creation __ //
@@ -197,6 +216,9 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
                     b => b.Session,
                     b => b.Clinic!
                  );
+
+                // __ Invalidate patient bookings cache to ensure fresh data on next fetch __ //
+                await _cache.RemoveAsync(CacheKeys.PatientBookingsVersion(patientId));
 
                 return Result.Success(_mapper.Map<BookingDto>(full!));
             }

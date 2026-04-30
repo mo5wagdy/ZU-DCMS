@@ -37,15 +37,19 @@ namespace ZU_DCMS.API
             // __ Authorizing Policies __ //
             services.AddAuthorization(o =>
             {
-                o.AddPolicy("PatientPolicy", policy => policy.RequireClaim("UserType", "Patient").RequireRole("Patient"));
-                o.AddPolicy("AdminPolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("Admin"));
-                o.AddPolicy("StudentPolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("Student"));
-                o.AddPolicy("StaffReviewPolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("TeachingAssistant", "Dean", "ViceDean", "Professor", "Admin"));
-                o.AddPolicy("StaffCaseAccessPolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("Student", "TeachingAssistant", "Dean", "ViceDean", "Professor", "Admin"));
-                o.AddPolicy("ClinicalCorePolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("InternDoctor", "Admin"));
+                o.AddPolicy("PatientPolicy", policy => policy.RequireRole("Patient"));
+                o.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
+                o.AddPolicy("StudentPolicy", policy => policy.RequireRole("Student"));
+                o.AddPolicy("StaffReviewPolicy", policy => policy.RequireRole("TeachingAssistant", "Dean", "ViceDean", "Professor", "Admin"));
+                o.AddPolicy("StaffCaseAccessPolicy", policy => policy.RequireRole("Student", "TeachingAssistant", "Dean", "ViceDean", "Professor", "Admin"));
+                o.AddPolicy("ClinicalCorePolicy", policy => policy.RequireRole("InternDoctor", "Admin"));
                 o.AddPolicy("PublicViewPolicy", policy => policy.RequireAssertion(context => 
-                    context.User.HasClaim("UserType", "Staff") || context.User.HasClaim("UserType", "Patient")));
-                o.AddPolicy("StaffViewPolicy", policy => policy.RequireClaim("UserType", "Staff").RequireRole("InternDoctor", "TeachingAssistant", "Dean", "ViceDean", "Professor", "Admin"));
+                    context.User.IsInRole("Student") || context.User.IsInRole("TeachingAssistant") || 
+                    context.User.IsInRole("Dean") || context.User.IsInRole("ViceDean") || 
+                    context.User.IsInRole("Professor") || context.User.IsInRole("Admin") || 
+                    context.User.IsInRole("Patient") || context.User.IsInRole("InternDoctor")));
+                o.AddPolicy("StaffViewPolicy", policy => policy.RequireRole("InternDoctor", "TeachingAssistant", "Dean", "ViceDean", "Professor", "Admin"));
+                o.AddPolicy("ManagementPolicy", policy => policy.RequireRole("Dean", "ViceDean", "Professor", "Admin"));
             });
 
             // __ Configure API Versioning (Defaults to V1) __ //

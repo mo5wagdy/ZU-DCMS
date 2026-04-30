@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient;
 using ZU_DCMS.APPLICATION.Validators.Shared;
 using ZU_DCMS.Domain.Enums;
@@ -14,8 +14,8 @@ namespace ZU_DCMS.APPLICATION.Validators.Auth
                    .NotEmpty().WithMessage("اسم المستخدم مطلوب")
                    .MinimumLength(3).WithMessage("لازم 3 حروف على الأقل")
                    .MaximumLength(50).WithMessage("لازم أقل من 50 حرف")
-                   .Matches(@"^[a-zA-Z0-9._-]+$")
-                   .WithMessage("يقبل حروف وأرقام و . _ - فقط");
+                   .Matches(@"^[\p{L}0-9._-]+$")
+                   .WithMessage("يقبل حروف (عربي وإنجليزي) وأرقام و . _ - فقط");
 
             RuleFor(x => x.Dto.FullName)
                    .NotEmpty().WithMessage("الاسم مطلوب")

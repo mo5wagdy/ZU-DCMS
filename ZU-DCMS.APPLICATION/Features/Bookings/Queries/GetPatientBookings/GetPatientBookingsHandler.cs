@@ -37,8 +37,12 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Queries.GetPatientBookings
         {
             _logger.LogInfo("Fetching bookings for patient {PatientId} - Page: {Page}, PageSize: {PageSize}", query.PatientId, query.Request.Page, query.Request.PageSize);
 
+            // __ Cache versioning for specific patient bookings __ //
+            var versionKey = CacheKeys.PatientBookingsVersion(query.PatientId);
+            var version = await _cache.GetOrSetAsync(versionKey, _ => Task.FromResult(1));
+
             // __ Fetching From Cache If Available __ //
-            var cacheKey = CacheKeys.PatientBookings(query.PatientId);
+            var cacheKey = CacheKeys.PatientBookingsPage(query.PatientId, query.Request.Page, query.Request.PageSize, version);
 
             var result = await _cache.GetOrSetAsync
             (

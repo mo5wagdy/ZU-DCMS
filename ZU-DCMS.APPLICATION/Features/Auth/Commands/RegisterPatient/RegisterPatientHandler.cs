@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.Extensions.Options;
 using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Common.Auth;
+using ZU_DCMS.APPLICATION.Common.Extensions;
 using ZU_DCMS.APPLICATION.Common.Token;
 using ZU_DCMS.APPLICATION.Contracts;
 using ZU_DCMS.APPLICATION.Contracts.Auth;
@@ -46,6 +47,11 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient
         public async Task<Result<AuthDto>> Handle(RegisterPatientCommand command, CancellationToken cancellationToken)
         {
             var dto = command.Dto;
+
+            // __ Normalize Inputs __ //
+            dto.Username = dto.Username.Trim().ToLower().NormalizeDigits();
+            dto.PhoneNumber = dto.PhoneNumber.Trim().NormalizeDigits();
+            dto.IdentityNumber = dto.IdentityNumber.Trim().NormalizeDigits();
 
             _logger.LogInfo("Registering patient with Username: {Username}, IdentityNumber: {IdentityNumber}", dto.Username, dto.IdentityNumber);
 

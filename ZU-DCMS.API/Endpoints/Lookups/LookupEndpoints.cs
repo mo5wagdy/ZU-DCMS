@@ -37,6 +37,16 @@ namespace ZU_DCMS.API.Endpoints.Lookups
             })
             .WithName("GetDiagnosisTypesLookup")
             .Produces<ApiResponse<List<DiagnosisTypeDto>>>(StatusCodes.Status200OK);
+
+            group.MapGet("/active-term", async ([FromServices] ISender sender) =>
+            {
+                var result = await sender.Send(new ZU_DCMS.APPLICATION.Features.Lookups.Queries.GetActiveTerm.GetActiveTermQuery());
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<TermDto>.Success(result.Value, "Active term retrieved."))
+                    : Results.BadRequest(ApiResponse<TermDto>.Failure(result.Error, "No active term found."));
+            })
+            .WithName("GetActiveTermLookup")
+            .Produces<ApiResponse<TermDto>>(StatusCodes.Status200OK);
         }
     }
 }

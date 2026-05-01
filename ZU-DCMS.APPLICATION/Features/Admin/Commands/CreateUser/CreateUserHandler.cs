@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using ZiggyCreatures.Caching.Fusion;
 using ZU_DCMS.APPLICATION.Common;
+using ZU_DCMS.APPLICATION.Common.Cache;
 using ZU_DCMS.APPLICATION.Contracts;
 using ZU_DCMS.APPLICATION.Contracts.Auth;
 using ZU_DCMS.APPLICATION.DTOs.Admin;
@@ -181,11 +182,16 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
                 //notify & email
 
 
-                // __ Cache version __ //
-                var version = await _cache.GetOrSetAsync("students:version", _ => Task.FromResult(1));
+                // __ Update Staff Cache Version __ //
+                var staffVersion = await _cache.GetOrSetAsync(CacheKeys.StaffUsersVersion, _ => Task.FromResult(1));
+                await _cache.SetAsync(CacheKeys.StaffUsersVersion, staffVersion + 1);
 
-                // __ Update Cache Version __ //
-                await _cache.SetAsync("students:version", version + 1);
+                // __ Update Student Cache Version if student __ //
+                if (dto.Role == UserRoles.Student)
+                {
+                    var version = await _cache.GetOrSetAsync("students:version", _ => Task.FromResult(1));
+                    await _cache.SetAsync("students:version", version + 1);
+                }
 
                 return Result.Success(result);
             }

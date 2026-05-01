@@ -7,6 +7,7 @@ using ZU_DCMS.APPLICATION.DTOs.Admin;
 using ZU_DCMS.APPLICATION.DTOs.Auth;
 using ZU_DCMS.Domain.Enums;
 using ZU_DCMS.INFRASTRUCTURE.Persistence;
+using ZU_DCMS.APPLICATION.Common.Extensions;
 
 namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
 {
@@ -113,10 +114,9 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
         {
             var user = new ApplicationUser
             {
-                UserName = username.Trim().ToLower(),
-                Email = email?.Trim().ToLower() ?? null,
-                PhoneNumber = phoneNumber?.Trim(),
-                PhoneNumberConfirmed = true,
+                UserName = username.Trim().ToLower().NormalizeDigits(),
+                Email = email?.Trim().ToLower(),
+                PhoneNumber = phoneNumber?.Trim().NormalizeDigits(),
                 FullName = fullName.Trim(),
                 UserType = type,
                 EmailConfirmed = email != null,
@@ -155,7 +155,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
         // _________________________ Lookup _________________________ //
         public async Task<ApplicationUserDto?> FindByUsernameAsync(string username)
         {
-            var user = await _userManager.FindByNameAsync(username.Trim().ToLower());
+            var user = await _userManager.FindByNameAsync(username.Trim().ToLower().NormalizeDigits());
             return user is null ? null : MapToDto(user);
         }
 
@@ -164,10 +164,12 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
             if (string.IsNullOrWhiteSpace(phone))
                 return null;
 
+            var normalizedPhone = phone.Trim().NormalizeDigits();
+
             var userExsist = await _userManager.Users.AsNoTracking().FirstOrDefaultAsync
                 (
                     u => u.Id != null &&
-                    u.PhoneNumber == phone.Trim() &&
+                    u.PhoneNumber == normalizedPhone &&
                     u.IsActive &&
                     u.PhoneNumber != null &&
                     u.PhoneNumber != ""
@@ -195,7 +197,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
             var user = await _userManager.FindByIdAsync(userId);
             if (user is null) return false;
 
-            return await _userManager.CheckPasswordAsync(user, password);
+            return await _userManager.CheckPasswordAsync(user, password.NormalizeDigits());
         }
 
         public async Task<bool> IsActiveAsync(string userId)

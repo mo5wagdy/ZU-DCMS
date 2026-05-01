@@ -58,7 +58,7 @@ namespace ZU_DCMS.API.Endpoints.Bookings
                     ? Results.Ok(ApiResponse<string>.Success(string.Empty, "Booking successfully postponed."))
                     : Results.BadRequest(ApiResponse<string>.Failure(result.Errors, "Failed to postpone booking."));
             })
-            .RequireAuthorization("PatientPolicy")
+            .RequireAuthorization("ClinicalCorePolicy")
             .WithName("PostponeBooking")
             .WithSummary("Postpones an active booking to a different timeframe or slot")
             .Produces<ApiResponse<string>>(StatusCodes.Status200OK)

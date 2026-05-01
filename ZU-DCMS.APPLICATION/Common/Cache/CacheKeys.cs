@@ -35,6 +35,8 @@ namespace ZU_DCMS.APPLICATION.Common.Cache
         public const string DailyMetrics = "dashboard:daily_metrics";
 
         // __ Staff Related __ //
+        public static string StaffUsersPage(int page, int size, string role, string search, int version) => $"staff:users:{page}:{size}:{role}:{search}:{version}";
+        public static string StaffUsersVersion => "staff:users:version";
         public static string StaffUserByUserId(string userId) => $"staff:user:{userId}";
     }
 }

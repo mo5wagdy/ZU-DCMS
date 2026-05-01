@@ -9,7 +9,7 @@ using ZU_DCMS.Domain.Interfaces;
 
 namespace ZU_DCMS.APPLICATION.Features.Patients.Commands.UpdateProfile
 {
-    public class UpdateProfileHandler : IRequestHandler<UpdateProfileCommand, Result<UpdatePatientDto>>
+    public class UpdateProfileHandler : IRequestHandler<UpdateProfileCommand, Result<PatientDto>>
     {
         private readonly IUnitOfWork _uow;
         private readonly IIdentityService _identity;
@@ -29,7 +29,7 @@ namespace ZU_DCMS.APPLICATION.Features.Patients.Commands.UpdateProfile
         }
 
         // ________________ Update Profile ________________ //
-        public async Task<Result<UpdatePatientDto>> Handle(UpdateProfileCommand command, CancellationToken cancellationToken)
+        public async Task<Result<PatientDto>> Handle(UpdateProfileCommand command, CancellationToken cancellationToken)
         {
             var id = command.Id;
            
@@ -44,7 +44,7 @@ namespace ZU_DCMS.APPLICATION.Features.Patients.Commands.UpdateProfile
             {
                 _logger.LogWarning("Patient not found for update, ID: {Id}", id);
                 
-                return Result.Failure<UpdatePatientDto>("المريض غير موجود");
+                return Result.Failure<PatientDto>("المريض غير موجود");
             }
 
             // __ We use transaction here because we might need to update the username in the identity service, and if that fails, we don't want to update the patient data. __ //
@@ -71,7 +71,7 @@ namespace ZU_DCMS.APPLICATION.Features.Patients.Commands.UpdateProfile
                             
                             _logger.LogWarning("Username already exists: {PhoneNumber}", newUsername);
                             
-                            return Result.Failure<UpdatePatientDto>("اسم المستخدم موجود بالفعل");
+                            return Result.Failure<PatientDto>("اسم المستخدم موجود بالفعل");
                         }
 
                         _logger.LogInfo("Updating username for patient ID: {Id}, New Username: {Username}", id, newUsername);
@@ -85,7 +85,7 @@ namespace ZU_DCMS.APPLICATION.Features.Patients.Commands.UpdateProfile
                         
                             _logger.LogWarning("Failed to update username: {Username}", newUsername);
                             
-                            return Result.Failure<UpdatePatientDto>("فشل تحديث اسم المستخدم");
+                            return Result.Failure<PatientDto>("فشل تحديث اسم المستخدم");
                         }
                     }
                 }
@@ -119,7 +119,7 @@ namespace ZU_DCMS.APPLICATION.Features.Patients.Commands.UpdateProfile
 
                 _logger.LogInfo("Patient profile updated successfully, ID: {Id}", id);
 
-                return Result.Success<UpdatePatientDto>(_mapper.Map<UpdatePatientDto>(patient));
+                return Result.Success<PatientDto>(_mapper.Map<PatientDto>(patient));
             }
 
             catch
@@ -128,7 +128,7 @@ namespace ZU_DCMS.APPLICATION.Features.Patients.Commands.UpdateProfile
                 
                 _logger.LogError("An error occurred while updating patient profile");
                 
-                return Result.Failure<UpdatePatientDto>("حدث خطأ ، حاول مرة أخرى");
+                return Result.Failure<PatientDto>("حدث خطأ ، حاول مرة أخرى");
             }
         }
     }

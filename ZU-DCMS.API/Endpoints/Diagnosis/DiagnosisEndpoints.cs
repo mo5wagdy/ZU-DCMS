@@ -26,7 +26,7 @@ namespace ZU_DCMS.API.Endpoints.Diagnosis
             var group = app.MapGroup("api/v1/diagnosis")
                            .WithApiVersionSet(versionSet)
                            .WithTags("Diagnosis")
-                           .RequireAuthorization("ClinicalCorePolicy"); // Protect via Clinical Core Policy (InternDoctor, Receptionist, Admin)
+                           .RequireAuthorization("ClinicalCorePolicy"); // Protect via Clinical Core Policy (InternDoctor, TA, Dean, ViceDean, Professor, Admin)
 
             // 1. Log a diagnosis
             group.MapPost("/", async ([FromServices] ISender sender, [FromBody] DiagnosePatientCommand command) =>
@@ -75,6 +75,7 @@ namespace ZU_DCMS.API.Endpoints.Diagnosis
                     ? Results.Ok(ApiResponse<List<DiagnosisTypeDto>>.Success(result.Value, "Diagnosis types retrieved."))
                     : Results.BadRequest(ApiResponse<List<DiagnosisTypeDto>>.Failure(result.Errors, "Failed to retrieve diagnosis types."));
             })
+            .RequireAuthorization("PublicViewPolicy")
             .WithName("GetDiagnosisTypes")
             .WithSummary("Retrieves diagnosis types, optionally filtered by clinic ID")
             .Produces<ApiResponse<List<DiagnosisTypeDto>>>(StatusCodes.Status200OK)
@@ -88,6 +89,7 @@ namespace ZU_DCMS.API.Endpoints.Diagnosis
                     ? Results.Ok(ApiResponse<List<ProcedureDto>>.Success(result.Value, "Procedures retrieved."))
                     : Results.BadRequest(ApiResponse<List<ProcedureDto>>.Failure(result.Errors, "Failed to retrieve procedures."));
             })
+            .RequireAuthorization("PublicViewPolicy")
             .WithName("GetProcedures")
             .WithSummary("Retrieves procedures, optionally filtered by clinic ID")
             .Produces<ApiResponse<List<ProcedureDto>>>(StatusCodes.Status200OK)

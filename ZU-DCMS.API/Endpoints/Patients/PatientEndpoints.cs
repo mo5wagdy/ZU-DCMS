@@ -27,14 +27,14 @@ namespace ZU_DCMS.API.Endpoints.Patients
             {
                 var result = await sender.Send(command);
                 return result.IsSuccess
-                    ? Results.Ok(ApiResponse<UpdatePatientDto>.Success(result.Value, "Patient profile successfully updated."))
-                    : Results.BadRequest(ApiResponse<UpdatePatientDto>.Failure(result.Errors, "Failed to update patient profile."));
+                    ? Results.Ok(ApiResponse<PatientDto>.Success(result.Value, "Patient profile successfully updated."))
+                    : Results.BadRequest(ApiResponse<PatientDto>.Failure(result.Errors, "Failed to update patient profile."));
             })
             .RequireAuthorization("PatientPolicy") // Restrict primarily to Patients making modifications
             .WithName("UpdatePatientProfile")
             .WithSummary("Modifies the authenticated patient's profile details")
-            .Produces<ApiResponse<UpdatePatientDto>>(StatusCodes.Status200OK)
-            .Produces<ApiResponse<UpdatePatientDto>>(StatusCodes.Status400BadRequest);
+            .Produces<ApiResponse<PatientDto>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<PatientDto>>(StatusCodes.Status400BadRequest);
 
             // 2. List all globally
             group.MapGet("/", async ([AsParameters] PagedRequest request, [FromServices] ISender sender) =>

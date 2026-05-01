@@ -25,8 +25,17 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Queries.GetAllUsers
 
         public async Task<Result<PagedResult<StaffUsersDto>>> Handle(GetAllUsersQuery query, CancellationToken cancellationToken)
         {
+            // __ Fetch version __ //
+            var version = await _cache.GetOrSetAsync(CacheKeys.StaffUsersVersion, _ => Task.FromResult(1));
+
             // __ Fetching From Cache If Available __ //
-            var cacheKey = CacheKeys.StaffUsers;
+            var cacheKey = CacheKeys.StaffUsersPage(
+                query.Request.Page, 
+                query.Request.PageSize, 
+                query.Role ?? "", 
+                query.Request.SearchTerm ?? "", 
+                version
+            );
 
             var result = await _cache.GetOrSetAsync
             (

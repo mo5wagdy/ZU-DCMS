@@ -8,6 +8,7 @@ using ZU_DCMS.APPLICATION.DTOs.Auth;
 using ZU_DCMS.Domain.Interfaces;
 using ZU_DCMS.Domain.UserRoles;
 
+using ZU_DCMS.APPLICATION.Common.Extensions;
 namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.Login
 {
     public class LoginHandler : IRequestHandler<LoginCommand, Result<AuthDto>>
@@ -33,6 +34,10 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.Login
         public async Task<Result<AuthDto>> Handle(LoginCommand command, CancellationToken cancellationToken)
         {
             var dto = command.Dto;
+            
+            // __ Normalize __ //
+            dto.PhoneNumber = dto.PhoneNumber.Trim().NormalizeDigits();
+            dto.IdentityNumber = dto.IdentityNumber.Trim().NormalizeDigits();
 
             _logger.LogInfo("Patient login attempt with PhoneNumber: {PhoneNumber}, IdentityNumber: {IdentityNumber}", dto.PhoneNumber, dto.IdentityNumber);
 

@@ -31,8 +31,7 @@ namespace ZU_DCMS.API.Endpoints.Admin
         {
             var group = app.MapGroup("api/v1/admin")
                            .WithApiVersionSet(versionSet)
-                           .WithTags("Administration")
-                           .RequireAuthorization("AdminPolicy"); // Restrict all these to the Admin policy
+                           .WithTags("Administration");
 
             // __ Management Dashboard (Dean / Vice Dean / Professor / Admin) __ //
             group.MapGet("/dashboard/daily-metrics", async ([FromServices] ISender sender) =>
@@ -57,6 +56,7 @@ namespace ZU_DCMS.API.Endpoints.Admin
                     ? Results.Ok(ApiResponse<List<SystemConfigDto>>.Success(result.Value, "System configurations retrieved."))
                     : Results.BadRequest(ApiResponse<List<SystemConfigDto>>.Failure(result.Errors, "Failed to retrieve configurations."));
             })
+            .RequireAuthorization("AdminPolicy")
             .WithName("GetAllConfigs")
             .WithSummary("Retrieves all system configurations")
             .Produces<ApiResponse<List<SystemConfigDto>>>(StatusCodes.Status200OK)
@@ -69,6 +69,7 @@ namespace ZU_DCMS.API.Endpoints.Admin
                     ? Results.Ok(ApiResponse<List<ClinicDto>>.Success(result.Value, "Clinics retrieved."))
                     : Results.BadRequest(ApiResponse<List<ClinicDto>>.Failure(result.Errors, "Failed to retrieve clinics."));
             })
+            .RequireAuthorization("AdminPolicy")
             .WithName("GetAllClinics")
             .WithSummary("Retrieves all clinics for requirement setting")
             .Produces<ApiResponse<List<ClinicDto>>>(StatusCodes.Status200OK)
@@ -81,6 +82,7 @@ namespace ZU_DCMS.API.Endpoints.Admin
                     ? Results.Ok(ApiResponse<List<TermDto>>.Success(result.Value, "Terms retrieved."))
                     : Results.BadRequest(ApiResponse<List<TermDto>>.Failure(result.Errors, "Failed to retrieve terms."));
             })
+            .RequireAuthorization("AdminPolicy")
             .WithName("GetAllTerms")
             .WithSummary("Retrieves all academic terms")
             .Produces<ApiResponse<List<TermDto>>>(StatusCodes.Status200OK)
@@ -93,6 +95,7 @@ namespace ZU_DCMS.API.Endpoints.Admin
                     ? Results.Ok(ApiResponse<TermDto>.Success(result.Value, "Term retrieved."))
                     : Results.NotFound(ApiResponse<TermDto>.Failure(result.Error, "Term not found."));
             })
+            .RequireAuthorization("AdminPolicy")
             .WithName("GetTermById")
             .WithSummary("Retrieves a specific term by its ID")
             .Produces<ApiResponse<TermDto>>(StatusCodes.Status200OK)
@@ -106,6 +109,7 @@ namespace ZU_DCMS.API.Endpoints.Admin
                     ? Results.Ok(ApiResponse<PagedResult<StaffUsersDto>>.Success(result.Value, "Users retrieved."))
                     : Results.BadRequest(ApiResponse<PagedResult<StaffUsersDto>>.Failure(result.Error, "Failed to retrieve users."));
             })
+            .RequireAuthorization("AdminPolicy")
             .WithName("GetAllUsers")
             .WithSummary("Retrieves all application users")
             .Produces<ApiResponse<PagedResult<StaffUsersDto>>>(StatusCodes.Status200OK)
@@ -118,6 +122,7 @@ namespace ZU_DCMS.API.Endpoints.Admin
                     ? Results.Ok(ApiResponse<StaffUsersDto>.Success(result.Value, "User retrieved."))
                     : Results.NotFound(ApiResponse<StaffUsersDto>.Failure(result.Error, "User not found."));
             })
+            .RequireAuthorization("AdminPolicy")
             .WithName("GetUserById")
             .WithSummary("Retrieves a specific user by their ApplicationBuilder ID")
             .Produces<ApiResponse<StaffUsersDto>>(StatusCodes.Status200OK)
@@ -131,6 +136,7 @@ namespace ZU_DCMS.API.Endpoints.Admin
                     ? Results.Ok(ApiResponse<List<StudentRequirementDto>>.Success(result.Value, "Student requirements records retrieved."))
                     : Results.BadRequest(ApiResponse<List<StudentRequirementDto>>.Failure(result.Error, "Failed to retrieve requirements."));
             })
+            .RequireAuthorization("AdminPolicy")
             .WithName("GetAllStudentRequirements")
             .WithSummary("Retrieves all set requirements for students")
             .Produces<ApiResponse<List<StudentRequirementDto>>>(StatusCodes.Status200OK)
@@ -145,6 +151,7 @@ namespace ZU_DCMS.API.Endpoints.Admin
                     ? Results.Ok(ApiResponse<TermDto>.Success(result.Value, "Term successfully created."))
                     : Results.BadRequest(ApiResponse<TermDto>.Failure(result.Error, "Failed to create term."));
             })
+            .RequireAuthorization("AdminPolicy")
             .WithName("CreateTerm")
             .WithSummary("Creates a new academic term")
             .Produces<ApiResponse<TermDto>>(StatusCodes.Status200OK)
@@ -157,6 +164,7 @@ namespace ZU_DCMS.API.Endpoints.Admin
                     ? Results.Ok(ApiResponse<TermDto>.Success(result.Value, "Term successfully updated."))
                     : Results.BadRequest(ApiResponse<TermDto>.Failure(result.Error, "Failed to update term."));
             })
+            .RequireAuthorization("AdminPolicy")
             .WithName("UpdateTerm")
             .WithSummary("Updates an existing term")
             .Produces<ApiResponse<TermDto>>(StatusCodes.Status200OK)
@@ -169,6 +177,7 @@ namespace ZU_DCMS.API.Endpoints.Admin
                     ? Results.Ok(ApiResponse<string>.Success(string.Empty, "Active term updated."))
                     : Results.BadRequest(ApiResponse<string>.Failure(result.Error, "Failed to set active term."));
             })
+            .RequireAuthorization("AdminPolicy")
             .WithName("SetActiveTerm")
             .WithSummary("Marks a specific academic term as active")
             .Produces<ApiResponse<string>>(StatusCodes.Status200OK)
@@ -181,6 +190,7 @@ namespace ZU_DCMS.API.Endpoints.Admin
                     ? Results.Ok(ApiResponse<StaffUsersDto>.Success(result.Value, "User created successfully."))
                     : Results.BadRequest(ApiResponse<StaffUsersDto>.Failure(result.Error, "Failed to create user."));
             })
+            .RequireAuthorization("AdminPolicy")
             .WithName("CreateUser")
             .WithSummary("Registers a new staff or student user directly")
             .Produces<ApiResponse<StaffUsersDto>>(StatusCodes.Status200OK)
@@ -193,6 +203,7 @@ namespace ZU_DCMS.API.Endpoints.Admin
                     ? Results.Ok(ApiResponse<string>.Success(string.Empty, "Student requirements successfully updated."))
                     : Results.BadRequest(ApiResponse<string>.Failure(result.Error, "Failed to update requirements."));
             })
+            .RequireAuthorization("AdminPolicy")
             .WithName("SetStudentRequirements")
             .WithSummary("Sets or modifies the clinical requirements threshold for students")
             .Produces<ApiResponse<string>>(StatusCodes.Status200OK)
@@ -205,6 +216,7 @@ namespace ZU_DCMS.API.Endpoints.Admin
                     ? Results.Ok(ApiResponse<string>.Success(string.Empty, "System configuration successfully updated."))
                     : Results.BadRequest(ApiResponse<string>.Failure(result.Error, "Failed to update config."));
             })
+            .RequireAuthorization("AdminPolicy")
             .WithName("UpdateConfig")
             .WithSummary("Updates a specific system operational configuration")
             .Produces<ApiResponse<string>>(StatusCodes.Status200OK)

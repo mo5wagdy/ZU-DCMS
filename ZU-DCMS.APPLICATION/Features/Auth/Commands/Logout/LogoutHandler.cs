@@ -20,9 +20,7 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.Logout
 
             var result = await _tokenService.RevokeByTokenAsync(request.RefreshToken);
 
-            return result 
-                ? Result.Success("تم تسجيل الخروج بنجاح") 
-                : Result.Failure<string>("حدث خطأ أثناء تسجيل الخروج أو الـ Token غير صالح");
+            return result  ? Result.Success("تم تسجيل الخروج بنجاح")  : Result.Failure<string>("حدث خطأ أثناء تسجيل الخروج أو الـ Token غير صالح");
         }
     }
 }

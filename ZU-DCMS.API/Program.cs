@@ -73,6 +73,15 @@ namespace ZU_DCMS.API
             // Use Rate Limiting
             app.UseRateLimiter();
 
+            // __ Configure Request Localization __ //
+            var supportedCultures = new[] { "en-US", "ar-EG" };
+            var localizationOptions = new RequestLocalizationOptions()
+                .SetDefaultCulture("ar-EG")
+                .AddSupportedCultures(supportedCultures)
+                .AddSupportedUICultures(supportedCultures);
+
+            app.UseRequestLocalization(localizationOptions);
+
             // Use Authentication (Must be before Authorization)
             app.UseAuthentication();
             app.UseAuthorization();

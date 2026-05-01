@@ -217,8 +217,10 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
                     b => b.Clinic!
                  );
 
-                // __ Invalidate patient bookings cache to ensure fresh data on next fetch __ //
-                await _cache.RemoveAsync(CacheKeys.PatientBookingsVersion(patientId));
+                // __ Increment patient bookings cache version __ //
+                var versionKey = CacheKeys.PatientBookingsVersion(patientId);
+                var version = await _cache.GetOrSetAsync(versionKey, _ => Task.FromResult(1));
+                await _cache.SetAsync(versionKey, version + 1);
 
                 return Result.Success(_mapper.Map<BookingDto>(full!));
             }

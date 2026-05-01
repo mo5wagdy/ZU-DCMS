@@ -1,9 +1,9 @@
-﻿
+
 namespace ZU_DCMS.Domain.Enums
 {
     public enum ReviewStatus
     {
-        Approved,
-        Rejected
+        Approved = 1,
+        Rejected = 2
     }
 }

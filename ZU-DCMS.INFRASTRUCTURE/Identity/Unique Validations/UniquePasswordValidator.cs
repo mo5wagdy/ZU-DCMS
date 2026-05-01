@@ -1,4 +1,4 @@
-﻿
+
 using Microsoft.AspNetCore.Identity;
 using ZU_DCMS.Domain.Enums;
 
@@ -21,10 +21,11 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.Unique_Validations
             // __ If the user is a patient, validate that the password is exactly 14 digits long. __ //
             if (user.UserType == UserType.Patient)
             {
-                if (password?.Length == 14 && password.All(char.IsDigit))
+                // __ National ID is 14 digits, Passport/Residence is 6-20 alphanumeric characters. __ //
+                if (password?.Length >= 6 && password?.Length <= 20 && password.All(char.IsLetterOrDigit))
                     return IdentityResult.Success;
 
-                return IdentityResult.Failed(new IdentityError { Description = "الرقم القومي لازم يكون 14 رقم"});
+                return IdentityResult.Failed(new IdentityError { Description = "رقم الهوية غير صحيح (يجب أن يكون بين 6 و 20 حرف أو رقم)"});
             }
             else
             {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using ZU_DCMS.APPLICATION.Common;
@@ -23,5 +23,7 @@ namespace ZU_DCMS.APPLICATION.DTOs.Patient
         public ChronicCondition ChronicConditions { get; set; }
         public string? OtherConditions { get; set; }
         public bool IsActive { get; set; }
+        public bool HasActiveBooking { get; set; }
+        public bool HasActiveCase { get; set; }
     }
 }

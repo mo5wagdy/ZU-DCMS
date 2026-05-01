@@ -4,6 +4,7 @@ using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Contracts.Logger;
 using ZU_DCMS.APPLICATION.DTOs.Patient;
 using ZU_DCMS.Domain.Entities;
+using ZU_DCMS.Domain.Enums;
 using ZU_DCMS.Domain.Interfaces;
 
 namespace ZU_DCMS.APPLICATION.Features.Patients.Queries.GetPatientById
@@ -42,8 +43,29 @@ namespace ZU_DCMS.APPLICATION.Features.Patients.Queries.GetPatientById
             }
             
             _logger.LogInfo("Patient found: {FullName} (ID: {Id})", patient.FullName, patient.Id);
+            
+            var dto = _mapper.Map<PatientDto>(patient);
 
-            return Result.Success<PatientDto>(_mapper.Map<PatientDto>(patient));
+            // __ Check for active bookings (Pending, Confirmed, Delayed) __ //
+            dto.HasActiveBooking = await _uow.Repository<Booking>().ExistsAsync
+                (
+                    b => 
+                    b.PatientId == patient.Id && 
+                    (b.Status == BookingStatus.Pending || 
+                    b.Status == BookingStatus.Confirmed || 
+                    b.Status == BookingStatus.Delayed)
+                );
+
+            // __ Check for active cases (Not Approved) __ //
+            dto.HasActiveCase = await _uow.Repository<CaseAssignment>().ExistsAsync
+                (
+                    ca => 
+                    ca.DiagnosisRecord.Booking.PatientId == patient.Id && 
+                    ca.Status != CaseStatus.Approved && 
+                    ca.Status != CaseStatus.Transferred
+                );
+
+            return Result.Success<PatientDto>(dto);
         }
     }
 }

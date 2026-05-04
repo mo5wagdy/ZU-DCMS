@@ -43,7 +43,7 @@ namespace ZU_DCMS.APPLICATION.Features.Students.Queries.GetAllStudents
             var version = await _cache.GetOrSetAsync("students:version", _ => Task.FromResult(1));
 
             // __ Fetching From Cache If Available __ //
-            var cacheKey = CacheKeys.StudentsPage(request.Page, request.PageSize, request.SearchTerm, request.SortBy, version);
+            var cacheKey = $"student:page:{request.Page}:{request.PageSize}:{query.AcademicYear}:{request.SearchTerm}:{request.SortBy}:{request.SortDescending}:{version}";
 
             var result = await _cache.GetOrSetAsync
             (
@@ -57,7 +57,20 @@ namespace ZU_DCMS.APPLICATION.Features.Students.Queries.GetAllStudents
                     {
                         var term = request.SearchTerm.Trim().ToLower();
 
-                        filter = s => s.FullName.ToLower().Contains(term) || s.StudentCode.ToLower().Contains(term);
+                        if (query.AcademicYear.HasValue)
+                        {
+                            var year = query.AcademicYear.Value;
+                            filter = s => (s.FullName.ToLower().Contains(term) || s.StudentCode.ToLower().Contains(term)) && s.AcademicYear == year;
+                        }
+                        else
+                        {
+                            filter = s => s.FullName.ToLower().Contains(term) || s.StudentCode.ToLower().Contains(term);
+                        }
+                    }
+                    else if (query.AcademicYear.HasValue)
+                    {
+                        var year = query.AcademicYear.Value;
+                        filter = s => s.AcademicYear == year;
                     }
 
                     // __ Func for ordering according to user choice __ // 

@@ -7,6 +7,8 @@ using ZU_DCMS.APPLICATION.DTOs.Case;
 using ZU_DCMS.Domain.Entities;
 using ZU_DCMS.Domain.Enums;
 using ZU_DCMS.Domain.Interfaces;
+using ZU_DCMS.APPLICATION.Common.Cache;
+using ZiggyCreatures.Caching.Fusion;
 
 namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
 {
@@ -14,17 +16,20 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
     public class AssignStudentHandler : IRequestHandler<AssignStudentCommand, Result<CaseAssignmentDto>>
     {
         private readonly IUnitOfWork _uow;
+        private readonly IFusionCache _cache;
         private readonly IEventPublisher _eventPublisher;
         private readonly IMapper _mapper;
         private readonly IAppLogger<AssignStudentHandler> _logger;
 
         public AssignStudentHandler(
             IUnitOfWork uow,
+            IFusionCache cache,
             IEventPublisher eventPublisher,
             IMapper mapper,
             IAppLogger<AssignStudentHandler> logger)
         {
             _uow = uow;
+            _cache = cache;
             _eventPublisher = eventPublisher;
             _mapper = mapper;
             _logger = logger;
@@ -193,6 +198,14 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
         // __ Persist both changes in a single transaction. __ //
                 await _uow.SaveChangesAsync(internDoctorId);
                 await _uow.CommitTransactionAsync();
+
+                // _____________ INVALIDATE CACHE _____________ //
+                // __ Remove student cases cache to reflect new assignment. __ //
+                await _cache.RemoveAsync(CacheKeys.StudentCases(dto.StudentId));
+                // __ Remove available students for this clinic as workload has changed. __ //
+                await _cache.RemoveAsync(CacheKeys.AvailableStudents(clinicId));
+                // __ Remove student user profile cache if it exists (handles useStudentContext updates) __ //
+                await _cache.RemoveAsync(CacheKeys.StudentByUserId(student.ApplicationUserId));
 
                 _logger.LogInfo($"Case assignment successful: Diagnosis {dto.DiagnosisRecordId} -> Student {dto.StudentId} in Clinic {clinicId}");
 

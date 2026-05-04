@@ -39,6 +39,16 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetAvailableStudents
             var clinicId = query.ClinicId;
             var termId = query.TermId;
 
+            if (!termId.HasValue)
+            {
+                var activeTerm = await _uow.Repository<Term>().GetFirstOrDefaultAsync(t => t.IsActive);
+                if (activeTerm == null)
+                {
+                    return Result.Failure<List<StudentPriorityDto>>("لا يوجد فصل دراسي نشط حالياً");
+                }
+                termId = activeTerm.Id;
+            }
+
             // _____________ STEP 1: Validate Clinic Exists & Load Constraints _____________ //
                     // __ Load the clinic to access academic year constraints (MinAcademicYear, MaxAcademicYear) __ //
             var clinic = await _uow.Repository<Clinic>().GetByIdAsync(clinicId);
@@ -237,7 +247,9 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetAvailableStudents
                                 IsComplete = req.IsSatisfied,
                                 RequirementPriority = req.Priority,
                                 AverageCompletionDays = hasMetrics ? metrics.AverageDays : null,
-                                PerformanceLabel = hasMetrics ? metrics.Label : "لا يوجد"
+                                PerformanceLabel = hasMetrics ? metrics.Label : "لا يوجد",
+                                IsAvailable = true,
+                                AvailabilityStatus = "متاح"
                             };
                         })
                         .ToList();

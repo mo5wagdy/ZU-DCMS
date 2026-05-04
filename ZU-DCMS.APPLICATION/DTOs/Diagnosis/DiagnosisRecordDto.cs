@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -13,9 +13,12 @@ namespace ZU_DCMS.APPLICATION.DTOs.Diagnosis
         public string ClinicName { get; set; } = string.Empty;
         public string Complaint { get; set; } = string.Empty;
         public string DiagnosisTypeName { get; set; } = string.Empty;
+        public int ClinicId { get; set; }
         public string? Notes { get; set; }
         public DateTime DiagnosedAt { get; set; }
         public bool IsAssigned { get; set; }
+        public string? StudentName { get; set; }
+        public string? StudentCode { get; set; }
     }
 
 }

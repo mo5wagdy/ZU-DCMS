@@ -9,6 +9,7 @@ using ZU_DCMS.APPLICATION.DTOs.Student;
 using ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent;
 using ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.DiagnosePatient;
 using ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetAvailableStudents;
+using ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetDiagnosisByBooking;
 using ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetSessionPatients;
 using ZU_DCMS.APPLICATION.Features.Lookups.Queries.GetDiagnosisTypes;
 using ZU_DCMS.APPLICATION.Features.Lookups.Queries.GetProcedures;
@@ -38,6 +39,19 @@ namespace ZU_DCMS.API.Endpoints.Diagnosis
             })
             .WithName("DiagnosePatient")
             .WithSummary("Records a new clinical diagnosis assessment for a queued patient")
+            .Produces<ApiResponse<DiagnosisRecordDto>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<DiagnosisRecordDto>>(StatusCodes.Status400BadRequest);
+
+            // 1.1 Get diagnosis by booking ID
+            group.MapGet("/booking/{bookingId:int}", async ([FromServices] ISender sender, int bookingId) =>
+            {
+                var result = await sender.Send(new GetDiagnosisByBookingQuery(bookingId));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<DiagnosisRecordDto>.Success(result.Value, "Diagnosis retrieved."))
+                    : Results.BadRequest(ApiResponse<DiagnosisRecordDto>.Failure(result.Errors, "Diagnosis not found."));
+            })
+            .WithName("GetDiagnosisByBooking")
+            .WithSummary("Retrieves an existing diagnosis record by its parent booking ID")
             .Produces<ApiResponse<DiagnosisRecordDto>>(StatusCodes.Status200OK)
             .Produces<ApiResponse<DiagnosisRecordDto>>(StatusCodes.Status400BadRequest);
 

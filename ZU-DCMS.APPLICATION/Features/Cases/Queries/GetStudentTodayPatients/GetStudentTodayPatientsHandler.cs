@@ -25,27 +25,30 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Queries.GetStudentTodayPatients
             if (student == null)
                 return Result.Failure<List<CaseAssignmentDto>>("الطالب غير موجود");
 
-            // __ Find CaseAssignments that have a confirmed booking for today __ //
+            // __ Find CaseAssignments that have a confirmed/delayed booking for today __ //
             var cases = await _uow.Repository<CaseAssignment>().GetListAsync(
                 c => c.StudentId == student.Id &&
                      c.Status == CaseStatus.InProgress &&
                      c.DiagnosisRecord!.Booking!.Session!.Date.Date == DateTime.Today &&
-                     c.DiagnosisRecord!.Booking!.Status == BookingStatus.Confirmed,
+                     (c.DiagnosisRecord!.Booking!.Status == BookingStatus.Confirmed || c.DiagnosisRecord!.Booking!.Status == BookingStatus.Delayed),
                 false,
                 c => c.DiagnosisRecord.Booking.Patient,
+                c => c.DiagnosisRecord.Booking.Session, // Added Session include
                 c => c.DiagnosisRecord.DiagnosisType,
                 c => c.Clinic,
                 c => c.Sessions
             );
 
             // __ Also find those where the FOLLOW-UP booking is for today __ //
-            var followUpBookings = await _uow.Repository<Booking>().GetListAsync(
+            var followUpBookings = await _uow.Repository<Booking>().GetListAsync
+            (
                 b => b.CaseAssignmentId != null &&
                      b.CaseAssignment!.StudentId == student.Id &&
                      b.BookingType == BookingType.FollowUp &&
                      b.Session!.Date.Date == DateTime.Today &&
-                     b.Status == BookingStatus.Confirmed,
+                     (b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Delayed),
                 false,
+                b => b.Session, // Added Session include
                 b => b.CaseAssignment!,
                 b => b.CaseAssignment!.DiagnosisRecord.Booking.Patient,
                 b => b.CaseAssignment!.DiagnosisRecord.DiagnosisType,

@@ -21,7 +21,7 @@ namespace ZU_DCMS.APPLICATION.Validators.Admin
                 .WithMessage("معرف الموظف مطلوب");
 
             RuleFor(x => x.Requirements)
-                .NotEmpty()
+                .NotNull()
                 .WithMessage("قائمة المتطلبات مطلوبة");
 
             RuleForEach(x => x.Requirements).ChildRules(req =>
@@ -31,8 +31,8 @@ namespace ZU_DCMS.APPLICATION.Validators.Admin
                        .WithMessage("العيادة مطلوبة");
 
                 req.RuleFor(x => x.RequiredCount)
-                       .GreaterThan(0)
-                       .WithMessage("عدد الحالات المطلوبة لازم يكون أكبر من 0");
+                       .GreaterThanOrEqualTo(0)
+                       .WithMessage("عدد الحالات المطلوبة لازم يكون 0 أو أكبر");
             });
         }
     }

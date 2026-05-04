@@ -86,6 +86,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.SetStudentRequirements
                         StudentId = command.StudentId,
                         TermId = command.TermId,
                         ClinicId = r.ClinicId,
+                        AcademicYear = student.AcademicYear,
                         RequiredCount = r.RequiredCount,
                         CompletedCount = 0,
                         CreatedAt = DateTime.UtcNow

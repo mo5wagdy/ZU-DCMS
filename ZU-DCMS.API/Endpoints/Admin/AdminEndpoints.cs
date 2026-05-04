@@ -209,6 +209,19 @@ namespace ZU_DCMS.API.Endpoints.Admin
             .Produces<ApiResponse<string>>(StatusCodes.Status200OK)
             .Produces<ApiResponse<string>>(StatusCodes.Status400BadRequest);
 
+            group.MapPut("/student-requirements/yearly", async ([FromServices] ISender sender, [FromBody] SetTermRequirementsCommand command) =>
+            {
+                var result = await sender.Send(command);
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<string>.Success(string.Empty, "Yearly requirements successfully updated."))
+                    : Results.BadRequest(ApiResponse<string>.Failure(result.Error, "Failed to update yearly requirements."));
+            })
+            .RequireAuthorization("AdminPolicy")
+            .WithName("SetYearlyRequirements")
+            .WithSummary("Sets clinical requirements for all students in a specific academic year")
+            .Produces<ApiResponse<string>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<string>>(StatusCodes.Status400BadRequest);
+
             group.MapPut("/configs", async ([FromServices] ISender sender, [FromBody] UpdateConfigCommand command) =>
             {
                 var result = await sender.Send(command);

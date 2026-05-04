@@ -49,19 +49,12 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient
             var dto = command.Dto;
 
             // __ Normalize Inputs __ //
-            dto.Username = dto.Username.Trim().ToLower().NormalizeDigits();
+            //dto.Username = dto.Username.Trim().ToLower().NormalizeDigits();
             dto.PhoneNumber = dto.PhoneNumber.Trim().NormalizeDigits();
             dto.IdentityNumber = dto.IdentityNumber.Trim().NormalizeDigits();
 
-            _logger.LogInfo("Registering patient with Username: {Username}, IdentityNumber: {IdentityNumber}", dto.Username, dto.IdentityNumber);
+            _logger.LogInfo("Registering patient with PhoneNumber: {PhoneNumber}, IdentityNumber: {IdentityNumber}", dto.PhoneNumber, dto.IdentityNumber);
 
-            // __ Check username uniqueness __ //
-            if (await _identity.UsernameExistsAsync(dto.Username))
-            {
-                _logger.LogWarning("Username exists: {PhoneNumber}", dto.Username);
-                
-                return Result.Failure<AuthDto>("اسم المستخدم موجود بالفعل");
-            }
 
             // __ Check identity number uniqueness __ //
             if (await _uow.Repository<Patient>().ExistsAsync(p => p.IdentityNumber == dto.IdentityNumber))
@@ -97,12 +90,12 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient
            
             try
             {
-                _logger.LogInfo("Creating Identity user for patient: {PhoneNumber}", dto.Username);
+                _logger.LogInfo("Creating Identity user for patient: {PhoneNumber}", dto.PhoneNumber);
 
                 // __ Create Identity user — password is the identity number __ //
                 var (success, userId, error) = await _identity.CreateUserAsync
                 (
-                   username: dto.Username,
+                    username: Guid.NewGuid().ToString(),
                     phoneNumber: dto.PhoneNumber,
                     email: dto.Email ?? null,
                     fullName: dto.FullName,
@@ -147,7 +140,7 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient
                 
                 await _uow.CommitTransactionAsync();
 
-                _logger.LogInfo("Patient registration successful: {PhoneNumber}", dto.Username);
+                _logger.LogInfo("Patient registration successful: {PhoneNumber}", dto.PhoneNumber);
 
                 return Result.Success<AuthDto>(new AuthDto
                 {

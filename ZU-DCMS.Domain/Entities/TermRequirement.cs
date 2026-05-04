@@ -1,4 +1,4 @@
-﻿
+
 using System.ComponentModel.DataAnnotations.Schema;
 using ZU_DCMS.Domain.Common;
 
@@ -22,8 +22,7 @@ namespace ZU_DCMS.Domain.Entities
         // __ Determines if the requirement has been satisfied. __ //
 
         [NotMapped]
-        public bool IsSatisfied =>
-            CompletedCount + TransferredCount >= RequiredCount;
+        public bool IsSatisfied => CompletedCount + TransferredCount >= RequiredCount;
 
         // __ Calculates the priority level for this requirement (1 = highest priority). __ //
 
@@ -37,9 +36,6 @@ namespace ZU_DCMS.Domain.Entities
                 _ => 4       // Lowest priority: 3+ cases done
             };
 
-        // => measure by time to finish
-        // => filter by all requirements progress in all clinics
-
         // _____________ Foreign Keys _____________ //
         // __ Reference to the Student who must fulfill this requirement. __ //
         public int StudentId { get; set; }
@@ -49,6 +45,9 @@ namespace ZU_DCMS.Domain.Entities
 
         // __ Reference to the Clinic where cases must be completed. __ //
         public int ClinicId { get; set; }
+
+        // __ The academic year this requirement applies to. __ //
+        public int AcademicYear { get; set; }
 
         // _____________ Navigation _____________ //
         public Student Student { get; set; } = null!;

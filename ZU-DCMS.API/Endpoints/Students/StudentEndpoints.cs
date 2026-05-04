@@ -23,9 +23,9 @@ namespace ZU_DCMS.API.Endpoints.Students
                            .WithTags("Students");
 
             // 1. Get All Students
-            group.MapGet("/", async ([AsParameters] PagedRequest request, [FromServices] ISender sender) =>
+            group.MapGet("/", async ([AsParameters] PagedRequest request, [FromQuery] int? academicYear, [FromServices] ISender sender) =>
             {
-                var query = new GetAllStudentsQuery(request);
+                var query = new GetAllStudentsQuery(request, academicYear);
                 var result = await sender.Send(query);
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<PagedResult<StudentDto>>.Success(result.Value, "All students retrieved."))

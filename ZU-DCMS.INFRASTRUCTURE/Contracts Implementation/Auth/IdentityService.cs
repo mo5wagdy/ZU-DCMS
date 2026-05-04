@@ -40,13 +40,14 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
 
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
             {
-                var searchTerm = (request.SearchTerm ?? "").Trim().ToLower();
+                var searchTerm = (request.SearchTerm ?? "").Trim().ToLower().NormalizeDigits();
 
                 users = users.Where
                     (
-                        u => u.UserName != null && u.UserName.ToLower().Contains(searchTerm) ||
-                        u.FullName != null && u.FullName.ToLower().Contains(searchTerm) ||
-                        u.Email != null && u.Email.ToLower().Contains(searchTerm)
+                        u => (u.UserName != null && u.UserName.ToLower().Contains(searchTerm)) ||
+                        (u.FullName != null && u.FullName.ToLower().Contains(searchTerm)) ||
+                        (u.Email != null && u.Email.ToLower().Contains(searchTerm)) ||
+                        (u.PhoneNumber != null && u.PhoneNumber.Contains(searchTerm))
                     );
             }
 
@@ -57,7 +58,10 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
                 users = sortBy switch
                 {
                     "fullname" => users.OrderByDescending(u => u.FullName),
+                    "username" => users.OrderByDescending(u => u.UserName),
                     "email" => users.OrderByDescending(u => u.Email),
+                    "createdat" => users.OrderByDescending(u => u.CreatedAt),
+                    "role" => users.OrderByDescending(u => _context.UserRoles.Where(ur => ur.UserId == u.Id).Select(ur => _context.Roles.Where(r => r.Id == ur.RoleId).Select(r => r.Name).FirstOrDefault()).FirstOrDefault()),
                     _ => users.OrderByDescending(u => u.Id)
                 };
             }
@@ -66,7 +70,10 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
                 users = sortBy switch
                 {
                     "fullname" => users.OrderBy(u => u.FullName),
+                    "username" => users.OrderBy(u => u.UserName),
                     "email" => users.OrderBy(u => u.Email),
+                    "createdat" => users.OrderBy(u => u.CreatedAt),
+                    "role" => users.OrderBy(u => _context.UserRoles.Where(ur => ur.UserId == u.Id).Select(ur => _context.Roles.Where(r => r.Id == ur.RoleId).Select(r => r.Name).FirstOrDefault()).FirstOrDefault()),
                     _ => users.OrderBy(u => u.Id)
                 };
             }

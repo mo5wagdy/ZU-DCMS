@@ -10,12 +10,6 @@ namespace ZU_DCMS.APPLICATION.Validators.Auth
         // __ Constructor to define validation rules for registering a patient __ //س
         public RegisterPatientValidator()
         {
-            RuleFor(x => x.Dto.Username)
-                   .NotEmpty().WithMessage("اسم المستخدم مطلوب")
-                   .MinimumLength(3).WithMessage("لازم 3 حروف على الأقل")
-                   .MaximumLength(50).WithMessage("لازم أقل من 50 حرف")
-                   .Matches(@"^[\p{L}0-9._-]+$")
-                   .WithMessage("يقبل حروف (عربي وإنجليزي) وأرقام و . _ - فقط");
 
             RuleFor(x => x.Dto.FullName)
                    .NotEmpty().WithMessage("الاسم مطلوب")
@@ -43,7 +37,11 @@ namespace ZU_DCMS.APPLICATION.Validators.Auth
             RuleFor(x => x.Dto.DateOfBirth)
                    .NotEmpty().WithMessage("تاريخ الميلاد مطلوب")
                    .Must(BeValidAge)
-                   .WithMessage("السن لازم يكون بين 1 و 120 سنة");
+                   .WithMessage("السن لازم يكون بين 5 ل 120 سنة");
+
+            RuleFor(x => x.Dto.ParentName)
+                   .NotEmpty().WithMessage("إسم ولي أمر الطفل من سن 5 ل 17 مطلوب")
+                   .When(x => x.Dto.IsChild);
 
             RuleFor(x => x.Dto.Gender)
                    .IsInEnum()
@@ -106,7 +104,7 @@ namespace ZU_DCMS.APPLICATION.Validators.Auth
                 var century = number[0] == '2' ? 1900 : 2000;
                 var year = int.Parse(number.Substring(1, 2));
                 var date = new DateTime(century + year, month, day);
-                if (date > DateTime.Today) return false;
+                if (date > DateTime.Today && (!BeValidAge(date))) return false;
             }
             catch { return false; }
 
@@ -132,7 +130,7 @@ namespace ZU_DCMS.APPLICATION.Validators.Auth
             var today = DateTime.Today;
             var age = today.Year - dateOfBirth.Year;
             if (dateOfBirth.Date > today.AddYears(-age)) age--;
-            return age >= 1 && age <= 120;
+            return age >= 5 && age <= 120;
         }
     }
 

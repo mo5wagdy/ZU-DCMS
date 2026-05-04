@@ -5,5 +5,5 @@ using ZU_DCMS.APPLICATION.DTOs.Student;
 
 namespace ZU_DCMS.APPLICATION.Features.Students.Queries.GetAllStudents
 {
-    public record GetAllStudentsQuery(PagedRequest Request) : IRequest<Result<PagedResult<StudentDto>>>;
+    public record GetAllStudentsQuery(PagedRequest Request, int? AcademicYear = null) : IRequest<Result<PagedResult<StudentDto>>>;
 }

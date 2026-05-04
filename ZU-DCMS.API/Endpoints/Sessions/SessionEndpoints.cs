@@ -11,6 +11,7 @@ using ZU_DCMS.APPLICATION.Features.Sessions.Queries.FindSession;
 using ZU_DCMS.APPLICATION.Features.Sessions.Queries.GetTodaySessions;
 using ZU_DCMS.APPLICATION.Features.Sessions.Queries.GetAvailableSlots;
 using ZU_DCMS.APPLICATION.Features.Sessions.Queries.IsSessionAvailable;
+using ZU_DCMS.APPLICATION.Features.Sessions.Queries.GetRecentSessions;
 
 namespace ZU_DCMS.API.Endpoints.Sessions
 {
@@ -83,9 +84,9 @@ namespace ZU_DCMS.API.Endpoints.Sessions
 
 
             // 5. Get Patients for session
-            group.MapGet("/patients", async ([FromServices] ISender sender, [FromQuery] int SessionId, [FromQuery] string InternDoctorId) =>
+            group.MapGet("/patients", async ([FromServices] ISender sender, [FromQuery] int SessionId, [FromQuery] string InternDoctorId, [AsParameters] PagedRequest request) =>
             {
-                var result = await sender.Send(new GetSessionPatientsQuery(SessionId, InternDoctorId));
+                var result = await sender.Send(new GetSessionPatientsQuery(SessionId, InternDoctorId, request));
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<PagedResult<BookingForDiagnosisDto>>.Success(result.Value, "Patients retriedved."))
                     : Results.BadRequest(ApiResponse<PagedResult<BookingForDiagnosisDto>>.Failure(result.Errors, "Failed to retrieve patients"));
@@ -107,6 +108,19 @@ namespace ZU_DCMS.API.Endpoints.Sessions
             .RequireAuthorization("ClinicalCorePolicy")
             .WithName("GetTodaySessions")
             .WithSummary("Retrieves all clinical sessions scheduled for the current date")
+            .Produces<ApiResponse<List<SessionDto>>>(StatusCodes.Status200OK);
+
+            // 7. Get Recent Sessions (for Intern Dashboard History)
+            group.MapGet("/recent", async ([FromServices] ISender sender, [FromQuery] int days = 6) =>
+            {
+                var result = await sender.Send(new GetRecentSessionsQuery(days));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<List<SessionDto>>.Success(result.Value, "Recent sessions retrieved."))
+                    : Results.BadRequest(ApiResponse<List<SessionDto>>.Failure(result.Errors, "Failed to retrieve recent sessions."));
+            })
+            .RequireAuthorization("ClinicalCorePolicy")
+            .WithName("GetRecentSessions")
+            .WithSummary("Retrieves clinical sessions from the last few days")
             .Produces<ApiResponse<List<SessionDto>>>(StatusCodes.Status200OK);
         }
     }

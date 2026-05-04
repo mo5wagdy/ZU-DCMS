@@ -75,5 +75,15 @@ namespace ZU_DCMS.APPLICATION.DTOs.Student
         /// E.g., "ممتاز", "جيد", "مقبول", "بطيء", "لا يوجد"
         /// </summary>
         public string PerformanceLabel { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Indicates if the student can take a new case now.
+        /// </summary>
+        public bool IsAvailable { get; set; } = true;
+
+        /// <summary>
+        /// Status message for availability.
+        /// </summary>
+        public string AvailabilityStatus { get; set; } = "Available";
     }
 }

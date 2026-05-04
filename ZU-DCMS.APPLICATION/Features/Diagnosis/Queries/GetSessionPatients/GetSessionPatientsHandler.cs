@@ -39,10 +39,13 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetSessionPatients
             var nowTime = DateTime.Now.TimeOfDay;
             var todayDate = DateTime.Today;
 
+            var gracePeriod = TimeSpan.FromMinutes(30);
+            var reQueueTime = nowTime.Subtract(gracePeriod);
+
             var overdueBookings = await _uow.Repository<Booking>().GetListAsync(
                 b => b.Session.Date == todayDate &&
                      b.Status == BookingStatus.Confirmed &&
-                     b.Session.EndTime < nowTime,
+                     b.Session.EndTime < reQueueTime,
                      includes : b => b.Session
             );
 
@@ -96,41 +99,40 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetSessionPatients
                 return Result.Failure<PagedResult<BookingForDiagnosisDto>>("السكشن غير موجود");
             }
 
-            // __ Log and return failure if session date is not today __ //
-            if (session.Date.Date != DateTime.Today)
+            // __ Validate session date (Allow past sessions, block future ones) __ //
+            if (session.Date.Date > DateTime.Today)
             {
-                _logger.LogWarning("Intern {InternDoctorId} attempted to access session {SessionId} for date {SessionDate}", internDoctorId, sessionId, session.Date);
+                _logger.LogWarning("Intern {InternDoctorId} attempted to access future session {SessionId} for date {SessionDate}", internDoctorId, sessionId, session.Date);
                
-                return Result.Failure<PagedResult<BookingForDiagnosisDto>>("لا يمكن الوصول لمرضى سكشن يوم آخر");
+                return Result.Failure<PagedResult<BookingForDiagnosisDto>>("لا يمكن الوصول لسكشن في المستقبل");
             }
 
-            // __ Log and return failure if session has not started yet __ //
-            if (DateTime.Now.TimeOfDay < session.StartTime)
+            // __ If session is today, ensure it has started __ //
+            if (session.Date.Date == DateTime.Today && DateTime.Now.TimeOfDay < session.StartTime)
             {
                 _logger.LogInfo("Intern {InternDoctorId} attempted to access session {SessionId} before start time {StartTime}", internDoctorId, sessionId, session.StartTime);
                
                 return Result.Failure<PagedResult<BookingForDiagnosisDto>>("السكشن لم يبدأ بعد");
             }
             _logger.LogInfo("Fetching confirmed bookings for SessionId: {SessionId}", sessionId);
-
-            // __ Get confirmed bookings for the session, ordered by creation time, including patient details __ //
-            var request = new PagedRequest();
-
-            var (items, total) = await _uow.Repository<Booking>().GetPagedListAsync
-                (
-                    (request.Page - 1) * request.PageSize,
-                    request.PageSize,
-                    b => b.SessionId == sessionId && b.Status == BookingStatus.Confirmed,
+            
+            var (items, total) = await _uow.Repository<Booking>().GetPagedListAsync(
+                    (query.Request.Page - 1) * query.Request.PageSize,
+                    query.Request.PageSize,
+                    b => b.SessionId == sessionId && (b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Delayed || b.Status == BookingStatus.Cancelled),
                     true,
                     q => q.OrderBy(b => b.CreatedAt),
-                    b => b.Patient
+                    b => b.Patient,
+                    b => b.DiagnosisRecord!,
+                    b => b.DiagnosisRecord!.CaseAssignment!,
+                    b => b.DiagnosisRecord!.CaseAssignment!.Student
                 );
 
             // __ Map to DTOs __ //
             var dtos = _mapper.Map<List<BookingForDiagnosisDto>>(items);
 
             // __ Return paged result __ //
-            var pagedResult = PagedResult<BookingForDiagnosisDto>.Create(dtos, total, request);
+            var pagedResult = PagedResult<BookingForDiagnosisDto>.Create(dtos, total, query.Request);
 
             _logger.LogInfo("Fetched {Count} confirmed bookings for SessionId: {SessionId}", dtos.Count, sessionId);
 

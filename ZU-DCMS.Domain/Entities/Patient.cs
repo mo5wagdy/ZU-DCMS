@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using ZU_DCMS.Domain.Common;
 using ZU_DCMS.Domain.Enums;
 
@@ -13,6 +10,7 @@ namespace ZU_DCMS.Domain.Entities
         public string ApplicationUserId { get; set; } = string.Empty;
         public string PatientCode { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
+        public string? ParentName { get; set; } = null;
         public IdentityType IdentityType { get; set; }
         public string IdentityNumber { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
@@ -22,8 +20,9 @@ namespace ZU_DCMS.Domain.Entities
 
         [NotMapped] // => This property is not mapped to the database, as it's computed based on DateOfBirth.
         public int Age => DateTime.Today.Year - DateOfBirth.Year - (DateOfBirth.Date > DateTime.Today.AddYears(-(DateTime.Today.Year - DateOfBirth.Year)) ? 1 : 0); // => Computed property to calculate age based on DateOfBirth.
+        public bool IsChild => (DateTime.Today.Year - DateOfBirth.Year) >= 5 && (DateTime.Today.Year - DateOfBirth.Year) <= 17;
         public Gender Gender { get; set; }
-        public ChronicCondition ChronicConditions { get; set; } = ChronicCondition.None;
+        public ChronicCondition? ChronicConditions { get; set; } = ChronicCondition.None;
         public string? OtherConditions { get; set; }
 
         // _____________ Navigation _____________ //

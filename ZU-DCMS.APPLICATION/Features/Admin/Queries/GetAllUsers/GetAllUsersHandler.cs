@@ -34,6 +34,8 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Queries.GetAllUsers
                 query.Request.PageSize, 
                 query.Role ?? "", 
                 query.Request.SearchTerm ?? "", 
+                query.Request.SortBy,
+                query.Request.SortDescending,
                 version
             );
 

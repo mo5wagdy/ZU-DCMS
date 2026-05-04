@@ -12,7 +12,7 @@ namespace ZU_DCMS.APPLICATION.Common.Cache
         // __ Student Related __ //
         public static string StudentById(int studentId) => $"student:{studentId}"; 
         public static string StudentByUserId(string userId) => $"student:user:{userId}"; 
-        public static string StudentsPage(int page, int size, string? search, string? sort, int version) => $"student:page:{page}:{size}:{search}:{sort}"; 
+        public static string StudentsPage(int page, int size, string? search, string? sort, bool desc, int version) => $"student:page:{page}:{size}:{search}:{sort}:{desc}:{version}"; 
         
         // __ Student Progress Related __ //
         public static string StudentProgress(int studentId, int termId) => $"student:progress:{studentId}:{termId}"; 
@@ -35,7 +35,7 @@ namespace ZU_DCMS.APPLICATION.Common.Cache
         public const string DailyMetrics = "dashboard:daily_metrics";
 
         // __ Staff Related __ //
-        public static string StaffUsersPage(int page, int size, string role, string search, int version) => $"staff:users:{page}:{size}:{role}:{search}:{version}";
+        public static string StaffUsersPage(int page, int size, string role, string search, string? sort, bool desc, int version) => $"staff:users:{page}:{size}:{role}:{search}:{sort}:{desc}:{version}";
         public static string StaffUsersVersion => "staff:users:version";
         public static string StaffUserByUserId(string userId) => $"staff:user:{userId}";
     }

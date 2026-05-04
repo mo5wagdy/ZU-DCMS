@@ -5,17 +5,18 @@ namespace ZU_DCMS.APPLICATION.DTOs.Auth
     // __ DTO for registering a patient __ //
     public class RegisterPatientDto
     {
-        public string Username { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
+        public string? ParentName { get; set; } = null;
         public string PhoneNumber { get; set; } = string.Empty;
         public IdentityType IdentityType { get; set; }
         public string IdentityNumber { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
         public string? Email { get; set; }
         public DateTime DateOfBirth { get; set; }
+        public bool IsChild => (DateTime.Today.Year - DateOfBirth.Year) >= 5 && (DateTime.Today.Year - DateOfBirth.Year) <= 17;
         public Gender Gender { get; set; }
         public UserType Type { get; set; } = UserType.Patient;
-        public ChronicCondition ChronicConditions { get; set; }
+        public ChronicCondition? ChronicConditions { get; set; }
         public string? OtherConditions { get; set; }
     }
 }

@@ -116,8 +116,9 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetSessionPatients
             }
             _logger.LogInfo("Fetching confirmed bookings for SessionId: {SessionId}", sessionId);
             
-            var (items, total) = await _uow.Repository<Booking>().GetPagedListAsync(
-                    (query.Request.Page - 1) * query.Request.PageSize,
+            var (items, total) = await _uow.Repository<Booking>().GetPagedListAsync
+                (
+                   (query.Request.Page - 1) * query.Request.PageSize,
                     query.Request.PageSize,
                     b => b.SessionId == sessionId && (b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Delayed || b.Status == BookingStatus.Cancelled),
                     true,

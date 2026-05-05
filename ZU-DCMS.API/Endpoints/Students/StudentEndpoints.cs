@@ -53,10 +53,10 @@ namespace ZU_DCMS.API.Endpoints.Students
             .Produces<ApiResponse<StudentDto>>(StatusCodes.Status404NotFound);
 
             // 3. Get Student By Identity User ID
-            group.MapGet("/user/{userId}", async ([FromServices] ISender sender, [AsParameters] GetStudentByUserIdQuery query) =>
+            group.MapGet("/user/{userId}", async ([FromServices] ISender sender, string userId) =>
             {
                 // Can be accessed by Staff or the student themselves.
-                var result = await sender.Send(query);
+                var result = await sender.Send(new GetStudentByUserIdQuery(userId));
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<StudentDto>.Success(result.Value, "Student details by user ID retrieved."))
                     : Results.NotFound(ApiResponse<StudentDto>.Failure(result.Errors, "Student not found by given user ID."));

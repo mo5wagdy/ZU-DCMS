@@ -119,14 +119,14 @@ namespace ZU_DCMS.API.Endpoints.Cases
 
             // ==== COMMON LOOKUP ====
             // 6. Common entity fallback
-            group.MapGet("/{caseAssignmentId}", async ([FromServices] ISender sender, [AsParameters] GetCaseByIdQuery query) =>
+            group.MapGet("/{caseAssignmentId:int}", async ([FromServices] ISender sender, int caseAssignmentId) =>
             {
-                var result = await sender.Send(query);
+                var result = await sender.Send(new GetCaseByIdQuery(caseAssignmentId));
                 return result.IsSuccess
                     ? Results.Ok(ApiResponse<CaseAssignmentDto>.Success(result.Value, "Extracted the detailed case structure blueprint."))
                     : Results.NotFound(ApiResponse<CaseAssignmentDto>.Failure(result.Error, "Case not found."));
             })
-            .RequireAuthorization() // Authorized structure allows owner tracking or staff inspection internally mapped
+            .RequireAuthorization("StaffCaseAccessPolicy") // Authorized structure allows owner tracking or staff inspection internally mapped
             .WithName("GetCaseById")
             .WithSummary("Retrieves the full object framework for a specific target clinical case")
             .Produces<ApiResponse<CaseAssignmentDto>>(StatusCodes.Status200OK)

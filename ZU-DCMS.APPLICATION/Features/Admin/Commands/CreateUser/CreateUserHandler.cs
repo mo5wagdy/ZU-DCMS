@@ -119,12 +119,16 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
                 // __ If the user is student __ //
                 if (dto.Role == UserRoles.Student)
                 {
+                    // __ Fetch active term to assign it to the student __ //
+                    var activeTerm = await _uow.Repository<Term>().GetFirstOrDefaultAsync(t => t.IsActive);
+
                     var student = new Student
                     {
                         ApplicationUserId = userId,
                         StudentCode = await _codeGen.GenerateAsync("STU", "StudentCodeSeq"),
                         FullName = dto.FullName.Trim(),
                         AcademicYear = dto.AcademicYear ?? 1,
+                        ActiveTermId = activeTerm?.Id, // Automatically assign active term
                         IsActive = true,
                         CreatedAt = DateTime.UtcNow
                     };

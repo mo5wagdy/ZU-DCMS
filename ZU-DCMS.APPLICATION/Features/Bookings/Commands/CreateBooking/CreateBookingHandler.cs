@@ -81,9 +81,13 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
             // __ Prevent New booking if patient has an active case __ //
             if (dto.BookingType == BookingType.New)
             {
-                var hasActiveCase = await _uow.Repository<CaseAssignment>().ExistsAsync(
+                var hasActiveCase = await _uow.Repository<CaseAssignment>().ExistsAsync
+                (
                     c => c.DiagnosisRecord.Booking.PatientId == patientId &&
-                         c.Status != CaseStatus.Completed);
+                         c.Status != CaseStatus.Completed &&
+                         c.Status != CaseStatus.Approved &&
+                         c.Status != CaseStatus.Transferred
+                );
                          
                 if (hasActiveCase)
                 {
@@ -102,17 +106,19 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
                 lastCase = await _uow.Repository<CaseAssignment>()
                     .GetFirstOrDefaultAsync(
                         c => c.DiagnosisRecord.Booking.PatientId == patientId &&
-                             c.Status != CaseStatus.Completed, 
+                             c.Status != CaseStatus.Completed &&
+                             c.Status != CaseStatus.Approved &&
+                             c.Status != CaseStatus.Transferred, 
                              includes: c => c.Sessions);
 
-                if (lastCase == null)
+                if (lastCase is null)
                     return Result.Failure<BookingDto>("لا يمكن حجز متابعة بدون حالة علاجية مسبقة");
 
                 lastSession = lastCase.Sessions
                     .OrderByDescending(s => s.SessionDate)
                     .FirstOrDefault();
 
-                if (lastSession == null || !lastSession.HasFollowUp)
+                if (lastSession is null || !lastSession.HasFollowUp)
                     return Result.Failure<BookingDto>("لا توجد متابعة مطلوبة لحالتك الحالية");
 
                 followUpClinicId = lastCase.ClinicId;

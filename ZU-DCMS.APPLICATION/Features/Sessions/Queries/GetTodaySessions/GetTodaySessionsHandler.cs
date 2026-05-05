@@ -3,6 +3,7 @@ using MediatR;
 using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Contracts.Logger;
 using ZU_DCMS.APPLICATION.DTOs.Session;
+using ZU_DCMS.APPLICATION.Features.Bookings.Commands.RequeueOverdueBookings;
 using ZU_DCMS.APPLICATION.Features.Sessions.Commands.GenerateSessions;
 using ZU_DCMS.Domain.Entities;
 using ZU_DCMS.Domain.Interfaces;
@@ -37,6 +38,9 @@ namespace ZU_DCMS.APPLICATION.Features.Sessions.Queries.GetTodaySessions
             var today = DateTime.Today;
 
             _logger.LogInfo("Fetching today's sessions");
+
+            // __ Re-queue overdue bookings first to ensure counts are accurate __ //
+            await _mediator.Send(new RequeueOverdueBookingsCommand(), cancellationToken);
 
             // __ Get sessions for today __ //
             var sessions = await _uow.Repository<Session>().GetListAsync(

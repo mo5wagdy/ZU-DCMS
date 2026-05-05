@@ -51,7 +51,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Identity.ContractImplementation
                     );
             }
 
-            var sortBy = request.SortBy?.Trim().ToLower() ?? "fullname";
+            var sortBy = request.SortBy?.Trim().ToLower() ?? "createdat";
 
             if (request.SortDescending)
             {

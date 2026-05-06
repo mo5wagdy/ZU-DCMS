@@ -186,22 +186,23 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
                     CreatedAt = DateTime.UtcNow
                 };
 
-                // Add to repository
+                // Add to repository and save immediately to get DB-generated ID
                 await _uow.Repository<CaseAssignment>().AddAsync(assignment);
+                await _uow.SaveChangesAsync(internDoctorId); // <-- assignment.Id is now valid
 
                 // _____________ UPDATE DiagnosisRecord _____________ //
         // __ Mark the DiagnosisRecord as assigned to prevent duplicate assignments. __ //
                 diagnosis.IsAssigned = true;
                 _uow.Repository<DiagnosisRecord>().Update(diagnosis);
-                
+
+                // __ Link booking to the newly created CaseAssignment using its real DB-generated ID __ //
                 var booking = await _uow.Repository<Booking>().GetByIdAsync(diagnosis.BookingId);
 
                 if (booking != null)
                 {
-                    booking.CaseAssignmentId = assignment.Id;
+                    booking.CaseAssignmentId = assignment.Id; // ID is now correct (not 0)
                     _uow.Repository<Booking>().Update(booking);
                 }
-
 
                 // _____________ SAVE & COMMIT TRANSACTION _____________ //
         // __ Persist both changes in a single transaction. __ //
@@ -215,6 +216,8 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
                 await _cache.RemoveAsync(CacheKeys.AvailableStudents(clinicId));
                 // __ Remove student user profile cache if it exists (handles useStudentContext updates) __ //
                 await _cache.RemoveAsync(CacheKeys.StudentByUserId(student.ApplicationUserId));
+                // __ Refresh dean dashboard stats __ //
+                await _cache.RemoveAsync(CacheKeys.DailyMetrics);
 
                 _logger.LogInfo($"Case assignment successful: Diagnosis {dto.DiagnosisRecordId} -> Student {dto.StudentId} in Clinic {clinicId}");
 

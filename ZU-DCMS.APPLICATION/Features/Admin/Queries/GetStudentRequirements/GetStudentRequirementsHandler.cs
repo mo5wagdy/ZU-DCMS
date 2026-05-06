@@ -54,7 +54,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Queries.GetStudentRequirements
                         {
                             requirements = await _uow.Repository<TermRequirement>().GetListAsync
                                 (r =>
-                                    r.StudentId == null &&
+                                    //r.StudentId == null &&
                                     r.TermId == query.TermId &&
                                     r.AcademicYear == student.AcademicYear,
                                     false,

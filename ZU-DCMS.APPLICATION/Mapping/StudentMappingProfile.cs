@@ -25,16 +25,26 @@ namespace ZU_DCMS.APPLICATION.Mapping
 
             // => TermRequirement → StudentRequirementDto
             CreateMap<TermRequirement, StudentRequirementDto>()
-                     .ForMember(d => d.ClinicName, o => o.MapFrom(s => s.Clinic.Name))
+                     .ForMember(d => d.ClinicName,   o => o.MapFrom(s => s.Clinic.NameAr != "" ? s.Clinic.NameAr : s.Clinic.Name))
+                     .ForMember(d => d.ClinicNameEn, o => o.MapFrom(s => s.Clinic.NameEn != "" ? s.Clinic.NameEn : s.Clinic.Name))
                      .ForMember(d => d.RequirementTypeName, o => o.MapFrom(s =>
-                        s.Clinic.Code == "REST" ? "حشوات (Fillings)" :
-                        s.Clinic.Code == "SURG" ? "خلع (Extractions)" :
-                        s.Clinic.Code == "PERIO" ? "تنظيف (Cleanings)" :
-                        s.Clinic.Code == "ENDO" ? "حشو عصب (Root Canals)" :
-                        s.Clinic.Code == "PED" ? "أطفال (Pediatrics)" :
-                        s.Clinic.Code == "FIX" ? "تركيبات ثابتة (Fixed)" :
-                        s.Clinic.Code == "REM" ? "تركيبات متحركة (Removable)" :
-                        s.Clinic.Name))
+                        s.Clinic.Code == "REST" ? "حشوات" :
+                        s.Clinic.Code == "SURG" ? "خلع" :
+                        s.Clinic.Code == "PERIO" ? "تنظيف" :
+                        s.Clinic.Code == "ENDO" ? "حشو عصب" :
+                        s.Clinic.Code == "PED" ? "أطفال" :
+                        s.Clinic.Code == "FIX" ? "تركيبات ثابتة" :
+                        s.Clinic.Code == "REM" ? "تركيبات متحركة" :
+                        s.Clinic.NameAr != "" ? s.Clinic.NameAr : s.Clinic.Name))
+                     .ForMember(d => d.RequirementTypeNameEn, o => o.MapFrom(s =>
+                        s.Clinic.Code == "REST" ? "Fillings" :
+                        s.Clinic.Code == "SURG" ? "Extractions" :
+                        s.Clinic.Code == "PERIO" ? "Cleanings" :
+                        s.Clinic.Code == "ENDO" ? "Root Canals" :
+                        s.Clinic.Code == "PED" ? "Pediatrics" :
+                        s.Clinic.Code == "FIX" ? "Fixed" :
+                        s.Clinic.Code == "REM" ? "Removable" :
+                        s.Clinic.NameEn != "" ? s.Clinic.NameEn : s.Clinic.Name))
                      // => Calculate completion percentage with safe division and rounding
                      .ForMember(d => d.CompletionPercentage, o => o.MapFrom(s => s.RequiredCount == 0 ? 0 : Math.Round((double)(s.CompletedCount + s.TransferredCount) / s.RequiredCount * 100, 1)));
         }

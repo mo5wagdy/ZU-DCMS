@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ZU_DCMS.INFRASTRUCTURE.Persistence;
 
@@ -11,9 +12,11 @@ using ZU_DCMS.INFRASTRUCTURE.Persistence;
 namespace ZU_DCMS.INFRASTRUCTURE.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260506153436_Clinical Updates")]
+    partial class ClinicalUpdates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2420,7 +2423,7 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                     b.Property<int>("RequiredCount")
                         .HasColumnType("int");
 
-                    b.Property<int?>("StudentId")
+                    b.Property<int>("StudentId")
                         .HasColumnType("int");
 
                     b.Property<int>("TermId")
@@ -2441,9 +2444,8 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
 
                     b.HasIndex("TermId");
 
-                    b.HasIndex("StudentId", "TermId", "ClinicId", "AcademicYear")
-                        .IsUnique()
-                        .HasFilter("[StudentId] IS NOT NULL");
+                    b.HasIndex("StudentId", "TermId", "ClinicId")
+                        .IsUnique();
 
                     b.ToTable("TermRequirements");
                 });
@@ -2811,7 +2813,8 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                     b.HasOne("ZU_DCMS.Domain.Entities.Student", "Student")
                         .WithMany("TermRequirements")
                         .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("ZU_DCMS.Domain.Entities.Term", "Term")
                         .WithMany("TermRequirements")

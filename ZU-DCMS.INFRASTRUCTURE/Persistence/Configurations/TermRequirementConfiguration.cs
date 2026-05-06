@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
@@ -13,8 +13,8 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
         {
             builder.HasKey(r => r.Id);
 
-            // __ StudentId + TermId + ClinicId should be unique to prevent duplicate requirements for the same student, term, and clinic __ //
-            builder.HasIndex(r => new { r.StudentId, r.TermId, r.ClinicId })
+            // __ StudentId + TermId + ClinicId + AcademicYear should be unique __ //
+            builder.HasIndex(r => new { r.StudentId, r.TermId, r.ClinicId, r.AcademicYear })
                    .IsUnique();
 
             // __ Global Query Filter to exclude soft-deleted records __ //

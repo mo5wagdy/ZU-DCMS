@@ -14,15 +14,16 @@ namespace ZU_DCMS.APPLICATION.Mapping
         {
             // => DiagnosisRecord → DiagnosisRecordDto
             CreateMap<DiagnosisRecord, DiagnosisRecordDto>()
-                     .ForMember(d => d.PatientName, o => o.MapFrom(s => s.Booking.Patient.FullName))
-                     .ForMember(d => d.InternDoctorName, o => o.MapFrom(s => s.InternDoctor.FullName))
-                     .ForMember(d => d.ClinicName, o => o.MapFrom(s => s.Clinic.Name))
-                     .ForMember(d => d.DiagnosisTypeName, o => o.MapFrom(s => s.DiagnosisType.NameAr))
-                     .ForMember(d => d.ClinicId, o => o.MapFrom(s => s.ClinicId))
-                     .ForMember(d => d.Complaint, o => o.MapFrom(s => s.Complaint))
-                     .ForMember(d => d.StudentName, o => o.MapFrom(s => s.CaseAssignment != null ? s.CaseAssignment.Student.FullName : null))
-                     .ForMember(d => d.StudentCode, o => o.MapFrom(s => s.CaseAssignment != null ? s.CaseAssignment.Student.StudentCode : null));
-
+                     .ForMember(d => d.PatientName,         o => o.MapFrom(s => s.Booking.Patient.FullName))
+                     .ForMember(d => d.InternDoctorName,    o => o.MapFrom(s => s.InternDoctor.FullName))
+                     .ForMember(d => d.ClinicName,          o => o.MapFrom(s => s.Clinic.NameAr != "" ? s.Clinic.NameAr : s.Clinic.Name))
+                     .ForMember(d => d.ClinicNameEn,        o => o.MapFrom(s => s.Clinic.NameEn != "" ? s.Clinic.NameEn : s.Clinic.Name))
+                     .ForMember(d => d.DiagnosisTypeName,   o => o.MapFrom(s => s.DiagnosisType.NameAr))
+                     .ForMember(d => d.DiagnosisTypeNameEn, o => o.MapFrom(s => s.DiagnosisType.NameEn))
+                     .ForMember(d => d.ClinicId,            o => o.MapFrom(s => s.ClinicId))
+                     .ForMember(d => d.Complaint,           o => o.MapFrom(s => s.Complaint))
+                     .ForMember(d => d.StudentName,         o => o.MapFrom(s => s.CaseAssignment != null ? s.CaseAssignment.Student.FullName : null))
+                     .ForMember(d => d.StudentCode,         o => o.MapFrom(s => s.CaseAssignment != null ? s.CaseAssignment.Student.StudentCode : null));
 
             // => DiagnosisRecord → BookingForDiagnosisDto
             CreateMap<Booking, BookingForDiagnosisDto>()

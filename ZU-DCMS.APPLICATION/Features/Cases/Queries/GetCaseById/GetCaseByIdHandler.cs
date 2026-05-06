@@ -40,23 +40,22 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Queries.GetCaseById
             // __ Fetching From Cache If Available __ //
             var cachekey = CacheKeys.CaseById(caseAssignmentId);
 
-            var result = await _cache.GetOrSetAsync
-            (
+            var result = await _cache.GetOrSetAsync(
                 cachekey,
-                async _ => // => If Not Found In Cache Fetch From DB
+                async _ =>
                 {
-                    // __ Fetch case assignment with related data __ //
-                    var assignment = await _uow.Repository<CaseAssignment>().GetFirstOrDefaultAsync
-                        (
-                            c => c.Id == caseAssignmentId,
-                            false,
-                            c => c.DiagnosisRecord,
-                            c => c.DiagnosisRecord.Booking.Patient,
-                            c => c.DiagnosisRecord.DiagnosisType,
-                            c => c.Clinic,
-                            c => c.AssignedByIntern,
-                            c => c.Sessions
-                        );
+                    // __ Fetch case assignment with all related data including session procedures __ //
+                    var assignment = await _uow.Repository<CaseAssignment>().GetFirstOrDefaultAsync(
+                        c => c.Id == caseAssignmentId,
+                        false,
+                        c => c.DiagnosisRecord,
+                        c => c.DiagnosisRecord.Booking.Patient,
+                        c => c.DiagnosisRecord.DiagnosisType,
+                        c => c.Clinic,
+                        c => c.AssignedByIntern,
+                        c => c.Student,
+                        c => c.Sessions
+                    );
 
                     // __ Handle case assignment not found __ //
                     if (assignment is null)
@@ -64,6 +63,17 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Queries.GetCaseById
                         _logger.LogWarning("Case assignment with ID: {CaseAssignmentId} not found", caseAssignmentId);
 
                         return Result.Failure<CaseAssignmentDto>("الحالة غير موجودة");
+                    }
+
+                    // __ Manually load procedures for each session (ThenInclude workaround) __ //
+                    foreach (var session in assignment.Sessions)
+                    {
+                        var procedures = await _uow.Repository<CaseSessionProcedure>().GetListAsync(
+                            sp => sp.CaseSessionId == session.Id,
+                            true,
+                            sp => sp.Procedure
+                        );
+                        session.Procedures = procedures.ToList();
                     }
 
                     _logger.LogInfo("Successfully fetched case assignment with ID: {CaseAssignmentId}", caseAssignmentId);
@@ -74,7 +84,7 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Queries.GetCaseById
                 CacheDuration.Short,
                 cancellationToken
             );
-            
+
             // __ Cache result __ //
             return result!;
         }

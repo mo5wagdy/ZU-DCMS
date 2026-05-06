@@ -24,6 +24,14 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
                    .IsRequired()
                    .HasMaxLength(100);
 
+            builder.Property(c => c.NameAr)
+                   .HasMaxLength(100)
+                   .HasDefaultValue("");
+
+            builder.Property(c => c.NameEn)
+                   .HasMaxLength(100)
+                   .HasDefaultValue("");
+
             // _____________ Academic Year Constraints Configuration _____________ //
             /// <summary>
             /// Configure academic year range constraints.
@@ -65,94 +73,14 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.Configurations
             /// </summary>
             builder.HasData
             (
-                new Clinic 
-                { 
-                    Id = 1, 
-                    Name = "عيادات التشخيص", 
-                    Code = "DIAG", 
-                    MaxDailyPatients = 200,
-                    MinAcademicYear = 1,
-                    MaxAcademicYear = 4,
-                    MaxCasesPerStudent = 5,  // Diagnosis allows more concurrent cases
-                    CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) 
-                },
-                new Clinic 
-                { 
-                    Id = 2, 
-                    Name = "عيادات حشو العصب", 
-                    Code = "ENDO", 
-                    MaxDailyPatients = 50,
-                    MinAcademicYear = 4,
-                    MaxAcademicYear = 4,
-                    MaxCasesPerStudent = 3,
-                    CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) 
-                },
-                new Clinic 
-                { 
-                    Id = 3, 
-                    Name = "عيادات الجراحة", 
-                    Code = "SURG", 
-                    MaxDailyPatients = 50,
-                    MinAcademicYear = 3,  // Only 3rd and 4th year
-                    MaxAcademicYear = 4,
-                    MaxCasesPerStudent = 3,  // Surgery requires close supervision
-                    CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) 
-                },
-                new Clinic 
-                { 
-                    Id = 4, 
-                    Name = "عيادات طب الفم واللثة", 
-                    Code = "PERIO", 
-                    MaxDailyPatients = 50,
-                    MinAcademicYear = 3,
-                    MaxAcademicYear = 4,
-                    MaxCasesPerStudent = 3,
-                    CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) 
-                },
-                new Clinic 
-                { 
-                    Id = 5, 
-                    Name = "عيادات الحشو العادي", 
-                    Code = "REST", 
-                    MaxDailyPatients = 50,
-                    MinAcademicYear = 3,
-                    MaxAcademicYear = 4,
-                    MaxCasesPerStudent = 3,  // Foundational, allows more
-                    CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) 
-                },
-                new Clinic 
-                { 
-                    Id = 6, 
-                    Name = "عيادات الأطفال", 
-                    Code = "PED", 
-                    MaxDailyPatients = 50,
-                    MinAcademicYear = 4,
-                    MaxAcademicYear = 4,
-                    MaxCasesPerStudent = 3,  // Foundational
-                    CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) 
-                },
-                new Clinic 
-                { 
-                    Id = 7, 
-                    Name = "التركيبات الثابتة", 
-                    Code = "FIX", 
-                    MaxDailyPatients = 50,
-                    MinAcademicYear = 4,
-                    MaxAcademicYear = 4,
-                    MaxCasesPerStudent = 3,
-                    CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) 
-                },
-                new Clinic 
-                { 
-                    Id = 8, 
-                    Name = "التركيبات المتحركة", 
-                    Code = "REM", 
-                    MaxDailyPatients = 50,
-                    MinAcademicYear = 4,
-                    MaxAcademicYear = 4,
-                    MaxCasesPerStudent = 3,
-                    CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) 
-                }
+                new Clinic { Id = 1, Name = "عيادات التشخيص",         NameAr = "عيادات التشخيص",          NameEn = "Diagnosis Clinics",                Code = "DIAG",  MaxDailyPatients = 200, MinAcademicYear = 1, MaxAcademicYear = 4, MaxCasesPerStudent = 5, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+                new Clinic { Id = 2, Name = "عيادات حشو العصب",       NameAr = "عيادات حشو العصب",        NameEn = "Endodontics Clinics",              Code = "ENDO",  MaxDailyPatients = 50,  MinAcademicYear = 4, MaxAcademicYear = 4, MaxCasesPerStudent = 3, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+                new Clinic { Id = 3, Name = "عيادات الجراحة",         NameAr = "عيادات الجراحة",          NameEn = "Surgery Clinics",                  Code = "SURG",  MaxDailyPatients = 50,  MinAcademicYear = 3, MaxAcademicYear = 4, MaxCasesPerStudent = 3, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+                new Clinic { Id = 4, Name = "عيادات طب الفم واللثة",  NameAr = "عيادات طب الفم واللثة",   NameEn = "Periodontics Clinics",             Code = "PERIO", MaxDailyPatients = 50,  MinAcademicYear = 3, MaxAcademicYear = 4, MaxCasesPerStudent = 3, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+                new Clinic { Id = 5, Name = "عيادات الحشو العادي",    NameAr = "عيادات الحشو العادي",     NameEn = "Restorative Clinics",              Code = "REST",  MaxDailyPatients = 50,  MinAcademicYear = 3, MaxAcademicYear = 4, MaxCasesPerStudent = 3, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+                new Clinic { Id = 6, Name = "عيادات الأطفال",         NameAr = "عيادات الأطفال",          NameEn = "Pediatric Dentistry Clinics",       Code = "PED",   MaxDailyPatients = 50,  MinAcademicYear = 4, MaxAcademicYear = 4, MaxCasesPerStudent = 3, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+                new Clinic { Id = 7, Name = "التركيبات الثابتة",      NameAr = "التركيبات الثابتة",       NameEn = "Fixed Prosthodontics Clinics",     Code = "FIX",   MaxDailyPatients = 50,  MinAcademicYear = 4, MaxAcademicYear = 4, MaxCasesPerStudent = 3, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+                new Clinic { Id = 8, Name = "التركيبات المتحركة",     NameAr = "التركيبات المتحركة",      NameEn = "Removable Prosthodontics Clinics", Code = "REM",   MaxDailyPatients = 50,  MinAcademicYear = 4, MaxAcademicYear = 4, MaxCasesPerStudent = 3, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
             );
         }
     }

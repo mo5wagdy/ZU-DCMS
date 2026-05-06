@@ -10,6 +10,7 @@ using ZU_DCMS.APPLICATION.Features.Cases.Commands.SubmitCaseForReview;
 using ZU_DCMS.APPLICATION.Features.Cases.Queries.GetCaseById;
 using ZU_DCMS.APPLICATION.Features.Cases.Queries.GetCaseReviews;
 using ZU_DCMS.APPLICATION.Features.Cases.Queries.GetCasesForReview;
+using ZU_DCMS.APPLICATION.Features.Cases.Queries.GetReviewedCases;
 using ZU_DCMS.APPLICATION.Features.Cases.Queries.GetStudentCases;
 using ZU_DCMS.APPLICATION.Features.Cases.Queries.GetStudentProgress;
 
@@ -114,6 +115,20 @@ namespace ZU_DCMS.API.Endpoints.Cases
             .RequireAuthorization("StaffReviewPolicy")
             .WithName("GetCasesForReview")
             .WithSummary("Retrieves all submitted procedural cases currently pending instructor validation")
+            .Produces<ApiResponse<List<CaseAssignmentDto>>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<List<CaseAssignmentDto>>>(StatusCodes.Status400BadRequest);
+
+            // 5.1 Reviewed cases history (cases a TA has already approved or rejected)
+            group.MapGet("/reviewed-by/{taUserId}", async ([FromServices] ISender sender, string taUserId) =>
+            {
+                var result = await sender.Send(new GetReviewedCasesQuery(taUserId));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<List<CaseAssignmentDto>>.Success(result.Value, "Reviewed cases retrieved successfully."))
+                    : Results.BadRequest(ApiResponse<List<CaseAssignmentDto>>.Failure(result.Errors, "Failed to retrieve reviewed cases."));
+            })
+            .RequireAuthorization("StaffReviewPolicy")
+            .WithName("GetReviewedCases")
+            .WithSummary("Returns all cases that a specific Teaching Assistant has already reviewed")
             .Produces<ApiResponse<List<CaseAssignmentDto>>>(StatusCodes.Status200OK)
             .Produces<ApiResponse<List<CaseAssignmentDto>>>(StatusCodes.Status400BadRequest);
 

@@ -8,8 +8,15 @@ namespace ZU_DCMS.APPLICATION.DTOs.Student
     public class StudentRequirementDto
     {
         public int Id { get; set; }
+        
+        // __ Clinic (bilingual) __ //
         public string ClinicName { get; set; } = string.Empty;
+        public string ClinicNameEn { get; set; } = string.Empty;
+
+        // __ Requirement Type (bilingual) __ //
         public string RequirementTypeName { get; set; } = string.Empty;
+        public string RequirementTypeNameEn { get; set; } = string.Empty;
+
         public int RequiredCount { get; set; }
         public int CompletedCount { get; set; }
         public int TransferredCount { get; set; }

@@ -7,7 +7,9 @@ namespace ZU_DCMS.Domain.Entities
     public class Clinic : BaseEntity
     {
         // _____________ Main Properties _____________ //
-        public string Name { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;     // Legacy (Arabic fallback)
+        public string NameAr { get; set; } = string.Empty;   // Arabic name
+        public string NameEn { get; set; } = string.Empty;   // English name
         public string Code { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
         public int MaxDailyPatients { get; set; }

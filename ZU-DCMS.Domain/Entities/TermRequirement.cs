@@ -38,7 +38,7 @@ namespace ZU_DCMS.Domain.Entities
 
         // _____________ Foreign Keys _____________ //
         // __ Reference to the Student who must fulfill this requirement. __ //
-        public int StudentId { get; set; }
+        public int? StudentId { get; set; }
 
         // __ Reference to the academic Term when this requirement applies. __ //
         public int TermId { get; set; }

@@ -59,8 +59,9 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
                 return Result.Failure<BookingDto>("المريض غير موجود");
             }
 
-            // __ Prevent duplicate active bookings per patient __ //
-            var hasActiveBooking = await _uow.Repository<Booking>().ExistsAsync
+            // __ Prevent duplicate active bookings per patient (FollowUp has its own validation below) __ //
+            var hasActiveBooking = dto.BookingType != BookingType.FollowUp &&
+                await _uow.Repository<Booking>().ExistsAsync
                 (b =>
                     b.PatientId == patientId &&
                     b.Status != BookingStatus.Cancelled &&
@@ -225,6 +226,9 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
                 var versionKey = CacheKeys.PatientBookingsVersion(patientId);
                 var version = await _cache.GetOrSetAsync(versionKey, _ => Task.FromResult(1));
                 await _cache.SetAsync(versionKey, version + 1);
+
+                // __ Invalidate daily metrics so dean dashboard reflects new booking __ //
+                await _cache.RemoveAsync(CacheKeys.DailyMetrics);
 
                 return Result.Success(_mapper.Map<BookingDto>(full!));
             }

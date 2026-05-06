@@ -138,6 +138,9 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.ReviewCase
                 // __ Invalidating The Cache __ //
                 await _cache.RemoveAsync(CacheKeys.StudentProgress(caseAssignment.StudentId, caseAssignment.TermId));
                 await _cache.RemoveAsync(CacheKeys.StudentRequirements(caseAssignment.StudentId, caseAssignment.TermId));
+                await _cache.RemoveAsync(CacheKeys.CaseById(dto.CaseAssignmentId));
+                await _cache.RemoveAsync(CacheKeys.StudentCases(caseAssignment.StudentId));
+                await _cache.RemoveAsync(CacheKeys.DailyMetrics); // refresh dean dashboard stats
 
                 return Result.Success();
             }

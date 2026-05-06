@@ -58,7 +58,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.SetStudentRequirements
                 var newRequirements = command.Requirements.Select(r =>
                     new TermRequirement
                     {
-                        StudentId = null, // Global
+                        StudentId = null, // Global Template
                         AcademicYear = command.AcademicYear,
                         TermId = command.TermId,
                         ClinicId = r.ClinicId,

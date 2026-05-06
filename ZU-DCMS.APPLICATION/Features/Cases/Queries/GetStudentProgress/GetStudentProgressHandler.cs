@@ -64,7 +64,7 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Queries.GetStudentProgress
                         {
                             requirements = await _uow.Repository<TermRequirement>().GetListAsync
                                 (
-                                    r => r.StudentId == null && r.TermId == termId && r.AcademicYear == stInfo.AcademicYear,
+                                    r =>  r.TermId == termId && r.AcademicYear == stInfo.AcademicYear,
                                     true,
                                     r => r.Clinic
                                 );

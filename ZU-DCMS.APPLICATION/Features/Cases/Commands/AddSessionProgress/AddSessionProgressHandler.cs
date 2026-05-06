@@ -6,6 +6,7 @@ using ZU_DCMS.APPLICATION.Common.Cache;
 using ZU_DCMS.APPLICATION.Contracts;
 using ZU_DCMS.APPLICATION.Contracts.Logger;
 using ZU_DCMS.APPLICATION.DTOs.Case;
+using ZU_DCMS.APPLICATION.Features.Cases.Commands.SubmitCaseForReview;
 using ZU_DCMS.Domain.Entities;
 using ZU_DCMS.Domain.Enums;
 using ZU_DCMS.Domain.Interfaces;
@@ -15,23 +16,20 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
     public class AddSessionProgressHandler : IRequestHandler<AddSessionProgressCommand, Result<CaseSessionDto>>
     {
         private readonly IUnitOfWork _uow;
-        private readonly IRawSqlExecutor _sql;
-        private readonly IEventPublisher _eventPublisher;
+        private readonly IMediator _mediator;
         private readonly IFusionCache _cache;
         private readonly IAppLogger<AddSessionProgressHandler> _logger;
 
         public AddSessionProgressHandler
         (
             IUnitOfWork uow,
-            IRawSqlExecutor sql,
-            IEventPublisher eventPublisher,
+            IMediator mediator,
             IFusionCache cache,
             IAppLogger<AddSessionProgressHandler> logger
         )
         {
             _uow = uow;
-            _sql = sql;
-            _eventPublisher = eventPublisher;
+            _mediator = mediator;
             _cache = cache;
             _logger = logger;
         }
@@ -152,9 +150,7 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
                 // __ If the session is marked as completed, update the case assignment status and increment the student's requirement count for the clinic __ //
                 if (dto.IsCompleted)
                 {
-                    assignment.Status = CaseStatus.PendingReview;
-                    
-                    _uow.Repository<CaseAssignment>().Update(assignment);
+                    await _mediator.Send(new SubmitCaseForReviewCommand(studentId, dto.CaseAssignmentId), cancellationToken: cancellationToken);
 
                     _logger.LogInfo("Case moved to PendingReview - waiting TA approval for student {StudentId}", studentId);
                 }
@@ -179,8 +175,7 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
                 await _cache.RemoveAsync(CacheKeys.AvailableStudents(assignment.ClinicId));
 
                 // __ Fetch procedure names safely from the database instead of relying on unloaded EF navigations __ //
-                var procedures = await _uow.Repository<Procedure>()
-                    .GetListAsync(p => dto.ProcedureIds.Contains(p.Id));
+                var procedures = await _uow.Repository<Procedure>().GetListAsync(p => dto.ProcedureIds.Contains(p.Id));
 
                 var resultDto = new CaseSessionDto
                 {
@@ -190,7 +185,8 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
                     HasFollowUp = session.HasFollowUp,
                     Notes = session.Notes,
                     SessionDate = session.SessionDate,
-                    ProceduresNames = procedures.Select(p => p.NameAr).ToList()
+                    ProceduresNames   = procedures.Select(p => p.NameAr).ToList(),
+                    ProceduresNamesEn = procedures.Select(p => p.NameEn).ToList()
                 };
 
                 _logger.LogInfo("Successfully added session progress for student ID: {StudentId} on case assignment ID: {CaseAssignmentId}", studentId, dto.CaseAssignmentId);

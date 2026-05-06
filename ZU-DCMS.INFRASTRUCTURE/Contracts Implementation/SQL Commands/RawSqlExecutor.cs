@@ -52,13 +52,50 @@ namespace ZU_DCMS.INFRASTRUCTURE.Persistence.ContractImplementation
 
             var result = await command.ExecuteScalarAsync();
 
-            if(result is null || result == DBNull.Value)
+            if (result is null || result == DBNull.Value)
             {
                 throw new InvalidOperationException($"Coud not get next value for sequence {sequenceName}");
             }
 
             return (T)Convert.ChangeType(result, typeof(T));
         }
+
+        public async Task<T?> QuerySingleAsync<T>(string sql, object? parameters = null)
+        {
+            // __ ADO.NET Call __ //
+            var connection = _context.Database.GetDbConnection();
+
+            using var command = connection.CreateCommand();
+
+            command.CommandText = sql;
+
+            // __ Making the command use the currently opening transaction __ //
+            command.Transaction = _context.Database.CurrentTransaction?.GetDbTransaction();
+
+            // __ Add parameters if provided __ //
+            if (parameters != null)
+            {
+                foreach (var prop in parameters.GetType().GetProperties())
+                {
+                    var value = prop.GetValue(parameters) ?? DBNull.Value;
+
+                    var param = command.CreateParameter();
+                    param.ParameterName = "@" + prop.Name;
+                    param.Value = value;
+
+                    command.Parameters.Add(param);
+                }
+            }
+
+            if (connection.State != ConnectionState.Open)
+                await connection.OpenAsync();
+
+            var result = await command.ExecuteScalarAsync();
+
+            if (result is null || result == DBNull.Value)
+                return default;
+
+            return (T)Convert.ChangeType(result, typeof(T));
+        }
     }
 }
-

@@ -193,6 +193,15 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
         // __ Mark the DiagnosisRecord as assigned to prevent duplicate assignments. __ //
                 diagnosis.IsAssigned = true;
                 _uow.Repository<DiagnosisRecord>().Update(diagnosis);
+                
+                var booking = await _uow.Repository<Booking>().GetByIdAsync(diagnosis.BookingId);
+
+                if (booking != null)
+                {
+                    booking.CaseAssignmentId = assignment.Id;
+                    _uow.Repository<Booking>().Update(booking);
+                }
+
 
                 // _____________ SAVE & COMMIT TRANSACTION _____________ //
         // __ Persist both changes in a single transaction. __ //

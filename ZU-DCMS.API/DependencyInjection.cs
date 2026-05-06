@@ -41,7 +41,11 @@ namespace ZU_DCMS.API
                 o.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
                 o.AddPolicy("StudentPolicy", policy => policy.RequireRole("Student"));
                 o.AddPolicy("StaffReviewPolicy", policy => policy.RequireRole("TeachingAssistant", "Dean", "ViceDean", "Professor", "Admin"));
-                o.AddPolicy("StaffCaseAccessPolicy", policy => policy.RequireRole("Student", "InternDoctor", "TeachingAssistant", "Dean", "ViceDean", "Professor", "Admin"));
+                o.AddPolicy("StaffCaseAccessPolicy", policy => policy.RequireAssertion(context => 
+                    context.User.IsInRole("Student") || context.User.IsInRole("InternDoctor") || 
+                    context.User.IsInRole("TeachingAssistant") || context.User.IsInRole("Dean") || 
+                    context.User.IsInRole("ViceDean") || context.User.IsInRole("Professor") || 
+                    context.User.IsInRole("Admin")));
                 o.AddPolicy("ClinicalCorePolicy", policy => policy.RequireRole("InternDoctor", "TeachingAssistant", "Dean", "ViceDean", "Professor", "Admin"));
                 o.AddPolicy("PublicViewPolicy", policy => policy.RequireAssertion(context => 
                     context.User.IsInRole("Student") || context.User.IsInRole("TeachingAssistant") || 

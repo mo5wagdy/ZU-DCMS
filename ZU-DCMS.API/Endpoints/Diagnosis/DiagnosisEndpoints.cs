@@ -26,8 +26,7 @@ namespace ZU_DCMS.API.Endpoints.Diagnosis
         {
             var group = app.MapGroup("api/v1/diagnosis")
                            .WithApiVersionSet(versionSet)
-                           .WithTags("Diagnosis")
-                           .RequireAuthorization("ClinicalCorePolicy"); // Protect via Clinical Core Policy (InternDoctor, TA, Dean, ViceDean, Professor, Admin)
+                           .WithTags("Diagnosis");
 
             // 1. Log a diagnosis
             group.MapPost("/", async ([FromServices] ISender sender, [FromBody] DiagnosePatientCommand command) =>
@@ -37,6 +36,7 @@ namespace ZU_DCMS.API.Endpoints.Diagnosis
                     ? Results.Ok(ApiResponse<DiagnosisRecordDto>.Success(result.Value, "Patient diagnosis recorded successfully."))
                     : Results.BadRequest(ApiResponse<DiagnosisRecordDto>.Failure(result.Errors, "Failed to record diagnosis."));
             })
+            .RequireAuthorization("ClinicalCorePolicy")
             .WithName("DiagnosePatient")
             .WithSummary("Records a new clinical diagnosis assessment for a queued patient")
             .Produces<ApiResponse<DiagnosisRecordDto>>(StatusCodes.Status200OK)
@@ -50,6 +50,7 @@ namespace ZU_DCMS.API.Endpoints.Diagnosis
                     ? Results.Ok(ApiResponse<DiagnosisRecordDto>.Success(result.Value, "Diagnosis retrieved."))
                     : Results.BadRequest(ApiResponse<DiagnosisRecordDto>.Failure(result.Errors, "Diagnosis not found."));
             })
+            .RequireAuthorization("ClinicalCorePolicy")
             .WithName("GetDiagnosisByBooking")
             .WithSummary("Retrieves an existing diagnosis record by its parent booking ID")
             .Produces<ApiResponse<DiagnosisRecordDto>>(StatusCodes.Status200OK)
@@ -63,6 +64,7 @@ namespace ZU_DCMS.API.Endpoints.Diagnosis
                     ? Results.Ok(ApiResponse<List<StudentPriorityDto>>.Success(result.Value, "Matching available students retrieved."))
                     : Results.BadRequest(ApiResponse<List<StudentPriorityDto>>.Failure(result.Errors, "Failed to retrieve available students."));
             })
+            .RequireAuthorization("ClinicalCorePolicy")
             .WithName("GetAvailableStudents")
             .WithSummary("Finds active students who actually need the specific procedure requirement")
             .Produces<ApiResponse<List<StudentPriorityDto>>>(StatusCodes.Status200OK)
@@ -76,6 +78,7 @@ namespace ZU_DCMS.API.Endpoints.Diagnosis
                     ? Results.Ok(ApiResponse<CaseAssignmentDto>.Success(result.Value, "Student was successfully assigned to this patient's case."))
                     : Results.BadRequest(ApiResponse<CaseAssignmentDto>.Failure(result.Errors, "Failed to assign student."));
             })
+            .RequireAuthorization("ClinicalCorePolicy")
             .WithName("AssignStudent")
             .WithSummary("Binds a clinical case to a specific student that needed it")
             .Produces<ApiResponse<CaseAssignmentDto>>(StatusCodes.Status200OK)

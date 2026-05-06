@@ -21,7 +21,8 @@ namespace ZU_DCMS.APPLICATION.Validators.Case
                    .WithMessage("الحالة مطلوبة");
 
             RuleFor(x => x.Dto.ProcedureIds)
-                   .NotEmpty().WithMessage("الإجراء اللي تم مطلوب");
+                   .NotEmpty()
+                   .WithMessage("الإجراء اللي تم مطلوب");
         }
     }
 }

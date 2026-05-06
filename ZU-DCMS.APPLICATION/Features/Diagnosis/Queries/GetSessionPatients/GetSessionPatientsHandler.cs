@@ -4,6 +4,7 @@ using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Common.Pagination;
 using ZU_DCMS.APPLICATION.Contracts.Logger;
 using ZU_DCMS.APPLICATION.DTOs.Diagnosis;
+using ZU_DCMS.APPLICATION.Features.Bookings.Commands.RequeueOverdueBookings;
 using ZU_DCMS.Domain.Entities;
 using ZU_DCMS.Domain.Enums;
 using ZU_DCMS.Domain.Interfaces;
@@ -13,17 +14,20 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetSessionPatients
     public class GetSessionPatientsHandler : IRequestHandler<GetSessionPatientsQuery, Result<PagedResult<BookingForDiagnosisDto>>>
     {
         private readonly IUnitOfWork _uow;
+        private readonly IMediator _mediator;
         private readonly IMapper _mapper;
         private readonly IAppLogger<GetSessionPatientsHandler> _logger;
 
         public GetSessionPatientsHandler
         (
             IUnitOfWork uow,
+            IMediator mediator,
             IMapper mapper,
             IAppLogger<GetSessionPatientsHandler> logger
         )
         {
             _uow = uow;
+            _mediator = mediator;
             _mapper = mapper;
             _logger = logger;
         }
@@ -36,57 +40,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetSessionPatients
             var internDoctorId = query.InternDoctorId;
 
             // __ Re-queue overdue confirmed patients from earlier sessions today __ //
-            var nowTime = DateTime.Now.TimeOfDay;
-            var todayDate = DateTime.Today;
-
-            var gracePeriod = TimeSpan.FromMinutes(30);
-            var reQueueTime = nowTime.Subtract(gracePeriod);
-
-            var overdueBookings = await _uow.Repository<Booking>().GetListAsync(
-                b => b.Session.Date == todayDate &&
-                     b.Status == BookingStatus.Confirmed &&
-                     b.Session.EndTime < reQueueTime,
-                     includes : b => b.Session
-            );
-
-            if (overdueBookings.Any())
-            {
-                _logger.LogInfo("Found {Count} overdue bookings to re-queue", overdueBookings.Count);
-                
-                var futureSessions = await _uow.Repository<Session>().GetListAsync
-                    (
-                        s => s.Date == todayDate &&
-                        s.EndTime > nowTime &&
-                        s.IsActive
-                    );
-
-                foreach (var booking in overdueBookings)
-                {
-                    var targetSession = futureSessions.OrderBy(s => s.StartTime).FirstOrDefault
-                        (s => 
-                            (booking.BookingType == BookingType.New && s.CurrentNewCount < s.MaxNewPatients) ||
-                            (booking.BookingType == BookingType.FollowUp && s.CurrentFollowUpCount < s.MaxFollowUpPatients)
-                        );
-
-                    if (targetSession != null)
-                    {
-                        booking.SessionId = targetSession.Id;
-                        booking.Status = BookingStatus.Delayed; 
-                        _uow.Repository<Booking>().Update(booking);
-                        
-                        if (booking.BookingType == BookingType.New) targetSession.CurrentNewCount++;
-                        else targetSession.CurrentFollowUpCount++;
-                        _uow.Repository<Session>().Update(targetSession);
-                    }
-                    else
-                    {
-                        booking.Status = BookingStatus.Cancelled;
-                        booking.PostponeReason = "تم الإلغاء لعدم الحضور وعدم وجود مواعيد أخرى متاحة اليوم";
-                        _uow.Repository<Booking>().Update(booking);
-                    }
-                }
-                await _uow.SaveChangesAsync(cancellationToken: cancellationToken); 
-            }
+            await _mediator.Send(new RequeueOverdueBookingsCommand(), cancellationToken);
 
             // __ Validate session existence and access __ //
             var session = await _uow.Repository<Session>().GetByIdAsync(sessionId);
@@ -120,13 +74,14 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetSessionPatients
                 (
                    (query.Request.Page - 1) * query.Request.PageSize,
                     query.Request.PageSize,
-                    b => b.SessionId == sessionId && (b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Delayed || b.Status == BookingStatus.Cancelled),
+                    b => b.SessionId == sessionId && b.Status != BookingStatus.Pending,
                     true,
                     q => q.OrderBy(b => b.CreatedAt),
                     b => b.Patient,
                     b => b.DiagnosisRecord!,
                     b => b.DiagnosisRecord!.CaseAssignment!,
                     b => b.DiagnosisRecord!.CaseAssignment!.Student
+
                 );
 
             // __ Map to DTOs __ //

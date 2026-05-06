@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using ZU_DCMS.Domain.Common;
 
 namespace ZU_DCMS.Domain.Entities

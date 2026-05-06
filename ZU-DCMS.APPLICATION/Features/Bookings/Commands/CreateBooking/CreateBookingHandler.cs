@@ -18,7 +18,6 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
     {
         private readonly IUnitOfWork _uow;
         private readonly IRawSqlExecutor _sql;
-        private readonly IEventPublisher _eventPublisher;
         private readonly IUserCodeGenerator _codeGen;
         private readonly IFusionCache _cache;
         private readonly IMapper _mapper;
@@ -27,7 +26,6 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
         public CreateBookingHandler(
             IUnitOfWork uow,
             IRawSqlExecutor sql,
-            IEventPublisher eventPublisher,
             IUserCodeGenerator codeGen,
             IFusionCache cache,
             IMapper mapper,
@@ -35,7 +33,6 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
         {
             _uow = uow;
             _sql = sql;
-            _eventPublisher = eventPublisher;
             _codeGen = codeGen;
             _cache = cache;
             _mapper = mapper;
@@ -103,13 +100,14 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
             if (dto.BookingType == BookingType.FollowUp)
             {
                 // Find last active CaseAssignment for this patient
-                lastCase = await _uow.Repository<CaseAssignment>()
-                    .GetFirstOrDefaultAsync(
-                        c => c.DiagnosisRecord.Booking.PatientId == patientId &&
-                             c.Status != CaseStatus.Completed &&
-                             c.Status != CaseStatus.Approved &&
-                             c.Status != CaseStatus.Transferred, 
-                             includes: c => c.Sessions);
+                lastCase = await _uow.Repository<CaseAssignment>().GetFirstOrDefaultAsync
+                    (c => 
+                            c.DiagnosisRecord.Booking.PatientId == patientId &&
+                            c.Status != CaseStatus.Completed &&
+                            c.Status != CaseStatus.Approved &&
+                            c.Status != CaseStatus.Transferred, 
+                            includes: c => c.Sessions
+                    );
 
                 if (lastCase is null)
                     return Result.Failure<BookingDto>("لا يمكن حجز متابعة بدون حالة علاجية مسبقة");

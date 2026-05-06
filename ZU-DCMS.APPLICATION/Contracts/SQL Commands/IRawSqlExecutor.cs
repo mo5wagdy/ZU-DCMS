@@ -9,5 +9,8 @@ namespace ZU_DCMS.APPLICATION.Contracts
 
         // __ We use sql query with type int or long so the constraint is set to struct __ //
         Task<T> GetScalarAsync<T>(string sequenceName);
+
+        // __ Executes a raw SQL query and returns a single scalar value (e.g., Id) within the current transaction. __ //
+        Task<T?> QuerySingleAsync<T>(string sql, object? parameters = null);
     }
 }

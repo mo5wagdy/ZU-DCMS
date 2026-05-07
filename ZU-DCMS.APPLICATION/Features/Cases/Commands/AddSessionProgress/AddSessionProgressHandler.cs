@@ -1,9 +1,7 @@
 using MediatR;
 using ZiggyCreatures.Caching.Fusion;
-using ZU_DCMS.APPLICATION.Background_Jobs.Events;
 using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Common.Cache;
-using ZU_DCMS.APPLICATION.Contracts;
 using ZU_DCMS.APPLICATION.Contracts.Logger;
 using ZU_DCMS.APPLICATION.DTOs.Case;
 using ZU_DCMS.APPLICATION.Features.Cases.Commands.SubmitCaseForReview;
@@ -147,6 +145,9 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
                 
                 await _uow.SaveChangesAsync(cancellationToken: cancellationToken);
 
+                // __ Commit The Transaction If Successful __ //
+                await _uow.CommitTransactionAsync();
+
                 // __ If the session is marked as completed, update the case assignment status and increment the student's requirement count for the clinic __ //
                 if (dto.IsCompleted)
                 {
@@ -154,9 +155,6 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
 
                     _logger.LogInfo("Case moved to PendingReview - waiting TA approval for student {StudentId}", studentId);
                 }
-
-                // __ Commit The Transaction If Successful __ //
-                await _uow.CommitTransactionAsync();
 
                 // __ Handle post-session business rules and notifications __ //
                 //if (dto.IsCompleted)

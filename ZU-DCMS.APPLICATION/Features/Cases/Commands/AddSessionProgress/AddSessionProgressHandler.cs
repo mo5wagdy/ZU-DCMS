@@ -45,7 +45,7 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
             {
                 _logger.LogWarning("Cannot mark case assignment ID: {CaseAssignmentId} as completed and has follow-up at the same time", dto.CaseAssignmentId);
                 
-                return Result.Failure<CaseSessionDto>("لا يمكن إنهاء الحالة وطلب متابعة في نفس الوقت");
+                return Result.Failure<CaseSessionDto>("Cannot complete the case and request follow-up at the same time");
             }
 
             // __ Validates if at least one procedure is selected for the session, as it's required to track the work done in the session __ //
@@ -53,7 +53,7 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
             {
                 _logger.LogWarning("No procedures selected for case assignment ID: {CaseAssignmentId}", dto.CaseAssignmentId);
                 
-                return Result.Failure<CaseSessionDto>("لازم تختار إجراءات");
+                return Result.Failure<CaseSessionDto>("Must select procedures");
             }
 
             // __ Fetch case assignment with related data __ //
@@ -71,7 +71,7 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
             {
                 _logger.LogWarning("Case assignment with ID: {CaseAssignmentId} not found", dto.CaseAssignmentId);
                 
-                return Result.Failure<CaseSessionDto>("الحالة غير موجودة");
+                return Result.Failure<CaseSessionDto>("Case not found");
             }
 
             // __ Verify that the student has permission to update this case assignment __ //
@@ -79,7 +79,7 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
             {
                 _logger.LogWarning("Student with ID: {StudentId} does not have permission for case assignment ID: {CaseAssignmentId}", studentId, dto.CaseAssignmentId);
                 
-                return Result.Failure<CaseSessionDto>("ليس لديك صلاحية");
+                return Result.Failure<CaseSessionDto>("You do not have permission");
             }
 
             // __ Only allow progress while case is being worked on __ //
@@ -87,7 +87,7 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
             {
                 _logger.LogWarning("Case assignment with ID: {CaseAssignmentId} is not active", dto.CaseAssignmentId);
              
-                return Result.Failure<CaseSessionDto>("الحالة ليست قيد العمل");
+                return Result.Failure<CaseSessionDto>("Case is not in progress");
             }
 
             // __ Validates that all selected procedures are valid and belong to the clinic associated with the case assignment __ //
@@ -103,7 +103,7 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
             {
                 _logger.LogWarning("Invalid procedures selected for case assignment ID: {CaseAssignmentId}", dto.CaseAssignmentId);
                 
-                return Result.Failure<CaseSessionDto>("إجراءات غير صحيحة");
+                return Result.Failure<CaseSessionDto>("Invalid procedures");
             }
 
             // __ Begin transaction to ensure atomicity of the operation __ //
@@ -199,7 +199,7 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
                 
                 _logger.LogError("Error in AddSessionProgress", ex);
                 
-                return Result.Failure<CaseSessionDto>("خطأ أثناء التنفيذ");
+                return Result.Failure<CaseSessionDto>("Error during execution");
             }
         }
     }

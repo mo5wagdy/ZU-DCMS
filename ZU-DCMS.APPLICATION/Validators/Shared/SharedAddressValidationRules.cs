@@ -19,7 +19,7 @@ namespace ZU_DCMS.APPLICATION.Validators.Shared
                       return parts.Length == 2 &&
                              parts.All(p => !string.IsNullOrWhiteSpace(p.Trim()));
                   })
-                  .WithMessage("العنوان لازم يكون: الدولة,المحافظة");
+                  .WithMessage("Address must be: Country,Governorate");
         }
     }
 }

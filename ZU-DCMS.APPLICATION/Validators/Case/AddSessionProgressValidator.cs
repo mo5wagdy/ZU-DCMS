@@ -10,19 +10,19 @@ namespace ZU_DCMS.APPLICATION.Validators.Case
         {
             RuleFor(x => x.StudentId)
                 .GreaterThan(0)
-                .WithMessage("الطالب مطلوب");
+                .WithMessage("Student is required");
 
             RuleFor(x => x.TermId)
                 .GreaterThan(0)
-                .WithMessage("الفصل الدراسي مطلوب");
+                .WithMessage("Term is required");
 
             RuleFor(x => x.Dto.CaseAssignmentId)
                    .GreaterThan(0)
-                   .WithMessage("الحالة مطلوبة");
+                   .WithMessage("Status is required");
 
             RuleFor(x => x.Dto.ProcedureIds)
                    .NotEmpty()
-                   .WithMessage("الإجراء اللي تم مطلوب");
+                   .WithMessage("Performed procedure is required");
         }
     }
 }

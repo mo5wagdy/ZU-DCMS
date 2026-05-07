@@ -5,7 +5,9 @@ using ZU_DCMS.APPLICATION.Common;
 using ZU_DCMS.APPLICATION.Contracts.Logger;
 using ZU_DCMS.APPLICATION.DTOs.Diagnosis;
 using ZU_DCMS.Domain.Entities;
+using ZU_DCMS.Domain.Enums;
 using ZU_DCMS.Domain.Interfaces;
+using ZU_DCMS.APPLICATION.Contracts.Engine;
 
 namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.DiagnosePatient
 {
@@ -15,17 +17,20 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.DiagnosePatient
         private readonly IEventPublisher _eventPublisher;
         private readonly IMapper _mapper;
         private readonly IAppLogger<DiagnosePatientHandler> _logger;
+        private readonly IAutoAssignmentEngine _autoAssignmentEngine;
 
         public DiagnosePatientHandler(
             IUnitOfWork uow,
             IEventPublisher eventPublisher,
             IMapper mapper,
-            IAppLogger<DiagnosePatientHandler> logger)
+            IAppLogger<DiagnosePatientHandler> logger,
+            IAutoAssignmentEngine autoAssignmentEngine)
         {
             _uow = uow;
             _eventPublisher = eventPublisher;
             _mapper = mapper;
             _logger = logger;
+            _autoAssignmentEngine = autoAssignmentEngine;
         }
 
         /* 
@@ -53,7 +58,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.DiagnosePatient
             {
                 _logger.LogWarning("Booking {BookingId} not found for diagnosis by intern {InternDoctorId}", dto.BookingId, internDoctorId);
                 
-                return Result.Failure<DiagnosisRecordDto>("الحجز غير موجود");
+                return Result.Failure<DiagnosisRecordDto>("Booking not found");
             }
 
             // __ Check if a diagnosis already exists for the booking __ //
@@ -64,7 +69,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.DiagnosePatient
             {
                 _logger.LogWarning("Attempt to diagnose booking {BookingId} that has already been diagnosed by intern {InternDoctorId}", dto.BookingId, internDoctorId);
                 
-                return Result.Failure<DiagnosisRecordDto>("تم تشخيص هذا المريض بالفعل");
+                return Result.Failure<DiagnosisRecordDto>("This patient has already been diagnosed");
             }
 
             // __ Validate intern doctor existence __ //
@@ -75,7 +80,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.DiagnosePatient
             {
                 _logger.LogWarning("Intern doctor with ApplicationUserId {InternDoctorId} not found", internDoctorId);
                 
-                return Result.Failure<DiagnosisRecordDto>("طبيب الامتياز غير موجود");
+                return Result.Failure<DiagnosisRecordDto>("Intern doctor not found");
             }
 
             // __ Validate diagnosis Type existence and activity __ //
@@ -88,7 +93,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.DiagnosePatient
             if (diagnosisType is null)
             {
                 _logger.LogWarning("Diagnosis Type with Id {DiagnosisTypeId} not found or inactive", dto.DiagnosisTypeId);
-                return Result.Failure<DiagnosisRecordDto>("نوع التشخيص غير موجود");
+                return Result.Failure<DiagnosisRecordDto>("Diagnosis type not found");
             }
 
             var isValidLink = await _uow.Repository<ClinicDiagnosisType>().ExistsAsync
@@ -103,7 +108,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.DiagnosePatient
             {
                 _logger.LogWarning("Diagnosis Type {DiagnosisTypeId} is not linked to Clinic {ClinicId}", dto.DiagnosisTypeId, dto.ClinicId);
                 
-                return Result.Failure<DiagnosisRecordDto>("نوع التشخيص لا ينتمي لهذه العيادة");
+                return Result.Failure<DiagnosisRecordDto>("Diagnosis type does not belong to this clinic");
             }
 
             // __ Validate clinic existence and active status __ //
@@ -112,7 +117,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.DiagnosePatient
             if (clinic is null || !clinic.IsActive)
             {
                 _logger.LogWarning("Clinic with Id {ClinicId} not found or inactive", dto.ClinicId);
-                return Result.Failure<DiagnosisRecordDto>("العيادة غير موجودة أو غير نشطة");
+                return Result.Failure<DiagnosisRecordDto>("Clinic not found or inactive");
             }
 
             // __ Create diagnosis record __ //
@@ -134,6 +139,47 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.DiagnosePatient
 
             // __ Save diagnosis record to database __ //
             await _uow.SaveChangesAsync(cancellationToken: cancellationToken);
+
+            // __ Run auto-assignment engine synchronously to select the best student __ //
+            var assignmentResult = await _autoAssignmentEngine.GetBestStudentForCaseAsync(diagnosis);
+            
+            if (assignmentResult.IsSuccess)
+            {
+                var studentId = assignmentResult.Value;
+                var student = await _uow.Repository<Student>().GetByIdAsync(studentId);
+                
+                if (student != null && student.ActiveTermId.HasValue)
+                {
+                    // __ Create preliminary assignment and add it to TA pending queue __ //
+                    var caseAssignment = new CaseAssignment
+                    {
+                        DiagnosisRecordId = diagnosis.Id,
+                        StudentId = studentId,
+                        ClinicId = dto.ClinicId,
+                        TermId = student.ActiveTermId.Value,
+                        AssignedByInternId = intern.Id,
+                        Status = CaseStatus.PendingAssignmentApproval,
+                        IsAutoAssigned = true,
+                        AssignedAt = DateTime.UtcNow,
+                        CreatedAt = DateTime.UtcNow,
+                        Notes = "Auto-assigned - Pending TA Review"
+                    };
+
+                    await _uow.Repository<CaseAssignment>().AddAsync(caseAssignment);
+                    
+                    // __ Update diagnosis status to (Assigned) __ //
+                    diagnosis.IsAssigned = true;
+                    _uow.Repository<DiagnosisRecord>().Update(diagnosis);
+                    
+                    await _uow.SaveChangesAsync(cancellationToken: cancellationToken);
+                    
+                    // __ Link assignment to the booking __ //
+                    booking.CaseAssignmentId = caseAssignment.Id;
+                    _uow.Repository<Booking>().Update(booking);
+                    
+                    await _uow.SaveChangesAsync(cancellationToken: cancellationToken);
+                }
+            }
 
             // __ Emit Event for background processing (e.g., updating patient history, notifying supervisors, etc.) __ //
             //await _eventPublisher.PublishAsync(new DiagnosisCreatedEvent(diagnosis.Id, diagnosis.BookingId));

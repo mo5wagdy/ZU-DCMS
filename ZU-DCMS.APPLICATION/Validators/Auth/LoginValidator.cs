@@ -9,13 +9,13 @@ namespace ZU_DCMS.APPLICATION.Validators.Auth
         public LoginValidator()
         {
             RuleFor(x => x.Dto.PhoneNumber)
-                   .NotEmpty().WithMessage("رقم التليفون مطلوب")
+                   .NotEmpty().WithMessage("Phone number is required")
                    .Matches(@"^\+?[0-9]{10,15}$")
-                   .WithMessage("رقم التليفون غير صحيح");
+                   .WithMessage("Invalid phone number");
 
             RuleFor(x => x.Dto.IdentityNumber)
                    .NotEmpty()
-                   .WithMessage("رقم الهوية مطلوب")
+                   .WithMessage("National ID is required")
                    .When(x => x.Dto != null);
         }
     }

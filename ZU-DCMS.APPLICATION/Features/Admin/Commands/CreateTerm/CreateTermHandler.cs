@@ -26,7 +26,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateTerm
             var hasActiveTerm = await _uow.Repository<Term>().ExistsAsync(t => t.IsActive);
 
             if (hasActiveTerm)
-                return Result.Failure<TermDto>("يوجد ترم نشط بالفعل، أوقفه أولاً");
+                return Result.Failure<TermDto>("There is already an active term, deactivate it first");
 
             // __ Create Term entity __ //
             var term = new Term

@@ -11,31 +11,31 @@ namespace ZU_DCMS.APPLICATION.Validators.Patient
         {
             RuleFor(x => x.Id)
                 .GreaterThan(0)
-                .WithMessage("معرف المريض غير صحيح");
+                .WithMessage("Invalid patient ID");
 
             RuleFor(x => x.Dto.Username)
-                   .MinimumLength(3).WithMessage("لازم 3 حروف على الأقل")
-                   .MaximumLength(50).WithMessage("لازم أقل من 50 حرف")
+                   .MinimumLength(3).WithMessage("Must be at least 3 characters")
+                   .MaximumLength(50).WithMessage("Must be less than 50 characters")
                    .Matches(@"^[a-zA-Z0-9._-]+$")
-                   .WithMessage("يقبل حروف وأرقام و . _ - فقط")
+                   .WithMessage("Accepts only letters, numbers, and . _ -")
                    .When(x => !string.IsNullOrEmpty(x.Dto.Username));
 
             RuleFor(x => x.Dto.PhoneNumber)
                    .Matches(@"^\+?[0-9]{10,15}$")
-                   .WithMessage("رقم التليفون غير صحيح")
+                   .WithMessage("Invalid phone number")
                    .When(x => !string.IsNullOrEmpty(x.Dto.PhoneNumber));
 
             RuleFor(x => x.Dto.Email)
-                   .EmailAddress().WithMessage("الإيميل غير صحيح")
+                   .EmailAddress().WithMessage("Invalid email")
                    .When(x => !string.IsNullOrEmpty(x.Dto.Email));
 
             RuleFor(x => x.Dto.ChronicConditions)
-                   .IsInEnum().WithMessage("الأمراض المزمنة غير صحيحة")
+                   .IsInEnum().WithMessage("Invalid chronic diseases")
                    .When(x => x.Dto.ChronicConditions.HasValue);
 
             RuleFor(x => x.Dto.OtherConditions)
                    .MaximumLength(500)
-                   .WithMessage("لازم يكون أقل من 500 حرف")
+                   .WithMessage("Must be less than 500 characters")
                    .When(x => !string.IsNullOrEmpty(x.Dto.OtherConditions));
 
             RuleFor(x => x.Dto.Address)

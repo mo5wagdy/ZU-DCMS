@@ -44,7 +44,7 @@
 //            {
 //                _logger.LogWarning("Booking not found for BookingId: {BookingId}", command.BookingId);
                 
-//                return Result.Failure("الحجز غير موجود");
+//                return Result.Failure("Booking not found");
 //            }
 
 //            // __ Get available slots for the booking Type __ //
@@ -53,7 +53,7 @@
 //            if (slots.IsFailure || slots.Value.Count == 0)
 //            {
 //                _logger.LogWarning("No available slots found for BookingType: {BookingType} during postponement of BookingId", booking.BookingType);
-//                return Result.Failure("لا يوجد مواعيد");
+//                return Result.Failure("None مواعيد");
 //            }
 
 //            var newSessionId = slots.Value.First().SessionId;
@@ -100,7 +100,7 @@
 //            {
 //                _logger.LogError("Error postponing booking", ex);
 //                await _uow.RollbackTransactionAsync();
-//                return Result.Failure("فشل التأجيل");
+//                return Result.Failure("Postponement failed");
 //            }
 //        }
 //    }

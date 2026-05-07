@@ -44,21 +44,21 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.StaffLogin
             {
                 _logger.LogWarning("Login failed: User not found for Email: {Email}", dto.Email);
                 
-                return Result.Failure<AuthDto>("بيانات الدخول غير صحيحة");
+                return Result.Failure<AuthDto>("Invalid login credentials");
             }
 
             if (!user.IsActive)
             {
                 _logger.LogWarning("Login failed: User account is inactive for Email: {Email}", dto.Email);
                
-                return Result.Failure<AuthDto>("الحساب موقوف، تواصل مع الإدارة");
+                return Result.Failure<AuthDto>("Account suspended, contact administration");
             }
 
             if (!await _identity.CheckPasswordAsync(user.Id, dto.Password))
             {
                 _logger.LogWarning("Login failed: Incorrect password for Email: {Email}", dto.Email);
                 
-                return Result.Failure<AuthDto>("بيانات الدخول غير صحيحة");
+                return Result.Failure<AuthDto>("Invalid login credentials");
             }
 
             // __ Ensure this account is Not a Patient __ //
@@ -68,7 +68,7 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.StaffLogin
             {
                 _logger.LogWarning("Login failed: User is a patient, not staff for Email: {Email}", dto.Email);
                 
-                return Result.Failure<AuthDto>("بيانات الدخول غير صحيحة");
+                return Result.Failure<AuthDto>("Invalid login credentials");
             }
 
             await _uow.BeginTransactionAsync();
@@ -117,7 +117,7 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.StaffLogin
                 
                 _logger.LogError("An error occurred during staff login");
                 
-                return Result.Failure<AuthDto>("حدث خطأ أثناء تسجيل الدخول، حاول مرة أخرى");
+                return Result.Failure<AuthDto>("An error occurred during login, try again");
             }
         }
     }

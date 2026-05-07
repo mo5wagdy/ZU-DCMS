@@ -12,52 +12,52 @@ namespace ZU_DCMS.APPLICATION.Validators.Auth
         {
 
             RuleFor(x => x.Dto.FullName)
-                   .NotEmpty().WithMessage("الاسم مطلوب")
-                   .MinimumLength(3).WithMessage("لازم 3 حروف على الأقل")
-                   .MaximumLength(100).WithMessage("لازم أقل من 100 حرف");
+                   .NotEmpty().WithMessage("Name is required")
+                   .MinimumLength(3).WithMessage("Must be at least 3 characters")
+                   .MaximumLength(100).WithMessage("Must be less than 100 characters");
 
             RuleFor(x => x.Dto.PhoneNumber)
-                   .NotEmpty().WithMessage("رقم التليفون مطلوب")
+                   .NotEmpty().WithMessage("Phone number is required")
                    .Matches(@"^\+?[0-9]{10,15}$")
-                   .WithMessage("رقم التليفون غير صحيح");
+                   .WithMessage("Invalid phone number");
 
             RuleFor(x => x.Dto.Email)
-                   .EmailAddress().WithMessage("الإيميل غير صحيح")
+                   .EmailAddress().WithMessage("Invalid email")
                    .When(x => !string.IsNullOrWhiteSpace(x.Dto.Email), ApplyConditionTo.CurrentValidator);
 
             RuleFor(x => x.Dto.IdentityType)
                    .IsInEnum()
-                   .WithMessage("نوع الهوية غير صحيح برجاء إختيار نوع هوية مناسب");
+                   .WithMessage("Invalid ID type, please select a suitable ID type");
 
             RuleFor(x => x.Dto.IdentityNumber)
-                   .NotEmpty().WithMessage("رقم الهوية مطلوب")
+                   .NotEmpty().WithMessage("National ID is required")
                    .Must((x, number) => BeValidIdentityNumber(number, x.Dto.IdentityType))
-                   .WithMessage("رقم الهوية غير صحيح");
+                   .WithMessage("Invalid National ID");
 
             RuleFor(x => x.Dto.DateOfBirth)
-                   .NotEmpty().WithMessage("تاريخ الميلاد مطلوب")
+                   .NotEmpty().WithMessage("Date of birth is required")
                    .Must(BeValidAge)
-                   .WithMessage("السن لازم يكون بين 5 ل 120 سنة");
+                   .WithMessage("Age must be between 5 and 120 years");
 
             RuleFor(x => x.Dto.ParentName)
-                   .NotEmpty().WithMessage("إسم ولي أمر الطفل من سن 5 ل 17 مطلوب")
+                   .NotEmpty().WithMessage("Guardian name is required for children aged 5 to 17")
                    .When(x => x.Dto.IsChild);
 
             RuleFor(x => x.Dto.Gender)
                    .IsInEnum()
-                   .WithMessage("النوع غير صحيح");
+                   .WithMessage("Invalid gender");
 
             RuleFor(x => x.Dto.ChronicConditions)
                    .IsInEnum()
-                   .WithMessage("الأمراض المزمنة غير صحيحة");
+                   .WithMessage("Invalid chronic diseases");
 
             RuleFor(x => x.Dto.OtherConditions)
                    .MaximumLength(500)
-                   .WithMessage("لازم يكون أقل من 500 حرف")
+                   .WithMessage("Must be less than 500 characters")
                    .When(x => !string.IsNullOrEmpty(x.Dto.OtherConditions));
             
             RuleFor(x => x.Dto.Address)
-                   .NotEmpty().WithMessage("العنوان مطلوب")
+                   .NotEmpty().WithMessage("Address is required")
                    .ValidAddress()
                    .When(x => !string.IsNullOrEmpty(x.Dto.Address));
         }

@@ -40,7 +40,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetAvailableStudents
                 var activeTerm = await _uow.Repository<Term>().GetFirstOrDefaultAsync(t => t.IsActive);
                 if (activeTerm is null)
                 {
-                    return Result.Failure<List<StudentPriorityDto>>("لا يوجد فصل دراسي نشط حالياً");
+                    return Result.Failure<List<StudentPriorityDto>>("None فصل دراسي نشط حالياً");
                 }
                 termId = activeTerm.Id;
             }
@@ -48,7 +48,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetAvailableStudents
             var clinic = await _uow.Repository<Clinic>().GetByIdAsync(clinicId);
             if (clinic is null || !clinic.IsActive)
             {
-                return Result.Failure<List<StudentPriorityDto>>("العيادة غير موجودة أو غير نشطة");
+                return Result.Failure<List<StudentPriorityDto>>("Clinic not found or inactive");
             }
 
             // _____________ STEP 2: Check Cache for Full List _____________ //
@@ -117,7 +117,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetAvailableStudents
                         .ToDictionary(g => g.Key, g => 
                         {
                             double avg = g.Average(c => (c.CompletedAt!.Value - c.AssignedAt).TotalDays);
-                            string label = avg <= 7 ? "ممتاز" : avg <= 14 ? "جيد" : avg <= 21 ? "مقبول" : "بطيء";
+                            string label = avg <= 7 ? "Excellent" : avg <= 14 ? "Good" : avg <= 21 ? "Acceptable" : "Slow";
                             double score = avg <= 7 ? -0.3 : avg <= 14 ? -0.1 : avg <= 21 ? 0.1 : 0.3;
                             return (Avg: avg, Label: label, Score: score);
                         });
@@ -146,9 +146,9 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetAvailableStudents
                             IsComplete = req.IsSatisfied,
                             RequirementPriority = req.Priority,
                             AverageCompletionDays = m.Avg > 0 ? m.Avg : null,
-                            PerformanceLabel = m.Label ?? "لا يوجد",
+                            PerformanceLabel = m.Label ?? "None",
                             IsAvailable = true,
-                            AvailabilityStatus = "متاح"
+                            AvailabilityStatus = "Available"
                         };
                     })
                     .ToList();

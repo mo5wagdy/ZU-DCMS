@@ -7,6 +7,8 @@ using ZU_DCMS.APPLICATION.Common.Cache;
 using ZU_DCMS.APPLICATION.Common.MediatR_Behaviors;
 using ZU_DCMS.APPLICATION.Common.Token;
 using ZU_DCMS.APPLICATION.Features.Auth.Commands.Login;
+using ZU_DCMS.APPLICATION.Contracts.Engine;
+using ZU_DCMS.APPLICATION.Features.Diagnosis.Engine;
 
 namespace ZU_DCMS.APPLICATION
 {
@@ -68,6 +70,7 @@ namespace ZU_DCMS.APPLICATION
 
             // __________ Common Services Registrations __________ //
             services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IAutoAssignmentEngine, AutoAssignmentEngine>();
 
             return services;
         }

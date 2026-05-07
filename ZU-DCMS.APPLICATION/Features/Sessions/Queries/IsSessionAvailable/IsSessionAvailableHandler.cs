@@ -34,14 +34,14 @@ namespace ZU_DCMS.APPLICATION.Features.Sessions.Queries.IsSessionAvailable
             { 
                 _logger.LogWarning("Session not found for SessionId: {SessionId}", sessionId);
                
-                return Result.Failure<bool>("السكشن غير موجود");
+                return Result.Failure<bool>("Session not found");
             }
 
             if (!session.IsActive)
             {
                 _logger.LogWarning("Session is not active for SessionId: {SessionId}", sessionId);
                
-                return Result.Failure<bool>("السكشن غير نشط");
+                return Result.Failure<bool>("Session is inactive");
             }
 
             // __ Determine availability based on booking Type __ //

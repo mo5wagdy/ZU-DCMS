@@ -10,13 +10,13 @@ namespace ZU_DCMS.APPLICATION.Validators.Auth
         {
             RuleFor(x => x.Dto.Email)
                 .NotEmpty()
-                .WithMessage("الإيميل مطلوب")
+                .WithMessage("Email is required")
                 .EmailAddress()
-                .WithMessage("الإيميل غير صالح");
+                .WithMessage("Invalid email");
 
             RuleFor(x => x.Dto.Password)
                 .NotEmpty()
-                .WithMessage("كلمة المرور مطلوبة");
+                .WithMessage("Password is required");
         }
     }
 }

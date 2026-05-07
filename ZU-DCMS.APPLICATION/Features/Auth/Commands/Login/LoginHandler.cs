@@ -51,14 +51,14 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.Login
             {
                 _logger.LogWarning("Login failed: User not found for PhoneNumber: {PhoneNumber}", dto.PhoneNumber);
                 
-                return Result.Failure<AuthDto>("بيانات الدخول غير صحيحة");
+                return Result.Failure<AuthDto>("Invalid login credentials");
             }
 
             if (!user.IsActive)
             {
                 _logger.LogWarning("Login failed: Account is inactive for PhoneNumber: {PhoneNumber}", dto.PhoneNumber);
                 
-                return Result.Failure<AuthDto>("الحساب موقوف، تواصل مع الإدارة");
+                return Result.Failure<AuthDto>("Account suspended, contact administration");
             }
 
             // __ For patients — password is their identity number __ //
@@ -66,7 +66,7 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.Login
             {
                 _logger.LogWarning("Login failed: Incorrect password for PhoneNumber: {PhoneNumber}", dto.PhoneNumber);
                 
-                return Result.Failure<AuthDto>("بيانات الدخول غير صحيحة");
+                return Result.Failure<AuthDto>("Invalid login credentials");
             }
 
             // __ Ensure this account is a Patient __ //
@@ -76,7 +76,7 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.Login
             {
                 _logger.LogWarning("Login failed: User is not a patient for PhoneNumber: {PhoneNumber}", dto.PhoneNumber);
                 
-                return Result.Failure<AuthDto>("بيانات الدخول غير صحيحة");
+                return Result.Failure<AuthDto>("Invalid login credentials");
             }
 
             await _uow.BeginTransactionAsync();
@@ -119,7 +119,7 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.Login
                 
                 _logger.LogError("An error occurred during patient login");
                 
-                return Result.Failure<AuthDto>("حدث خطأ أثناء تسجيل الدخول، حاول مرة أخرى");
+                return Result.Failure<AuthDto>("An error occurred during login, try again");
             }
         }
     }

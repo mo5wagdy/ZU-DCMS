@@ -44,7 +44,7 @@ namespace ZU_DCMS.APPLICATION.Features.Patients.Commands.UpdateProfile
             {
                 _logger.LogWarning("Patient not found for update, ID: {Id}", id);
                 
-                return Result.Failure<PatientDto>("المريض غير موجود");
+                return Result.Failure<PatientDto>("Patient not found");
             }
 
             // __ We use transaction here because we might need to update the username in the identity service, and if that fails, we don't want to update the patient data. __ //
@@ -71,7 +71,7 @@ namespace ZU_DCMS.APPLICATION.Features.Patients.Commands.UpdateProfile
                             
                             _logger.LogWarning("Username already exists: {PhoneNumber}", newUsername);
                             
-                            return Result.Failure<PatientDto>("اسم المستخدم موجود بالفعل");
+                            return Result.Failure<PatientDto>("Username already exists");
                         }
 
                         _logger.LogInfo("Updating username for patient ID: {Id}, New Username: {Username}", id, newUsername);
@@ -85,7 +85,7 @@ namespace ZU_DCMS.APPLICATION.Features.Patients.Commands.UpdateProfile
                         
                             _logger.LogWarning("Failed to update username: {Username}", newUsername);
                             
-                            return Result.Failure<PatientDto>("فشل تحديث اسم المستخدم");
+                            return Result.Failure<PatientDto>("Failed to update username");
                         }
                     }
                 }
@@ -128,7 +128,7 @@ namespace ZU_DCMS.APPLICATION.Features.Patients.Commands.UpdateProfile
                 
                 _logger.LogError("An error occurred while updating patient profile");
                 
-                return Result.Failure<PatientDto>("حدث خطأ ، حاول مرة أخرى");
+                return Result.Failure<PatientDto>("An error occurred, try again");
             }
         }
     }

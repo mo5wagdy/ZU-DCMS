@@ -22,7 +22,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.SetActiveTerm
             var term = await _uow.Repository<Term>().GetByIdAsync(command.TermId);
 
             if (term is null)
-                return Result.Failure("الترم غير موجود");
+                return Result.Failure("Term not found");
 
             await _uow.BeginTransactionAsync();
 
@@ -70,7 +70,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.SetActiveTerm
 
                 await _uow.RollbackTransactionAsync();
                
-                return Result.Failure("حدث خطأ أثناء تفعيل الترم");
+                return Result.Failure("An error occurred while activating the term");
             }
         }
     }

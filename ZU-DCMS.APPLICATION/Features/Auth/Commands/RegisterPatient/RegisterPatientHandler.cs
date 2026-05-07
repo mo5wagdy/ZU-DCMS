@@ -61,28 +61,28 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient
             {
                 _logger.LogWarning("Identity number already exists: {IdentityNumber}", dto.IdentityNumber);
                 
-                return Result.Failure<AuthDto>("رقم الهوية مسجل بالفعل");
+                return Result.Failure<AuthDto>("National ID is already registered");
             }
 
             if (await _uow.Repository<Patient>().ExistsAsync(p => p.PhoneNumber == dto.PhoneNumber))
             {
                 _logger.LogWarning("Phone number already exists: {PhoneNumber}", dto.PhoneNumber);
 
-                return Result.Failure<AuthDto>("رقم الهاتف مسجل بالفعل");
+                return Result.Failure<AuthDto>("Phone number is already registered");
             }
 
             if (!string.IsNullOrWhiteSpace(dto.Email) && await _identity.EmailExistsAsync(dto.Email))
             {
                 _logger.LogWarning("Email already exists: {Email}", dto.Email);
 
-                return Result.Failure<AuthDto>("الإيميل مسجل بالفعل");
+                return Result.Failure<AuthDto>("Email is already registered");
             }
 
             if (dto.Type != UserType.Patient)
             {
                 _logger.LogWarning("Attempt Registering With Different Type Which Is Not Allowed");
 
-                return Result.Failure<AuthDto>("غير مسموح");
+                return Result.Failure<AuthDto>("Not allowed");
             }
 
             // __ Begin transaction — Identity + Patient must both succeed __ //
@@ -158,7 +158,7 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.RegisterPatient
                
                 _logger.LogError("An error occurred during patient registration");
                 
-                return Result.Failure<AuthDto>("حدث خطأ أثناء التسجيل، حاول مرة أخرى");
+                return Result.Failure<AuthDto>("An error occurred during registration, try again");
             }
         }
     }

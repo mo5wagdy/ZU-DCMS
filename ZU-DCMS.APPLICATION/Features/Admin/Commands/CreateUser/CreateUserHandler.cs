@@ -44,32 +44,32 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
             // __ Check user email uniqueness __ //
             if (await _identity.EmailExistsAsync(dto.Email))
             {
-                return Result.Failure<StaffUsersDto>("الإيميل موجود بالفعل");
+                return Result.Failure<StaffUsersDto>("Email already exists");
             }
 
             // __ Check username uniqueness __ //
             if (await _identity.UsernameExistsAsync(dto.Username))
             {
-                return Result.Failure<StaffUsersDto>("اسم المستخدم موجود بالفعل");
+                return Result.Failure<StaffUsersDto>("Username already exists");
             }
 
             // __ Chech phone uniqueness __ //
             if (string.IsNullOrWhiteSpace(dto.PhoneNumber)) 
             {
-                return Result.Failure<StaffUsersDto>("رقم الهاتف مطلوب");
+                return Result.Failure<StaffUsersDto>("Phone number is required");
             }
 
             var phone = await _identity.FindByPhoneAsync(dto.PhoneNumber);
 
             if (phone != null)
             {
-                return Result.Failure<StaffUsersDto>("رقم الهاتف موجود بالفعل");
+                return Result.Failure<StaffUsersDto>("Phone number already exists");
             }
 
             // __ Patients not allowed __ //
             if (dto.Type != UserType.Staff)
             {
-                return Result.Failure<StaffUsersDto>("لا يمكن إضافة عيان إلى الطاقم الإداري");
+                return Result.Failure<StaffUsersDto>("Cannot add patient to administrative staff");
             }
 
             // __ We don't need to check roles here since we trust dto.Role string from CreatableRoles __ //
@@ -77,13 +77,13 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
 
             if (selectedRole == UserRoles.Patient)
             {
-                return Result.Failure<StaffUsersDto>("لا يمكن إضافه عيان إلى الأعضاء المسؤولين");
+                return Result.Failure<StaffUsersDto>("Cannot add patient to responsible members");
             }
 
             // __ Prevent assigning student role to more than 5 academic years __ //
             if (dto.AcademicYear > 5)
             {
-                return Result.Failure<StaffUsersDto>("عدد السنوات الأكاديمية الرسمية 5 سنوات");
+                return Result.Failure<StaffUsersDto>("The number of official academic years is 5 years");
             }
 
 
@@ -110,7 +110,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
                 {
                     await _uow.RollbackTransactionAsync();
 
-                    return Result.Failure<StaffUsersDto>(error ?? "فشل إنشاء المستخدم");
+                    return Result.Failure<StaffUsersDto>(error ?? "Failed to create user");
                 }
 
                 // __ Adding to the selected role __ //
@@ -207,7 +207,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.CreateUser
 
                 _logger.LogError(ex, "Error creating user {PhoneNumber}", dto.Username);
                 
-                return Result.Failure<StaffUsersDto>("حدث خطأ أثناء إنشاء المستخدم");
+                return Result.Failure<StaffUsersDto>("An error occurred while creating the user");
             }
         }
     }

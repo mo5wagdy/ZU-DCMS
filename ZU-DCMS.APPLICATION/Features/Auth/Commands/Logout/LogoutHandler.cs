@@ -16,11 +16,11 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Commands.Logout
         public async Task<Result<string>> Handle(LogoutCommand request, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(request.RefreshToken))
-                return Result.Failure<string>("الـ Refresh Token مطلوب لعملية تسجيل الخروج");
+                return Result.Failure<string>("Refresh token is required for logout");
 
             var result = await _tokenService.RevokeByTokenAsync(request.RefreshToken);
 
-            return result  ? Result.Success("تم تسجيل الخروج بنجاح")  : Result.Failure<string>("حدث خطأ أثناء تسجيل الخروج أو الـ Token غير صالح");
+            return result  ? Result.Success("Logged out successfully")  : Result.Failure<string>("حدث خطأ أثناء تسجيل الخروج أو Invalid token");
         }
     }
 }

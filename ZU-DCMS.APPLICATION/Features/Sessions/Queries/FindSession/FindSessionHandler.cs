@@ -23,7 +23,7 @@ namespace ZU_DCMS.APPLICATION.Features.Sessions.Queries.FindSession
 
             // __ Validate time slot format __ //
             if (!TimeSpan.TryParse(timeSlot, out var time))
-                return Result.Failure<SessionDto>("صيغة الوقت غير صحيحة");
+                return Result.Failure<SessionDto>("Invalid time format");
 
             // __ Fetch the session that matches the date and time slot __ //
             var session = await _uow.Repository<Session>().GetFirstOrDefaultAsync
@@ -36,7 +36,7 @@ namespace ZU_DCMS.APPLICATION.Features.Sessions.Queries.FindSession
 
             // __ If session is not found, return failure __ //
             if (session == null)
-                return Result.Failure<SessionDto>("السكشن غير موجود");
+                return Result.Failure<SessionDto>("Session not found");
 
             // __ Map domain entity to DTO to avoid exposing domain internals __ //
             var dto = new SessionDto

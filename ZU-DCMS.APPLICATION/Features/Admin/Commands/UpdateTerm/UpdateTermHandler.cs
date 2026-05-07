@@ -27,7 +27,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.UpdateTerm
 
             // __ If null → NotFound __ //
             if (term is null)
-                return Result.Failure<TermDto>("الترم غير موجود");
+                return Result.Failure<TermDto>("Term not found");
 
             // __ Update allowed fields only __ //
             if (!string.IsNullOrWhiteSpace(dto.Name))

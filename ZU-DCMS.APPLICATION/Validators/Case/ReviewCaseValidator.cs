@@ -9,11 +9,11 @@ namespace ZU_DCMS.APPLICATION.Validators.Case
         {
             RuleFor(x => x.CaseAssignmentId)
                    .GreaterThan(0)
-                   .WithMessage("الحالة مطلوبة");
+                   .WithMessage("Status is required");
 
             RuleFor(x => x.Notes)
                    .NotEmpty()
-                   .WithMessage("يجب إعطاء ملحوظات عن الحالة في حالة القبول أو الرفض")
+                   .WithMessage("Notes must be provided in case of approval or rejection")
                    .MaximumLength(500);
         }
     }

@@ -131,7 +131,7 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.RequeueOverdueBookings
 
                             _logger.LogWarning("Failed to release slot for SessionId: {SessionId}, Type: {Type}", booking.SessionId, booking.BookingType);
 
-                            return Result.Failure<int>("فشل تحرير مكان الحجز");
+                            return Result.Failure<int>("Failed to release booking slot");
                         }
 
                         booking.SessionId = newSessionId.Value;
@@ -143,7 +143,7 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.RequeueOverdueBookings
                     else
                     {
                         booking.Status = BookingStatus.Cancelled;
-                        booking.PostponeReason = "تم الإلغاء لعدم الحضور وعدم وجود مواعيد أخرى متاحة اليوم";
+                        booking.PostponeReason = "Cancelled due to no-show and no other appointments available today";
                         _uow.Repository<Booking>().Update(booking);
                     }
                 }
@@ -158,7 +158,7 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.RequeueOverdueBookings
             {
                 await _uow.RollbackTransactionAsync();
 
-                return Result.Failure<int>("حدث خطأ اثناء إعادة جدولة الحجوزات");
+                return Result.Failure<int>("An error occurred while rescheduling bookings");
             }
         }
     }

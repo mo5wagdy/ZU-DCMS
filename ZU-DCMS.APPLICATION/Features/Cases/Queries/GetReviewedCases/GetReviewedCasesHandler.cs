@@ -29,7 +29,7 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Queries.GetReviewedCases
             );
 
             if (ta is null)
-                return Result.Failure<List<CaseAssignmentDto>>("المعيد غير موجود");
+                return Result.Failure<List<CaseAssignmentDto>>("Teaching assistant not found");
 
             // __ Get all reviews done by this TA __ //
             var reviews = await _uow.Repository<CaseReview>().GetListAsync(

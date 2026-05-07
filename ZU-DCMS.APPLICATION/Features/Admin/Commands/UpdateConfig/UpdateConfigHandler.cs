@@ -25,7 +25,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.UpdateConfig
 
             // __ If not found → NotFound __ //
             if (config is null)
-                return Result.Failure("الإعداد غير موجود");
+                return Result.Failure("Setting not found");
 
             // __ Update value __ //
             config.Value = command.Value.Trim();

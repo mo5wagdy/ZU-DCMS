@@ -244,6 +244,9 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                     b.Property<int>("AssignedByInternId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("AssignmentReviewedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("ClinicId")
                         .HasColumnType("int");
 
@@ -259,12 +262,21 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                     b.Property<int>("DiagnosisRecordId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsAutoAssigned")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("Notes")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ReviewNotes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ReviewedByTAId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -290,6 +302,8 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
 
                     b.HasIndex("DiagnosisRecordId")
                         .IsUnique();
+
+                    b.HasIndex("ReviewedByTAId");
 
                     b.HasIndex("StudentId");
 
@@ -2629,6 +2643,10 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("ZU_DCMS.Domain.Entities.TeachingAssistant", "ReviewedByTA")
+                        .WithMany("ReviewedAssignments")
+                        .HasForeignKey("ReviewedByTAId");
+
                     b.HasOne("ZU_DCMS.Domain.Entities.Student", "Student")
                         .WithMany("CaseAssignments")
                         .HasForeignKey("StudentId")
@@ -2646,6 +2664,8 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
                     b.Navigation("Clinic");
 
                     b.Navigation("DiagnosisRecord");
+
+                    b.Navigation("ReviewedByTA");
 
                     b.Navigation("Student");
 
@@ -2902,6 +2922,8 @@ namespace ZU_DCMS.INFRASTRUCTURE.Migrations
             modelBuilder.Entity("ZU_DCMS.Domain.Entities.TeachingAssistant", b =>
                 {
                     b.Navigation("CaseReviews");
+
+                    b.Navigation("ReviewedAssignments");
                 });
 
             modelBuilder.Entity("ZU_DCMS.Domain.Entities.Term", b =>

@@ -49,7 +49,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Queries.GetAllUsers
 
                     if (appUsers is null)
                     {
-                        return Result.Failure<PagedResult<StaffUsersDto>>("خطأ في تحميل المستخدمين");
+                        return Result.Failure<PagedResult<StaffUsersDto>>("Error loading users");
                     }
 
                     // __ Map to StaffUsersDto __ //

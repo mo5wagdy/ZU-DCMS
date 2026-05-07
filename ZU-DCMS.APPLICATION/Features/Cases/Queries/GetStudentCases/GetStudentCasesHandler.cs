@@ -63,7 +63,7 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Queries.GetStudentCases
                     {
                         _logger.LogWarning("No cases found for student with ID: {StudentId}", studentId);
 
-                        return Result.Failure<List<CaseAssignmentDto>>("لا يوجد حالات لهذا الطالب");
+                        return Result.Failure<List<CaseAssignmentDto>>("None حالات لهذا الطالب");
                     }
 
                     _logger.LogInfo("Successfully fetched {Count} cases for student with ID: {StudentId}", cases.Count, studentId);

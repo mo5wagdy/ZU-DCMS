@@ -10,30 +10,30 @@ namespace ZU_DCMS.APPLICATION.Validators.Admin
         {
             RuleFor(x => x.TermId)
                 .GreaterThan(0)
-                .WithMessage("معرف الفصل الدراسي غير صحيح");
+                .WithMessage("Invalid term ID");
 
             RuleFor(x => x.AdminId)
                 .NotEmpty()
-                .WithMessage("معرف المدير مطلوب");
+                .WithMessage("Manager ID is required");
 
             RuleFor(x => x.Dto.Name)
                    .MaximumLength(100)
-                   .WithMessage("الاسم لازم يكون أقل من 100 حرف")
+                   .WithMessage("Name must be less than 100 characters")
                    .When(x => !string.IsNullOrEmpty(x.Dto.Name));
 
             RuleFor(x => x.Dto.StartDate)
                    .GreaterThan(DateTime.Today)
-                   .WithMessage("تاريخ البداية لازم يكون في المستقبل")
+                   .WithMessage("Start date must be in the future")
                    .When(x => x.Dto.StartDate.HasValue);
 
             RuleFor(x => x.Dto.EndDate)
                    .GreaterThan(x => x.Dto.StartDate ?? DateTime.Today)
-                   .WithMessage("تاريخ النهاية لازم يكون بعد تاريخ البداية")
+                   .WithMessage("End date must be after start date")
                    .When(x => x.Dto.EndDate.HasValue);
 
             RuleFor(x => x.Dto.RequiredCasesCount)
                    .GreaterThan(0)
-                   .WithMessage("عدد الحالات لازم يكون أكبر من 0")
+                   .WithMessage("Number of cases must be greater than 0")
                    .When(x => x.Dto.RequiredCasesCount.HasValue);
         }
     }

@@ -22,15 +22,15 @@ namespace ZU_DCMS.APPLICATION.Validators.Admin
         {
             RuleFor(x => x.Key)
                    .NotEmpty()
-                   .WithMessage("الـ Key مطلوب")
+                   .WithMessage("Key is required")
                    .Must(key => ValidKeys.Contains(key))
-                   .WithMessage("الـ Key غير صحيح");
+                   .WithMessage("Invalid Key");
 
             RuleFor(x => x.Value)
                    .NotEmpty()
-                   .WithMessage("القيمة مطلوبة")
+                   .WithMessage("Value is required")
                    .Must((dto, value) => BeValidValue(dto.Key, value))
-                   .WithMessage("القيمة غير صحيحة لهذا الإعداد");
+                   .WithMessage("Invalid value for this setting");
         }
 
         // __ Helper method to validate the value based on the key. __ //

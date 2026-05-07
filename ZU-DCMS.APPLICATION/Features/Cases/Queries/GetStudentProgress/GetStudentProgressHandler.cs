@@ -75,7 +75,7 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Queries.GetStudentProgress
                     if (requirements == null || requirements.Count == 0)
                     {
                         _logger.LogWarning("No requirements found for student ID: {StudentId} in term ID: {TermId}", studentId, termId);
-                        return Result.Failure<StudentProgressDto>("لا يوجد متطلبات محددة لهذا الطالب");
+                        return Result.Failure<StudentProgressDto>("None متطلبات محددة لهذا الطالب");
                     }
 
                     // __ Calculate progress dynamically for global templates __ //
@@ -88,7 +88,7 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Queries.GetStudentProgress
                     }
 
                     var student = await _uow.Repository<Student>().GetByIdAsync(studentId);
-                    if (student is null) return Result.Failure<StudentProgressDto>("الطالب غير موجود");
+                    if (student is null) return Result.Failure<StudentProgressDto>("Student not found");
 
                     var res = new StudentProgressDto
                     {

@@ -28,13 +28,13 @@ namespace ZU_DCMS.APPLICATION.Mapping
                      .ForMember(d => d.ClinicName,   o => o.MapFrom(s => s.Clinic.NameAr != "" ? s.Clinic.NameAr : s.Clinic.Name))
                      .ForMember(d => d.ClinicNameEn, o => o.MapFrom(s => s.Clinic.NameEn != "" ? s.Clinic.NameEn : s.Clinic.Name))
                      .ForMember(d => d.RequirementTypeName, o => o.MapFrom(s =>
-                        s.Clinic.Code == "REST" ? "حشوات" :
-                        s.Clinic.Code == "SURG" ? "خلع" :
-                        s.Clinic.Code == "PERIO" ? "تنظيف" :
-                        s.Clinic.Code == "ENDO" ? "حشو عصب" :
-                        s.Clinic.Code == "PED" ? "أطفال" :
-                        s.Clinic.Code == "FIX" ? "تركيبات ثابتة" :
-                        s.Clinic.Code == "REM" ? "تركيبات متحركة" :
+                        s.Clinic.Code == "REST" ? "Fillings" :
+                        s.Clinic.Code == "SURG" ? "Extraction" :
+                        s.Clinic.Code == "PERIO" ? "Cleaning" :
+                        s.Clinic.Code == "ENDO" ? "Endodontics" :
+                        s.Clinic.Code == "PED" ? "Pediatrics" :
+                        s.Clinic.Code == "FIX" ? "Fixed Prosthodontics" :
+                        s.Clinic.Code == "REM" ? "Removable Prosthodontics" :
                         s.Clinic.NameAr != "" ? s.Clinic.NameAr : s.Clinic.Name))
                      .ForMember(d => d.RequirementTypeNameEn, o => o.MapFrom(s =>
                         s.Clinic.Code == "REST" ? "Fillings" :

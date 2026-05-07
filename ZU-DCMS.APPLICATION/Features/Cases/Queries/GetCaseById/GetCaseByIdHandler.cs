@@ -62,7 +62,7 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Queries.GetCaseById
                     {
                         _logger.LogWarning("Case assignment with ID: {CaseAssignmentId} not found", caseAssignmentId);
 
-                        return Result.Failure<CaseAssignmentDto>("الحالة غير موجودة");
+                        return Result.Failure<CaseAssignmentDto>("Case not found");
                     }
 
                     // __ Manually load procedures for each session (ThenInclude workaround) __ //

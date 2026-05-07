@@ -22,15 +22,15 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.SubmitCaseForReview
 
             // __ Validate existence __ //
             if (caseAssignment is null)
-                return Result.Failure("الحاله غير موجوده");
+                return Result.Failure("Case not found");
 
             // __ Ensure this student owns the case __ //
             if (caseAssignment.StudentId != command.StudentId)
-                return Result.Failure("ليس لديك صلاحية");
+                return Result.Failure("You do not have permission");
 
             // __ Ensure case is in progress __ //
             if (caseAssignment.Status != CaseStatus.InProgress)
-                return Result.Failure("الحاله ليست قيد العمل");
+                return Result.Failure("Case is not in progress");
 
             // __ Move case to PendingReview __ //
             caseAssignment.Status = CaseStatus.PendingReview;

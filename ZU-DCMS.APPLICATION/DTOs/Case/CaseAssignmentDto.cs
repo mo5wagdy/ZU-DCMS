@@ -29,6 +29,7 @@ namespace ZU_DCMS.APPLICATION.DTOs.Case
         public string? Notes { get; set; }
         public CaseStatus Status { get; set; }
         public DateTime AssignedAt { get; set; }
+        public DateTime? AssignmentReviewedAt { get; set; }
 
         // __ Session log __ //
         public List<CaseSessionDto> Sessions { get; set; } = new();

@@ -10,21 +10,21 @@ namespace ZU_DCMS.APPLICATION.Validators.Diagnosis
         {
             RuleFor(x => x.InternDoctorId)
                 .NotEmpty()
-                .WithMessage("معرف الطبيب مطلوب");
+                .WithMessage("Doctor ID is required");
 
             RuleFor(x => x.Dto.DiagnosisTypeId)
                    .NotEmpty()
-                   .WithMessage("نوع التشخيص غير صحيح");
+                   .WithMessage("Invalid diagnosis type");
 
             RuleFor(x => x.Dto.Complaint)
                    .NotEmpty()
-                   .WithMessage("التشخيص مطلوب")
+                   .WithMessage("Diagnosis is required")
                    .MaximumLength(1000)
-                   .WithMessage("التشخيص لازم يكون أقل من 1000 حرف");
+                   .WithMessage("Diagnosis must be less than 1000 characters");
 
             RuleFor(x => x.Dto.Notes)
                    .MaximumLength(1000)
-                   .WithMessage("الملاحظات لازم تكون أقل من 1000 حرف")
+                   .WithMessage("Notes must be less than 1000 characters")
                    .When(x => !string.IsNullOrEmpty(x.Dto.Notes));
         }
     }

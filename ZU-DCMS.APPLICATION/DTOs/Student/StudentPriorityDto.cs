@@ -72,7 +72,7 @@ namespace ZU_DCMS.APPLICATION.DTOs.Student
 
         /// <summary>
         /// Textual representation of the student's performance based on AverageCompletionDays.
-        /// E.g., "ممتاز", "جيد", "مقبول", "بطيء", "لا يوجد"
+        /// E.g., "Excellent", "Good", "Acceptable", "Slow", "None"
         /// </summary>
         public string PerformanceLabel { get; set; } = string.Empty;
 

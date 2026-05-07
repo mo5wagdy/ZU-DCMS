@@ -10,27 +10,27 @@ namespace ZU_DCMS.APPLICATION.Validators.Booking
         {
             RuleFor(x => x.PatientId)
                 .GreaterThan(0)
-                .WithMessage("معرف المريض غير صحيح");
+                .WithMessage("Invalid patient ID");
 
             RuleFor(x => x.Dto.BookingType)
                    .IsInEnum()
-                   .WithMessage("نوع الحجز غير صحيح");
+                   .WithMessage("Invalid booking type");
 
             RuleFor(x => x.Dto.PreferredDate)
-                   .NotEmpty().WithMessage("التاريخ مطلوب")
+                   .NotEmpty().WithMessage("Date is required")
                    .Must(BeWorkingDay)
-                   .WithMessage("الجمعة إجازة - اختار يوم تاني")
+                   .WithMessage("Friday is a holiday - choose another day")
                    .Must(NotBeInThePast)
-                   .WithMessage("التاريخ لازم يكون في المستقبل");
+                   .WithMessage("Date must be in the future");
 
             RuleFor(x => x.Dto.PreferredTimeSlot)
-                   .NotEmpty().WithMessage("وقت السكشن مطلوب")
+                   .NotEmpty().WithMessage("Session time is required")
                    .Matches(@"^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$")
-                   .WithMessage("الوقت المتاح: من 09:00 إلى 11:00 أو من 11:00 إلى 13:00 أو من 13:00 إلى 15:00");
+                   .WithMessage("الوقت الAvailable: من 09:00 إلى 11:00 أو من 11:00 إلى 13:00 أو من 13:00 إلى 15:00");
 
             RuleFor(x => x.Dto.PreliminaryComplaint)
                    .MaximumLength(500)
-                   .WithMessage("الشكوى لازم تكون أقل من 500 حرف")
+                   .WithMessage("Complaint must be less than 500 characters")
                    .When(x => !string.IsNullOrEmpty(x.Dto.PreliminaryComplaint));
         }
 

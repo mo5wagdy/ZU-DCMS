@@ -1,4 +1,4 @@
-﻿using ZU_DCMS.Domain.Common;
+using ZU_DCMS.Domain.Common;
 
 namespace ZU_DCMS.Domain.Entities
 {
@@ -12,5 +12,8 @@ namespace ZU_DCMS.Domain.Entities
 
         // _____________ Navigation _____________ //
         public ICollection<CaseReview> CaseReviews { get; set; } = new List<CaseReview>();
+        
+        // __ Assignments reviewed by this TA during the pre-treatment phase __ //
+        public ICollection<CaseAssignment> ReviewedAssignments { get; set; } = new List<CaseAssignment>();
     }
 }

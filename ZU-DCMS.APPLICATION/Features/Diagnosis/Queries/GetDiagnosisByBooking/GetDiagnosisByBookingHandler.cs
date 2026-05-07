@@ -33,7 +33,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetDiagnosisByBooking
 
             if (diagnosis == null)
             {
-                return Result.Failure<DiagnosisRecordDto>("التشخيص غير موجود لهذا الحجز");
+                return Result.Failure<DiagnosisRecordDto>("Diagnosis not found for this booking");
             }
 
             return Result.Success(_mapper.Map<DiagnosisRecordDto>(diagnosis));

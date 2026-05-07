@@ -41,7 +41,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Queries.GetUserById
 
                     // __ If null → return null __ //
                     if (user is null)
-                        return Result.Failure<StaffUsersDto>("المستخدم غير موجود");
+                        return Result.Failure<StaffUsersDto>("User not found");
 
                     var roles = await _identity.GetRolesAsync(query.UserId);
 

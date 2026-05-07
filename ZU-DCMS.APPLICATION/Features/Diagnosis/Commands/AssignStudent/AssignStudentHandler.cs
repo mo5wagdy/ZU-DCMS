@@ -57,14 +57,14 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
             {
                 _logger.LogWarning($"Diagnosis record {dto.DiagnosisRecordId} not found for case assignment by intern {internDoctorId}");
                 
-                return Result.Failure<CaseAssignmentDto>("سجل التشخيص غير موجود");
+                return Result.Failure<CaseAssignmentDto>("Diagnosis record not found");
             }
 
             if (diagnosis.IsAssigned)
             {
                 _logger.LogWarning($"Diagnosis record {dto.DiagnosisRecordId} is already assigned. Duplicate assignment attempted by intern {internDoctorId}");
                 
-                return Result.Failure<CaseAssignmentDto>("تم التعيين بالفعل");
+                return Result.Failure<CaseAssignmentDto>("Already assigned");
             }
 
             // _____________ AUTO-CLINIC SELECTION STEP 2: Extract ClinicId from DiagnosisRecord _____________ //
@@ -76,7 +76,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
             {
                 _logger.LogWarning($"Clinic {clinicId} is null or inactive");
                
-                return Result.Failure<CaseAssignmentDto>("العيادة غير صالحة");
+                return Result.Failure<CaseAssignmentDto>("Invalid clinic");
             }
 
             // _____________ VALIDATION STEP 2.1: Block Diagnosis Clinic (ID 1) _____________ //
@@ -84,7 +84,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
             {
                 _logger.LogWarning($"Attempted to assign student {dto.StudentId} to Diagnosis Clinic (ID 1)");
                 
-                return Result.Failure<CaseAssignmentDto>("لا يمكن تعيين الطلاب في عيادة التشخيص");
+                return Result.Failure<CaseAssignmentDto>("Cannot assign students in the diagnosis clinic");
             }
 
             // _____________ VALIDATION STEP 3: Validate InternDoctor _____________ //
@@ -95,7 +95,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
             {
                 _logger.LogWarning($"Intern doctor {internDoctorId} not found");
                
-                return Result.Failure<CaseAssignmentDto>("طبيب الامتياز غير موجود");
+                return Result.Failure<CaseAssignmentDto>("Intern doctor not found");
             }
 
             // _____________ VALIDATION STEP 4: Validate Student Basic Requirements _____________ //
@@ -106,14 +106,14 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
             {
                 _logger.LogWarning($"Student {dto.StudentId} not found or inactive");
                 
-                return Result.Failure<CaseAssignmentDto>("الطالب غير صالح");
+                return Result.Failure<CaseAssignmentDto>("Invalid student");
             }
 
             if (student.ActiveTermId is null)
             {
                 _logger.LogWarning($"Student {dto.StudentId} does not have an active term");
                
-                return Result.Failure<CaseAssignmentDto>("لا يوجد ترم نشط");
+                return Result.Failure<CaseAssignmentDto>("No active term");
             }
 
             // _____________ VALIDATION STEP 5: Academic Year Constraint _____________ //
@@ -122,7 +122,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
             {
                 _logger.LogWarning($"Student {dto.StudentId} academic year {student.AcademicYear} outside clinic range [{clinic.MinAcademicYear}-{clinic.MaxAcademicYear}]");
 
-                return Result.Failure<CaseAssignmentDto>($"الطالب في سنة دراسية غير مناسبة للعيادة (متطلب: {clinic.MinAcademicYear}-{clinic.MaxAcademicYear}, الطالب في: {student.AcademicYear})");
+                return Result.Failure<CaseAssignmentDto>($"Student is in an inappropriate academic year for the clinic (Requirement: {clinic.MinAcademicYear}-{clinic.MaxAcademicYear}, Student: {student.AcademicYear})");
             }
 
             // _____________ VALIDATION STEP 6: Unsatisfied TermRequirement Check _____________ //
@@ -139,14 +139,14 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
             {
                 _logger.LogWarning($"No TermRequirement found for student {dto.StudentId} in clinic {clinicId} for term {student.ActiveTermId}");
 
-                return Result.Failure<CaseAssignmentDto>("الطالب غير مسجل في هذه العيادة لهذا الترم");
+                return Result.Failure<CaseAssignmentDto>("Student is not registered in this clinic for this term");
             }
 
             if (termRequirement.IsSatisfied)
             {
                 _logger.LogInfo($"Student {dto.StudentId} has already satisfied clinic {clinicId} requirement");
 
-                return Result.Failure<CaseAssignmentDto>("الطالب قد أكمل متطلبات هذه العيادة");
+                return Result.Failure<CaseAssignmentDto>("Student has already satisfied this clinic's requirements");
             }
 
             // _____________ VALIDATION STEP 7: Workload Check - Student Capacity _____________ //
@@ -162,7 +162,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
             {
                 _logger.LogWarning($"Student {dto.StudentId} at capacity in clinic {clinicId}: {activeCasesCount}/{clinic.MaxCasesPerStudent}");
 
-                return Result.Failure<CaseAssignmentDto>($"الطالب في حده الأقصى من الحالات في هذه العيادة ({activeCasesCount}/{clinic.MaxCasesPerStudent})");
+                return Result.Failure<CaseAssignmentDto>($"Student is at their maximum case limit in this clinic ({activeCasesCount}/{clinic.MaxCasesPerStudent})");
             }
 
             // _____________ TRANSACTION BEGIN: All-or-Nothing Operation _____________ //
@@ -257,7 +257,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Commands.AssignStudent
                 
                 _logger.LogError($"Error assigning student {dto.StudentId} to diagnosis {dto.DiagnosisRecordId}", ex);
                 
-                return Result.Failure<CaseAssignmentDto>("فشل التعيين. حاول مرة أخرى أو تواصل مع الدعم الفني");
+                return Result.Failure<CaseAssignmentDto>("Assignment failed. Try again or contact technical support");
             }
         }
     }

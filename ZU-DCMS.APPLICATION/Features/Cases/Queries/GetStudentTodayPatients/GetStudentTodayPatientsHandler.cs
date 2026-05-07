@@ -23,7 +23,7 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Queries.GetStudentTodayPatients
         {
             var student = await _uow.Repository<Student>().GetFirstOrDefaultAsync(s => s.ApplicationUserId == request.StudentApplicationUserId);
             if (student == null)
-                return Result.Failure<List<CaseAssignmentDto>>("الطالب غير موجود");
+                return Result.Failure<List<CaseAssignmentDto>>("Student not found");
 
             // __ Find CaseAssignments that have a confirmed/delayed booking for today __ //
             var cases = await _uow.Repository<CaseAssignment>().GetListAsync(

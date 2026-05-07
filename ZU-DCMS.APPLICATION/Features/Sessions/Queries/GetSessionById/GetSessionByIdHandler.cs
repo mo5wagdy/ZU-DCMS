@@ -36,7 +36,7 @@ namespace ZU_DCMS.APPLICATION.Features.Sessions.Queries.GetSessionById
             {
                 _logger.LogWarning("Session not found for Id: {SessionId}", sessionId);
                
-                return Result.Failure<SessionDto>("السكشن غير موجود");
+                return Result.Failure<SessionDto>("Session not found");
             }
 
             _logger.LogInfo("Session found for Id: {SessionId}", sessionId);

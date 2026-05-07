@@ -10,25 +10,25 @@ namespace ZU_DCMS.APPLICATION.Validators.Admin
         {
             RuleFor(x => x.Dto.Name)
                    .NotEmpty()
-                   .WithMessage("اسم الترم مطلوب")
+                   .WithMessage("Term name is required")
                    .MaximumLength(100)
-                   .WithMessage("الاسم لازم يكون أقل من 100 حرف");
+                   .WithMessage("Name must be less than 100 characters");
 
             RuleFor(x => x.Dto.StartDate)
                    .NotEmpty()
-                   .WithMessage("تاريخ البداية مطلوب")
+                   .WithMessage("Start date is required")
                    .GreaterThan(DateTime.Today)
-                   .WithMessage("تاريخ البداية لازم يكون في المستقبل");
+                   .WithMessage("Start date must be in the future");
 
             RuleFor(x => x.Dto.EndDate)
                    .NotEmpty()
-                   .WithMessage("تاريخ النهاية مطلوب")
+                   .WithMessage("End date is required")
                    .GreaterThan(x => x.Dto.StartDate)
-                   .WithMessage("تاريخ النهاية لازم يكون بعد تاريخ البداية");
+                   .WithMessage("End date must be after start date");
 
             RuleFor(x => x.Dto.RequiredCasesCount)
                    .GreaterThan(0)
-                   .WithMessage("عدد الحالات المطلوبة لازم يكون أكبر من 0");
+                   .WithMessage("Required cases must be greater than 0");
         }
     }
 }

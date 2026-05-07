@@ -25,7 +25,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Queries.GetTermById
 
             // __ If null → return failure __ //
             if (term is null)
-                return Result.Failure<TermDto>("الترم غير موجود");
+                return Result.Failure<TermDto>("Term not found");
 
             // __ Map to DTO __ //
             return Result.Success(_mapper.Map<TermDto>(term));

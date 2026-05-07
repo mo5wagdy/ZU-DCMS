@@ -28,14 +28,14 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.SetStudentRequirements
             // __ Verify term exists __ //
             var term = await _uow.Repository<Term>().GetByIdAsync(command.TermId);
             if (term is null)
-                return Result.Failure("الترم غير موجود");
+                return Result.Failure("Term not found");
 
             // __ Verify all clinics exist __ //
             var clinicIds = command.Requirements.Select(r => r.ClinicId).ToList();
             var clinics = await _uow.Repository<Clinic>().GetListAsync(c => clinicIds.Contains(c.Id) && c.IsActive);
 
             if (clinics.Count != clinicIds.Distinct().Count())
-                return Result.Failure("بعض العيادات غير موجودة أو غير نشطة");
+                return Result.Failure("Some clinics are not found or inactive");
 
             await _uow.BeginTransactionAsync();
 
@@ -80,7 +80,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.SetStudentRequirements
             {
                 await _uow.RollbackTransactionAsync();
                 _logger.LogError(ex, "Error setting term requirements for year {Year}", command.AcademicYear);
-                return Result.Failure("حدث خطأ أثناء تحديث متطلبات الترم");
+                return Result.Failure("An error occurred while updating term requirements");
             }
         }
     }

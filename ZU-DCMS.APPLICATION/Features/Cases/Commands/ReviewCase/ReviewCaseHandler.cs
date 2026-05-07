@@ -52,7 +52,7 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.ReviewCase
             {
                 _logger.LogWarning("TA Not Found");
 
-                return Result.Failure("المعيد غير موجود");
+                return Result.Failure("Teaching assistant not found");
             }
 
             // __ Validate TA role __ //
@@ -62,18 +62,18 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.ReviewCase
             {
                 _logger.LogWarning("Cannot Review a Case By Anyone Except The TA");
 
-                return Result.Failure("المعيد فقط هو المسؤول عن مراجعة الحاله");
+                return Result.Failure("Only TA is responsible for reviewing the case");
             }
 
             // __ Fetch case __ //
             var caseAssignment = await _uow.Repository<CaseAssignment>().GetByIdAsync(dto.CaseAssignmentId);
 
             if (caseAssignment is null) 
-                return Result.Failure("الحاله غير موجوده");
+                return Result.Failure("Case not found");
 
             // __ Ensure case is pending review __ //
             if (caseAssignment.Status != CaseStatus.PendingReview)
-                return Result.Failure("الحاله لم تكتمل بعد");
+                return Result.Failure("Case is not completed yet");
 
             await _uow.BeginTransactionAsync();
 
@@ -120,7 +120,7 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.ReviewCase
 
                         await _uow.RollbackTransactionAsync();
 
-                        return Result.Failure<CaseSessionDto>("حدث خطأ أثناء إتمام الحاله");
+                        return Result.Failure<CaseSessionDto>("An error occurred while completing the case");
                     }
                 }
                 else
@@ -152,7 +152,7 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.ReviewCase
                 
                 await _uow.RollbackTransactionAsync();
                 
-                return Result.Failure("حدث خطأ أثناء المراجعة");
+                return Result.Failure("An error occurred during review");
             }
         }
     }

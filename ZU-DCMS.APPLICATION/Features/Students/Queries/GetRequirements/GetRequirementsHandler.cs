@@ -53,7 +53,7 @@ namespace ZU_DCMS.APPLICATION.Features.Students.Queries.GetRequirements
                     if (!studentExist)
                     {
                         _logger.LogWarning("Error while fetcheing student data");
-                        return Result.Failure<List<StudentRequirementDto>>("الطالب غير موجود");
+                        return Result.Failure<List<StudentRequirementDto>>("Student not found");
                     }
 
                     // __ Fetching requirement for the student __ //
@@ -69,7 +69,7 @@ namespace ZU_DCMS.APPLICATION.Features.Students.Queries.GetRequirements
                     {
                         _logger.LogWarning("Student Requirements Not Found");
 
-                        return Result.Failure<List<StudentRequirementDto>>("لا يوجد متطلبات لهذا الطالب");
+                        return Result.Failure<List<StudentRequirementDto>>("None متطلبات لهذا الطالب");
                     }
 
                     // __ Mapping to DTO __ //

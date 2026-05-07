@@ -10,29 +10,29 @@ namespace ZU_DCMS.APPLICATION.Validators.Admin
         {
             RuleFor(x => x.StudentId)
                 .GreaterThan(0)
-                .WithMessage("الطالب مطلوب");
+                .WithMessage("Student is required");
 
             RuleFor(x => x.TermId)
                 .GreaterThan(0)
-                .WithMessage("الفصل الدراسي مطلوب");
+                .WithMessage("Term is required");
 
             RuleFor(x => x.AdminId)
                 .NotEmpty()
-                .WithMessage("معرف الموظف مطلوب");
+                .WithMessage("Employee ID is required");
 
             RuleFor(x => x.Requirements)
                 .NotNull()
-                .WithMessage("قائمة المتطلبات مطلوبة");
+                .WithMessage("Requirements list is required");
 
             RuleForEach(x => x.Requirements).ChildRules(req =>
             {
                 req.RuleFor(x => x.ClinicId)
                        .GreaterThan(0)
-                       .WithMessage("العيادة مطلوبة");
+                       .WithMessage("Clinic is required");
 
                 req.RuleFor(x => x.RequiredCount)
                        .GreaterThanOrEqualTo(0)
-                       .WithMessage("عدد الحالات المطلوبة لازم يكون 0 أو أكبر");
+                       .WithMessage("Required cases must be 0 or greater");
             });
         }
     }

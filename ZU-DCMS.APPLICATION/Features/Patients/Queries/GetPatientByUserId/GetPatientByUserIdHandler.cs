@@ -40,7 +40,7 @@ namespace ZU_DCMS.APPLICATION.Features.Patients.Queries.GetPatientByUserId
             {
                 _logger.LogWarning("Patient not found with User ID: {UserId}", userId);
                 
-                return Result.Failure<PatientDto>("المريض غير موجود");
+                return Result.Failure<PatientDto>("Patient not found");
             }
             
             _logger.LogInfo("Patient found: {FullName} (User ID: {UserId})", patient.FullName, userId);

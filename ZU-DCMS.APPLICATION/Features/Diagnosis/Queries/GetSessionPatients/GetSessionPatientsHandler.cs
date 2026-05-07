@@ -50,7 +50,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetSessionPatients
             {
                 _logger.LogWarning("Session {SessionId} not found for intern {InternDoctorId}", sessionId, internDoctorId);
             
-                return Result.Failure<PagedResult<BookingForDiagnosisDto>>("السكشن غير موجود");
+                return Result.Failure<PagedResult<BookingForDiagnosisDto>>("Session not found");
             }
 
             // __ Validate session date (Allow past sessions, block future ones) __ //
@@ -58,7 +58,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetSessionPatients
             {
                 _logger.LogWarning("Intern {InternDoctorId} attempted to access future session {SessionId} for date {SessionDate}", internDoctorId, sessionId, session.Date);
                
-                return Result.Failure<PagedResult<BookingForDiagnosisDto>>("لا يمكن الوصول لسكشن في المستقبل");
+                return Result.Failure<PagedResult<BookingForDiagnosisDto>>("Cannot access a session in the future");
             }
 
             // __ If session is today, ensure it has started __ //
@@ -66,7 +66,7 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Queries.GetSessionPatients
             {
                 _logger.LogInfo("Intern {InternDoctorId} attempted to access session {SessionId} before start time {StartTime}", internDoctorId, sessionId, session.StartTime);
                
-                return Result.Failure<PagedResult<BookingForDiagnosisDto>>("السكشن لم يبدأ بعد");
+                return Result.Failure<PagedResult<BookingForDiagnosisDto>>("Session hasn't started yet");
             }
             _logger.LogInfo("Fetching confirmed bookings for SessionId: {SessionId}", sessionId);
             

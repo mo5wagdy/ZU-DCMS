@@ -47,7 +47,7 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CancelBooking
             {
                 _logger.LogWarning("Booking not found for BookingId: {BookingId}", command.BookingId);
             
-                return Result.Failure("الحجز غير موجود");
+                return Result.Failure("Booking not found");
             }
 
             // __ Check if the booking belongs to the patient __ //
@@ -55,7 +55,7 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CancelBooking
             {
                 _logger.LogWarning("Unauthorized cancellation attempt for BookingId: {BookingId} by PatientId: {PatientId}", command.BookingId, command.PatientId);
                 
-                return Result.Failure("غير مصرح");
+                return Result.Failure("Unauthorized");
             }
 
             // __ Transaction for cancellation process __ //
@@ -95,7 +95,7 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CancelBooking
 
                     _logger.LogWarning("Failed to release slot for SessionId: {SessionId}, Type: {Type}", booking.SessionId, booking.BookingType);
 
-                    return Result.Failure("فشل تحرير مكان الحجز");
+                    return Result.Failure("Failed to release booking slot");
                 }
 
                 // __ Save changes to database __ //
@@ -116,7 +116,7 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CancelBooking
                
                 _logger.LogError("Error cancelling booking", ex);
                 
-                return Result.Failure("فشل الإلغاء");
+                return Result.Failure("Cancellation failed");
             }
         }
     }

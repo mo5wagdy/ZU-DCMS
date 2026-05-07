@@ -40,7 +40,7 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Queries.GetBookingById
             {
                 _logger.LogWarning("Booking not found for BookingId: {BookingId}", query.BookingId);
                
-                return Result.Failure<BookingDto>("الحجز غير موجود");
+                return Result.Failure<BookingDto>("Booking not found");
             }
 
             _logger.LogInfo("Booking details fetched for BookingId: {BookingId}", query.BookingId);

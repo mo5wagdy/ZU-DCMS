@@ -44,7 +44,7 @@ namespace ZU_DCMS.APPLICATION.Features.Sessions.Commands.GenerateSessions
             if (config is null)
             {
                 _logger.LogError("Session configuration is missing");
-                return Result.Failure<List<SessionDto>>("إعدادات السكاشن غير موجودة");
+                return Result.Failure<List<SessionDto>>("Session settings not found");
             }
 
             for (int i = 0; i < daysCount; i++)

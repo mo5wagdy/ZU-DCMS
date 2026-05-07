@@ -6,10 +6,13 @@ using ZU_DCMS.APPLICATION.DTOs.Case;
 using ZU_DCMS.APPLICATION.DTOs.Student;
 using ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress;
 using ZU_DCMS.APPLICATION.Features.Cases.Commands.ReviewCase;
+using ZU_DCMS.APPLICATION.Features.Cases.Commands.ReviewAssignment;
 using ZU_DCMS.APPLICATION.Features.Cases.Commands.SubmitCaseForReview;
 using ZU_DCMS.APPLICATION.Features.Cases.Queries.GetCaseById;
 using ZU_DCMS.APPLICATION.Features.Cases.Queries.GetCaseReviews;
 using ZU_DCMS.APPLICATION.Features.Cases.Queries.GetCasesForReview;
+using ZU_DCMS.APPLICATION.Features.Cases.Queries.GetPendingAssignments;
+using ZU_DCMS.APPLICATION.Features.Cases.Queries.GetReviewedAssignments;
 using ZU_DCMS.APPLICATION.Features.Cases.Queries.GetReviewedCases;
 using ZU_DCMS.APPLICATION.Features.Cases.Queries.GetStudentCases;
 using ZU_DCMS.APPLICATION.Features.Cases.Queries.GetStudentProgress;
@@ -129,6 +132,50 @@ namespace ZU_DCMS.API.Endpoints.Cases
             .RequireAuthorization("StaffReviewPolicy")
             .WithName("GetReviewedCases")
             .WithSummary("Returns all cases that a specific Teaching Assistant has already reviewed")
+            .Produces<ApiResponse<List<CaseAssignmentDto>>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<List<CaseAssignmentDto>>>(StatusCodes.Status400BadRequest);
+
+            // ==== PRE-TREATMENT ASSIGNMENT REVIEWS ====
+            
+            // 5.2 Look up queue for assignments pending TA approval
+            group.MapGet("/pending-assignments", async ([FromServices] ISender sender) =>
+            {
+                var result = await sender.Send(new GetPendingAssignmentsQuery());
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<List<CaseAssignmentDto>>.Success(result.Value, "Pending assignments mapped."))
+                    : Results.BadRequest(ApiResponse<List<CaseAssignmentDto>>.Failure(result.Errors, "Failed to map pending assignments."));
+            })
+            .RequireAuthorization("StaffReviewPolicy")
+            .WithName("GetPendingAssignments")
+            .WithSummary("Retrieves all auto-assigned cases currently pending instructor approval to start treatment")
+            .Produces<ApiResponse<List<CaseAssignmentDto>>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<List<CaseAssignmentDto>>>(StatusCodes.Status400BadRequest);
+
+            // 5.3 Submit a TA decision on a pending assignment
+            group.MapPost("/assignment-review", async ([FromServices] ISender sender, [FromBody] ReviewAssignmentCommand command) =>
+            {
+                var result = await sender.Send(command);
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<string>.Success(string.Empty, "Assignment review processed successfully."))
+                    : Results.BadRequest(ApiResponse<string>.Failure(result.Errors, "Failed to process assignment review."));
+            })
+            .RequireAuthorization("StaffReviewPolicy")
+            .WithName("ReviewAssignment")
+            .WithSummary("Approves, escalates, or transfers a pending auto-assigned student case")
+            .Produces<ApiResponse<string>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<string>>(StatusCodes.Status400BadRequest);
+
+            // 5.4 Reviewed assignments history (assignments a TA has already approved, escalated, or transferred)
+            group.MapGet("/reviewed-assignments/{taUserId}", async ([FromServices] ISender sender, string taUserId) =>
+            {
+                var result = await sender.Send(new GetReviewedAssignmentsQuery(taUserId));
+                return result.IsSuccess
+                    ? Results.Ok(ApiResponse<List<CaseAssignmentDto>>.Success(result.Value, "Reviewed assignments retrieved successfully."))
+                    : Results.BadRequest(ApiResponse<List<CaseAssignmentDto>>.Failure(result.Errors, "Failed to retrieve reviewed assignments."));
+            })
+            .RequireAuthorization("StaffReviewPolicy")
+            .WithName("GetReviewedAssignments")
+            .WithSummary("Returns all assignments that a specific Teaching Assistant has already reviewed")
             .Produces<ApiResponse<List<CaseAssignmentDto>>>(StatusCodes.Status200OK)
             .Produces<ApiResponse<List<CaseAssignmentDto>>>(StatusCodes.Status400BadRequest);
 

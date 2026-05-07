@@ -90,14 +90,14 @@ namespace ZU_DCMS.APPLICATION.Common.Token
             var stored = await _uow.Repository<RefreshToken>().GetFirstOrDefaultAsync(t => t.Token == refreshToken);
 
             if (stored == null || !stored.IsActive)
-                return TokenResult.Fail(new[] { "الـ Token غير صالح" });
+                return TokenResult.Fail(new[] { "Invalid token" });
 
             if (stored.IsRevoked)
-                return TokenResult.Fail(new[] { "تم استخدام توكن قديم" });
+                return TokenResult.Fail(new[] { "An old token was used" });
 
             var user = await _identity.FindByIdAsync(stored.UserId);
             if (user == null || !user.IsActive)
-                return TokenResult.Fail(new[] { "الحساب غير موجود أو موقوف" });
+                return TokenResult.Fail(new[] { "Account not found or suspended" });
 
             // __ Begin a database transaction to revoke the old refresh token and generate a new access token and refresh token atomically __ //
             await _uow.BeginTransactionAsync();

@@ -25,7 +25,7 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Queries.GetCasesForReview
             var activeTerm = await _uow.Repository<Term>().GetFirstOrDefaultAsync(t => t.IsActive);
 
             if (activeTerm == null)
-                return Result.Failure<List<CaseAssignmentDto>>("لا يوجد ترم نشط");
+                return Result.Failure<List<CaseAssignmentDto>>("No active term");
 
             // __ Get only pending cases __ //
             var cases = await _uow.Repository<CaseAssignment>().GetListAsync

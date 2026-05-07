@@ -56,7 +56,7 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
             {
                 _logger.LogWarning("Patient not found for PatientId: {PatientId}", patientId);
                 
-                return Result.Failure<BookingDto>("المريض غير موجود");
+                return Result.Failure<BookingDto>("Patient not found");
             }
 
             // __ Prevent duplicate active bookings per patient (FollowUp has its own validation below) __ //
@@ -73,7 +73,7 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
             {
                 _logger.LogWarning("Patient {PatientId} already has an active booking", patientId);
                 
-                return Result.Failure<BookingDto>("لديك حجز نشط بالفعل");
+                return Result.Failure<BookingDto>("You already have an active booking");
             }
 
             // __ Prevent New booking if patient has an active case __ //
@@ -89,7 +89,7 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
                          
                 if (hasActiveCase)
                 {
-                    return Result.Failure<BookingDto>("لديك حالة قيد العلاج، يجب حجز موعد متابعة بدلاً من حجز جديد");
+                    return Result.Failure<BookingDto>("You have a case in progress, you must book a follow-up appointment instead of a new one");
                 }
             }
 
@@ -111,21 +111,21 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
                     );
 
                 if (lastCase is null)
-                    return Result.Failure<BookingDto>("لا يمكن حجز متابعة بدون حالة علاجية مسبقة");
+                    return Result.Failure<BookingDto>("Cannot book a follow-up without a previous treatment case");
 
                 lastSession = lastCase.Sessions
                     .OrderByDescending(s => s.SessionDate)
                     .FirstOrDefault();
 
                 if (lastSession is null || !lastSession.HasFollowUp)
-                    return Result.Failure<BookingDto>("لا توجد متابعة مطلوبة لحالتك الحالية");
+                    return Result.Failure<BookingDto>("No follow-up required for your current case");
 
                 followUpClinicId = lastCase.ClinicId;
             }
 
             // __ Validate time slot format __ //
             if (!TimeSpan.TryParse(dto.PreferredTimeSlot, out var time))
-                return Result.Failure<BookingDto>("صيغة الوقت غير صحيحة");
+                return Result.Failure<BookingDto>("Invalid time format");
 
             // __ Find session for preferred date and time slot __ //
             var sessionResult = await _uow.Repository<Session>().GetFirstOrDefaultAsync
@@ -141,7 +141,7 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
             {
                 _logger.LogWarning("Session not found or ended for PreferredDate: {PreferredDate} and TimeSlot: {TimeSlot}", dto.PreferredDate, dto.PreferredTimeSlot);
                 
-                return Result.Failure<BookingDto>("الميعاد غير متاح أو انتهى وقته");
+                return Result.Failure<BookingDto>("Appointment not available or time has passed");
             }
 
             // __ Session found, proceed with booking creation __ //
@@ -184,7 +184,7 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
 
                     _logger.LogWarning("Failed to reserve slot for SessionId: {SessionId}, BookingType: {Type}", session.Id, dto.BookingType);
 
-                    return Result.Failure<BookingDto>("السكشن غير متاح أو تم حجزه للتو، حاول اختيار موعد آخر");
+                    return Result.Failure<BookingDto>("Session not available or just booked, try choosing another time");
                 }
 
                 // __ Create booking entity __ //
@@ -240,7 +240,7 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Commands.CreateBooking
                
                 _logger.LogError("Error creating booking", ex);
                 
-                return Result.Failure<BookingDto>("حدث خطأ أثناء الحجز");
+                return Result.Failure<BookingDto>("An error occurred during booking");
             }
         }
     }

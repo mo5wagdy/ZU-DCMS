@@ -11,41 +11,41 @@ namespace ZU_DCMS.APPLICATION.Validators.Admin
         {
             RuleFor(x => x.Dto.Username)
                    .NotEmpty()
-                   .WithMessage("اسم المستخدم مطلوب")
+                   .WithMessage("Username is required")
                    .MinimumLength(3)
-                   .WithMessage("لازم 3 حروف على الأقل")
+                   .WithMessage("Must be at least 3 characters")
                    .MaximumLength(50)
-                   .WithMessage("لازم أقل من 50 حرف")
+                   .WithMessage("Must be less than 50 characters")
                    .Matches(@"^[a-zA-Z0-9._-]+$")
-                   .WithMessage("يقبل حروف وأرقام و . _ - فقط");
+                   .WithMessage("Accepts only letters, numbers, and . _ -");
 
             RuleFor(x => x.Dto.FullName)
                    .NotEmpty()
-                   .WithMessage("الاسم مطلوب")
+                   .WithMessage("Name is required")
                    .MaximumLength(100)
-                   .WithMessage("لازم أقل من 100 حرف");
+                   .WithMessage("Must be less than 100 characters");
 
             RuleFor(x => x.Dto.Email)
                    .NotEmpty()
-                   .WithMessage("الإيميل مطلوب")
+                   .WithMessage("Email is required")
                    .EmailAddress()
-                   .WithMessage("الإيميل غير صحيح");
+                   .WithMessage("Invalid email");
 
             RuleFor(x => x.Dto.Password)
                    .NotEmpty()
-                   .WithMessage("كلمة المرور مطلوبه")
+                   .WithMessage("Password is required")
                    .MinimumLength(8)
-                   .WithMessage("لازم 8 حروف على الأقل");
+                   .WithMessage("Must be at least 8 characters");
 
             RuleFor(x => x.Dto.Role)
                    .NotEmpty()
-                   .WithMessage("الدور مطلوب")
+                   .WithMessage("Role is required")
                    .Must(BeValidStaffRole)
-                   .WithMessage("الدور غير صحيح");
+                   .WithMessage("Invalid role");
 
             RuleFor(x => x.Dto.AcademicYear)
                    .InclusiveBetween(1, 5)
-                   .WithMessage("السنة الدراسية لازم تكون بين 1 و 5")
+                   .WithMessage("Academic year must be between 1 and 5")
                    .When(x => x.Dto.Role == UserRoles.Student);
 
         }

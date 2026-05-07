@@ -32,7 +32,7 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Queries.ForgotPhone
             // __ If Not Found __ //
             if (patient is null)
             {
-                return Result.Failure<ForgotPhoneResponseDto>("البيانات غير صحيحه");
+                return Result.Failure<ForgotPhoneResponseDto>("Invalid data");
             }
 
             // __ Fetching Identity User For The Patient __ //
@@ -40,7 +40,7 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Queries.ForgotPhone
 
             if (user is null)
             {
-                return Result.Failure<ForgotPhoneResponseDto>("لا يوجد شخص مسجل بالرقم القومي هذا");
+                return Result.Failure<ForgotPhoneResponseDto>("None شخص مسجل بالرقم القومي هذا");
             }
 
             // __ Checking phone number __ //
@@ -48,7 +48,7 @@ namespace ZU_DCMS.APPLICATION.Features.Auth.Queries.ForgotPhone
 
             if (phoneNumber is null)
             {
-                return Result.Failure<ForgotPhoneResponseDto>("لا يوجد رقم مسجل");
+                return Result.Failure<ForgotPhoneResponseDto>("None رقم مسجل");
             }
 
             // __ Masking Phone Number __ //

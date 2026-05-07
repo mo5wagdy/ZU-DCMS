@@ -32,13 +32,13 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.SetStudentRequirements
             var student = await _uow.Repository<Student>().GetByIdAsync(command.StudentId);
 
             if (student is null)
-                return Result.Failure("الطالب غير موجود");
+                return Result.Failure("Student not found");
 
             // __ Verify term exists __ //
             var term = await _uow.Repository<Term>().GetByIdAsync(command.TermId);
 
             if (term is null)
-                return Result.Failure("الترم غير موجود");
+                return Result.Failure("Term not found");
 
             // __ Verify all clinics exist __ //
             var clinicIds = command.Requirements.Select(r => r.ClinicId).ToList();
@@ -46,11 +46,11 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.SetStudentRequirements
             var clinics = await _uow.Repository<Clinic>().GetListAsync(c => clinicIds.Contains(c.Id) && c.IsActive);
 
             if (clinics.Count != clinicIds.Distinct().Count())
-                return Result.Failure("بعض العيادات غير موجودة أو غير نشطة");
+                return Result.Failure("Some clinics are not found or inactive");
 
             // __ Block Diagnosis Clinic (ID: 1) from having student requirements __ //
             if (clinicIds.Contains(1))
-                return Result.Failure("لا يمكن إضافة متطلبات لعيادة التشخيص");
+                return Result.Failure("Cannot add requirements to the diagnosis clinic");
 
             // __ Validate Student's Academic Year against each Clinic's constraints __ //
             foreach (var reqDto in command.Requirements)
@@ -59,7 +59,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.SetStudentRequirements
                 
                 if (clinic != null && (student.AcademicYear < clinic.MinAcademicYear || student.AcademicYear > clinic.MaxAcademicYear))
                 {
-                    return Result.Failure($"العيادة '{clinic.Name}' غير متاحة لطلاب السنة {student.AcademicYear} (المطلوب: {clinic.MinAcademicYear}-{clinic.MaxAcademicYear})");
+                    return Result.Failure($"Clinic '{clinic.Name}' is not available for year {student.AcademicYear} students (Required: {clinic.MinAcademicYear}-{clinic.MaxAcademicYear})");
                 }
             }
 
@@ -109,7 +109,7 @@ namespace ZU_DCMS.APPLICATION.Features.Admin.Commands.SetStudentRequirements
 
                 _logger.LogError(ex, "Error setting requirements for student {StudentId}", command.StudentId);
                 
-                return Result.Failure("حدث خطأ أثناء تحديث المتطلبات");
+                return Result.Failure("An error occurred while updating requirements");
             }
         }
     }

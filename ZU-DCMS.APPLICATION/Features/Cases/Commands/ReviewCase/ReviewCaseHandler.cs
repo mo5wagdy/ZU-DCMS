@@ -66,7 +66,11 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.ReviewCase
             }
 
             // __ Fetch case __ //
-            var caseAssignment = await _uow.Repository<CaseAssignment>().GetByIdAsync(dto.CaseAssignmentId);
+            var caseAssignment = await _uow.Repository<CaseAssignment>().GetFirstOrDefaultAsync(
+                c => c.Id == dto.CaseAssignmentId,
+                true,
+                c => c.DiagnosisRecord
+            );
 
             if (caseAssignment is null) 
                 return Result.Failure("Case not found");
@@ -101,6 +105,19 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.ReviewCase
 
                     _uow.Repository<CaseAssignment>().Update(caseAssignment);
 
+                    // __ Mark associated bookings as completed __ //
+                    var relatedBookings = await _uow.Repository<Booking>().GetListAsync(
+                        b => (b.CaseAssignmentId == caseAssignment.Id || b.Id == caseAssignment.DiagnosisRecord.BookingId) 
+                             && (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Delayed),
+                        true
+                    );
+
+                    foreach (var b in relatedBookings)
+                    {
+                        b.Status = BookingStatus.Completed;
+                        _uow.Repository<Booking>().Update(b);
+                    }
+
                     _logger.LogInfo("Incrementing requirement for student {StudentId}", caseAssignment.StudentId);
 
                     // __ Atomically Increamenting student requirement for the assigned case __ //
@@ -113,14 +130,11 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.ReviewCase
 
                     var rows = await _sql.ExecuteAsync(sql, new { caseAssignment.StudentId, caseAssignment.ClinicId, caseAssignment.TermId });
 
-                    // __ If no changes rollback and return failure __ //
+                    // __ We do NOT rollback if rows == 0 because global requirements calculate count dynamically 
+                    // based on CaseAssignment Status being Approved. __ //
                     if (rows == 0)
                     {
-                        _logger.LogWarning("No Rows Affected");
-
-                        await _uow.RollbackTransactionAsync();
-
-                        return Result.Failure<CaseSessionDto>("An error occurred while completing the case");
+                        _logger.LogInfo("No TermRequirements row updated (User may be using Global Templates). Dynamic count will handle it.");
                     }
                 }
                 else

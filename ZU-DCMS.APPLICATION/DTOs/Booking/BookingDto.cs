@@ -15,5 +15,7 @@ namespace ZU_DCMS.APPLICATION.DTOs.Booking
         public TimeSpan SessionStartTime { get; set; }
         public TimeSpan SessionEndTime { get; set; }
         public string? ClinicName { get; set; }
+        public bool HasDiagnosisRecord { get; set; }
+        public bool HasCaseAssignment { get; set; }
     }
 }

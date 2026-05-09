@@ -15,7 +15,9 @@ namespace ZU_DCMS.APPLICATION.Mapping
                      .ForMember(d => d.SessionDate, o => o.MapFrom(s => s.Session.Date))
                      .ForMember(d => d.SessionStartTime, o => o.MapFrom(s => s.Session.StartTime))
                      .ForMember(d => d.SessionEndTime, o => o.MapFrom(s => s.Session.EndTime))
-                     .ForMember(d => d.ClinicName, o => o.MapFrom(s => s.Clinic != null ? s.Clinic.Name : null));
+                     .ForMember(d => d.ClinicName, o => o.MapFrom(s => s.Clinic != null ? s.Clinic.Name : null))
+                     .ForMember(d => d.HasDiagnosisRecord, o => o.MapFrom(s => s.DiagnosisRecord != null))
+                     .ForMember(d => d.HasCaseAssignment, o => o.MapFrom(s => s.CaseAssignmentId != null));
         }
     }
 }

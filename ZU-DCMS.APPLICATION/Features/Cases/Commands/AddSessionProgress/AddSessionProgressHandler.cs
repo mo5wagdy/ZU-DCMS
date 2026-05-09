@@ -90,6 +90,25 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
                 return Result.Failure<CaseSessionDto>("Case is not in progress");
             }
 
+            // __ Validate that the patient has a booking for today (New or Follow-up) __ //
+            var egyptTime = DateTime.UtcNow.AddHours(3);
+            var today = egyptTime.Date;
+            var tomorrow = today.AddDays(1);
+            var patientId = assignment.DiagnosisRecord.Booking.PatientId;
+            
+            var bookingCount = await _uow.Repository<Booking>().CountAsync(
+                b => b.PatientId == patientId && 
+                     b.Session.Date >= today && b.Session.Date < tomorrow &&
+                     (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Delayed) &&
+                     (b.CaseAssignmentId == assignment.Id || b.Id == assignment.DiagnosisRecord.BookingId)
+            );
+
+            if (bookingCount == 0)
+            {
+                _logger.LogWarning("Patient {PatientId} does not have a valid booking for today for case {CaseId}", patientId, dto.CaseAssignmentId);
+                return Result.Failure<CaseSessionDto>("المريض ليس لديه حجز (متابعة أو جديد) مسجل لهذا اليوم. يجب على المريض حجز موعد أولاً.");
+            }
+
             // __ Validates that all selected procedures are valid and belong to the clinic associated with the case assignment __ //
             var validCount = await _uow.Repository<ClinicProcedure>().CountAsync
                 (

@@ -42,15 +42,46 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Engine
                     s => s.CaseAssignments
                 );
 
+                // __ 2.5. Load global requirement templates for fallback __ //
+                var globalRequirements = await _uow.Repository<TermRequirement>().GetListAsync(
+                    r => r.StudentId == null && r.ClinicId == clinic.Id && !r.IsDeleted
+                );
+
                 // __ 3. Filter students who haven't satisfied their requirements in this clinic __ //
-                var eligibleStudents = studentsWithRequirements
-                    .Select(s => new
+                // __ Check individual requirements first, fallback to global templates __ //
+                var eligibleStudents = new List<(Student Student, TermRequirement Requirement)>();
+
+                foreach (var s in studentsWithRequirements)
+                {
+                    // Try individual requirement first
+                    var req = s.TermRequirements.FirstOrDefault(r => r.ClinicId == clinic.Id && r.TermId == s.ActiveTermId);
+
+                    // Fallback to global template if no individual requirement exists
+                    if (req == null)
                     {
-                        Student = s,
-                        Requirement = s.TermRequirements.FirstOrDefault(r => r.ClinicId == clinic.Id && r.TermId == s.ActiveTermId)
-                    })
-                    .Where(x => x.Requirement != null && !x.Requirement.IsSatisfied)
-                    .ToList();
+                        var globalReq = globalRequirements.FirstOrDefault(r => r.AcademicYear == s.AcademicYear && r.TermId == s.ActiveTermId);
+                        if (globalReq != null)
+                        {
+                            // Calculate completed count dynamically for global templates
+                            var completedCount = s.CaseAssignments.Count(ca => ca.ClinicId == clinic.Id && ca.TermId == s.ActiveTermId && ca.Status == CaseStatus.Approved);
+                            
+                            // Create a virtual requirement to evaluate eligibility
+                            req = new TermRequirement
+                            {
+                                ClinicId = clinic.Id,
+                                TermId = globalReq.TermId,
+                                RequiredCount = globalReq.RequiredCount,
+                                CompletedCount = completedCount,
+                                AcademicYear = s.AcademicYear
+                            };
+                        }
+                    }
+
+                    if (req != null && !req.IsSatisfied)
+                    {
+                        eligibleStudents.Add((s, req));
+                    }
+                }
 
                 if (!eligibleStudents.Any())
                 {
@@ -99,10 +130,10 @@ namespace ZU_DCMS.APPLICATION.Features.Diagnosis.Engine
                     return new
                     {
                         x.Student.Id,
-                        Priority = x.Requirement!.Priority,            // 1 = Highest Priority
-                        SpeedScore = averageCompletionDays,           // Lower is better (faster)
-                        x.ActiveCasesInClinic,                        // Lower is better
-                        LastAssigned = lastAssignedAt                 // Older date is better
+                        Priority = x.Requirement.Priority,              // 1 = Highest Priority
+                        SpeedScore = averageCompletionDays,             // Lower is better (faster)
+                        x.ActiveCasesInClinic,                          // Lower is better
+                        LastAssigned = lastAssignedAt                   // Older date is better
                     };
                 })
                 .OrderBy(x => x.Priority)                // __ Primary filter: Requirement priority __ //

@@ -57,7 +57,7 @@ namespace ZU_DCMS.APPLICATION.Features.Bookings.Queries.GetPatientBookings
                             b => b.PatientId == query.PatientId,
                             true,
                             q => q.OrderByDescending(b => b.CreatedAt),
-                            b => b.Session
+                            b => b.Session, b => b.Clinic, b => b.DiagnosisRecord
                         );
 
                     // __ Map to DTOs __ //

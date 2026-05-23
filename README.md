@@ -37,19 +37,19 @@ It's a **smart orchestration engine** that connects:
 ## 🎬 System in Action
 
 ### Patient Signup and Diagnostic Booking
-![Patient Booking](https://github.com/mo5wagdy/ZU-DCMS/raw/master/screen-recordings/Patientsignupandbookingadiagnosticsession-ezgif.com-resize.gif)
+![Patient Booking](screen-recordings/Patientsignupandbookingadiagnosticsession-ezgif.com-resize.gif)
 
 ### Diagnosing the Patient's Condition
-![Patient Diagnosis](https://github.com/mo5wagdy/ZU-DCMS/raw/master/screen-recordings/Diagnosing%20the%20patient's%20condition.gif)
+![Patient Diagnosis](screen-recordings/Diagnosing%20the%20patient's%20condition.gif)
 
 ### Student Case Completion
-![Student Case Work](https://github.com/mo5wagdy/ZU-DCMS/raw/master/screen-recordings/The%20student%20completes%20their%20work%20on%20the%20case.gif)
+![Student Case Work](screen-recordings/The%20student%20completes%20their%20work%20on%20the%20case.gif)
 
 ### TA Reviews Student Case Assignment
-![TA Review Assignment](https://github.com/mo5wagdy/ZU-DCMS/raw/master/screen-recordings/TA%20reviews%20the%20student's%20case%20assignment.gif)
+![TA Review Assignment](screen-recordings/TA%20reviews%20the%20student's%20case%20assignment.gif)
 
 ### Teaching Assistant Reviews Treated Cases
-![TA Review Cases](https://github.com/mo5wagdy/ZU-DCMS/raw/master/screen-recordings/Teaching%20assistant's%20review%20of%20the%20treated%20cases.gif)
+![TA Review Cases](screen-recordings/Teaching%20assistant's%20review%20of%20the%20treated%20cases.gif)
 
 ---
 

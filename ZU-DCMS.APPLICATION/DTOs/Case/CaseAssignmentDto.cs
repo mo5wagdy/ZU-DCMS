@@ -8,6 +8,7 @@ namespace ZU_DCMS.APPLICATION.DTOs.Case
     {
         public int Id { get; set; }
         public string PatientName { get; set; } = string.Empty;
+        public string PatientComplaint { get; set; } = string.Empty;
 
         // __ Clinic (bilingual) __ //
         public int ClinicId { get; set; }

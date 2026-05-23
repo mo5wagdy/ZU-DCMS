@@ -100,7 +100,8 @@ namespace ZU_DCMS.APPLICATION.Features.Cases.Commands.AddSessionProgress
                 b => b.PatientId == patientId && 
                      b.Session.Date >= today && b.Session.Date < tomorrow &&
                      (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Delayed) &&
-                     (b.CaseAssignmentId == assignment.Id || b.Id == assignment.DiagnosisRecord.BookingId)
+                     (b.CaseAssignmentId == assignment.Id || b.Id == assignment.DiagnosisRecord.BookingId),
+                false
             );
 
             if (!bookingsToday.Any())

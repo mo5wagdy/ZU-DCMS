@@ -12,6 +12,7 @@ namespace ZU_DCMS.APPLICATION.Mapping
             // => CaseAssignment → CaseAssignmentDto
             CreateMap<CaseAssignment, CaseAssignmentDto>()
                      .ForMember(d => d.PatientName,           o => o.MapFrom(s => s.DiagnosisRecord!.Booking!.Patient!.FullName))
+                     .ForMember(d => d.PatientComplaint,      o => o.MapFrom(s => s.DiagnosisRecord!.Complaint))
                      .ForMember(d => d.ClinicName,            o => o.MapFrom(s => s.Clinic!.NameAr != "" ? s.Clinic.NameAr : s.Clinic!.Name))
                      .ForMember(d => d.ClinicNameEn,          o => o.MapFrom(s => s.Clinic!.NameEn != "" ? s.Clinic.NameEn : s.Clinic!.Name))
                      .ForMember(d => d.Diagnosis,             o => o.MapFrom(s => s.DiagnosisRecord!.DiagnosisType!.NameAr))

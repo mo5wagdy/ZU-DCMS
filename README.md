@@ -36,20 +36,20 @@ It's a **smart orchestration engine** that connects:
 
 ## 🎬 System in Action
 
-### Dashboard Overview
-![Dashboard Demo](https://via.placeholder.com/1200x600?text=Admin+Dashboard+Overview)
+### Patient Signup and Diagnostic Booking
+![Patient Booking](https://github.com/mo5wagdy/ZU-DCMS/raw/master/screen-recordings/Patientsignupandbookingadiagnosticsession-ezgif.com-resize.gif)
 
-### Patient Booking
-![Booking System](https://via.placeholder.com/1200x600?text=Patient+Booking+System)
+### Diagnosing the Patient's Condition
+![Patient Diagnosis](https://github.com/mo5wagdy/ZU-DCMS/raw/master/screen-recordings/Diagnosing%20the%20patient's%20condition.gif)
 
-### Case Distribution
-![Case Assignment](https://via.placeholder.com/1200x600?text=Smart+Case+Distribution)
+### Student Case Completion
+![Student Case Work](https://github.com/mo5wagdy/ZU-DCMS/raw/master/screen-recordings/The%20student%20completes%20their%20work%20on%20the%20case.gif)
 
-### Student Progress Tracking
-![Student Dashboard](https://via.placeholder.com/1200x600?text=Student+Progress+Tracking)
+### TA Reviews Student Case Assignment
+![TA Review Assignment](https://github.com/mo5wagdy/ZU-DCMS/raw/master/screen-recordings/TA%20reviews%20the%20student's%20case%20assignment.gif)
 
-### System Analytics
-![Analytics Dashboard](https://via.placeholder.com/1200x600?text=System+Analytics+&+Reports)
+### Teaching Assistant Reviews Treated Cases
+![TA Review Cases](https://github.com/mo5wagdy/ZU-DCMS/raw/master/screen-recordings/Teaching%20assistant's%20review%20of%20the%20treated%20cases.gif)
 
 ---
 
@@ -141,7 +141,7 @@ All configurable. No hardcoding.
 - **Patterns:** Repository Pattern, Unit of Work, Dependency Injection
 
 ### Frontend
-- **Repository:** [ZU-DCMS-REACT](https://github.com/mo5wagdy/ZU-DCMS-REACT)
+- **Repository:** [ZU-DCMS-REACT](https://github.com/mo5wagdy/ZU-DCMS-React)
 - **Framework:** React with modern TypeScript
 - **UI/UX:** Responsive design with intuitive patient, student, and admin interfaces
 - **State Management:** Efficient global state handling
